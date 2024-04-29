@@ -1,9 +1,11 @@
 import pickle
 from datetime import date
 
+
 def new():
     x_data_akt = Data_Akt()
     return x_data_akt
+
 
 def load(path_file):
     input_file = open(path_file, 'rb')
@@ -12,10 +14,12 @@ def load(path_file):
     input_file.close()
     return data_akts
 
+
 def save(path_file, file):
     output_file = open(path_file, 'wb')
     pickle.dump(file, output_file)
     output_file.close()
+
 
 class Data_Akt:
     def __init__(self):
@@ -25,7 +29,7 @@ class Data_Akt:
         self.__organization = ()
         self.__representative = ()
 
-    #функции для АКТОВ
+    # функции для АКТОВ
     def set_akt(self, name_object):
         self.__akts = list(self.__akts)
         self.__akts.append(Akt(name_object))
@@ -42,59 +46,54 @@ class Data_Akt:
     def get_all_akts(self):
         return self.__akts
 
-    #функции для ПОЛНОГО ИМЯ ОБЪЕКТА
-        # Добавление ПОЛНОГО ИМЕНИ ОБЪЕКТА в конец кортежа
-    def set_name_object(self, name):
+    # функции для ИМЁН ОБЪЕКТА
+    # Добавление ИМЕНИ ОБЪЕКТА в конец кортежа
+    def set_name_object(self, text, name):
         self.__names_object = list(self.__names_object)
-        self.__names_object.insert(0, name)
+        self.__names_object.insert(0, Object_element(text, name))
         self.__names_object = tuple(self.__names_object)
 
-        # Изменение ПОЛНОГО ИМЕНИ ОБЪЕКТА в кортеже
-    def change_name_object(self, changed_name, name_index):
+        # Изменение ИМЕНИ ОБЪЕКТА в кортеже
+    def change_name_object(self, text, name, index):
         self.__names_object = list(self.__names_object)
-        self.__names_object[name_index] = changed_name
+        self.__names_object[index].set_text(text)
+        self.__names_object[index].set_name(name)
         self.__names_object = tuple(self.__names_object)
 
-        # Удаление ПОЛНОГО ИМЕНИ ОБЪЕКТА из кортежа
-    def delete_name_object(self, name_index):
+        # Удаление ИМЕНИ ОБЪЕКТА из кортежа
+    def delete_name_object(self, index):
         self.__names_object = list(self.__names_object)
-        del self.__names_object[name_index]
+        del self.__names_object[index]
         self.__names_object = tuple(self.__names_object)
 
         # Возвращение ПОЛНОГО ИМЕНИ из кортежа
-    def get_name_object(self, name_index):
-        return self.__names_object[name_index]
+    def get_name_object_text(self, index):
+        return self.__names_object[index].get_text()
 
-        # Возвращение кортежа ПОЛНЫХ ИМЕНЁН
+        # Возвращение КОРОТКОГО ИМЕНИ из кортежа
+    def get_name_object_name(self, index):
+        return self.__names_object[index].get_name()
+
+        # Возвращение кортежа ПОЛНЫХ ИМЁН
+    def get_all_name_object_texts(self):
+        return tuple(element.get_text() for element in self.__names_object)
+
+        # Возвращение кортежа КОРОТКИХ ИМЁН
+    def get_all_name_object_names(self):
+        return tuple(element.get_name() for element in self.__names_object)
+
+        # Возвращение ИМЕНИ
+    def get_name_object(self, index):
+        return self.__names_object[index]
+
+        # Возвращение кортежа ПОЛНЫХ ИМЁН
     def get_all_names_object(self):
-        return  self.__names_object
-
-    #функции для КОРОТКОГО ИМЯ ОБЪЕКТА
-    def set_name_short(self, short_name):
-        self.__names_shorts = list(self.__names_shorts)
-        self.__names_shorts.insert(0, short_name)
-        self.__names_shorts = tuple(self.__names_shorts)
-
-    def change_name_short(self, changed_name, name_index):
-        self.__names_shorts = list(self.__names_shorts)
-        self.__names_shorts[name_index] = changed_name
-        self.__names_shorts = tuple(self.__names_shorts)
-
-    def delete_name_short(self, name_index):
-        self.__names_shorts = list(self.__names_shorts)
-        del self.__names_shorts[name_index]
-        self.__names_shorts = tuple(self.__names_shorts)
-
-    def get_name_short(self, name_short_index):
-        return self.__names_shorts[name_short_index]
-
-    def get_all_names_shorts(self):
-        return  self.__names_shorts
+        return self.__names_object
 
     # функции для ОРГАНИЗАЦИЙ
     def set_organization(self, text, name):
         self.__organization = list(self.__organization)
-        self.__organization.insert(0, Object_elemenl(text, name))
+        self.__organization.insert(0, Object_element(text, name))
         self.__organization = tuple(self.__organization)
 
     def change_organization(self, text, name, index):
@@ -124,13 +123,13 @@ class Data_Akt:
         return self.__organization[index]
 
     def get_all_organizations(self):
-        return  self.__organization
+        return self.__organization
 
     # функции для ПРЕДСТВАВИТЕЛЕЙ
-        # Добавление ПРЕДСТАВИТЕЛЯ в конец кортежа
+    # Добавление ПРЕДСТАВИТЕЛЯ в конец кортежа
     def set_representative(self, text, name):
         self.__representative = list(self.__representative)
-        self.__representative.insert(0, Object_elemenl(text, name))
+        self.__representative.insert(0, Object_element(text, name))
         self.__representative = tuple(self.__representative)
 
         # Изменение ПРЕДСТАВИТЕЛЯ в кортеже
@@ -140,7 +139,7 @@ class Data_Akt:
         self.__representative[index].set_name(name)
         self.__representative = tuple(self.__representative)
 
-        # Удаление ПРЕДСТВАИТЛЕЯ из кортежа
+        # Удаление ПРЕДСТВИТЕЛЯ из кортежа
     def delete_representative(self, index):
         self.__representative = list(self.__representative)
         del self.__representative[index]
@@ -169,7 +168,8 @@ class Data_Akt:
         # Возвращение кортежа с ПРЕДСТАВИТЕЛЯМИ
     def get_all_representatives(self):
         return self.__representative
-    
+
+
 class Akt:
     def __init__(self, name_object):
         self.__name_object = name_object
@@ -259,8 +259,6 @@ class Akt:
 
         return x_date
 
-
-
     def set_start_date(self, start_date):
         self.__start_date = date(start_date)
 
@@ -273,22 +271,12 @@ class Akt:
     def get_finish_date(self):
         return self.__finish_date
 
-    def __str__ (self):
+    def __str__(self):
         return self.__name_hous
 
-# класс ИМЯ ОБЪЕКТА для АКТА
-class Name_object:
-    def __init__(self, text):
-        self.__name_text = text
-
-    def set_text(self, text):
-        self.__name_text = text
-
-    def get_text(self):
-        return self.__name_text
 
 # класс ЭЛЕМЕНТЫ для АКТА
-class Object_elemenl:
+class Object_element:
     def __init__(self, text, name):
         self.__text = text
         self.__name = name
@@ -304,8 +292,6 @@ class Object_elemenl:
 
     def get_name(self):
         return self.__name
-
-
 
 
 if __name__ == '__main__':
