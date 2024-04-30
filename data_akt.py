@@ -30,9 +30,9 @@ class Data_Akt:
         self.__representative = ()
 
     # функции для АКТОВ
-    def set_akt(self, name_object):
+    def set_akt(self, akt):
         self.__akts = list(self.__akts)
-        self.__akts.append(Akt(name_object))
+        self.__akts.append(akt)
         self.__akts = tuple(self.__akts)
 
     def delete_akt(self, akt_index):
@@ -171,23 +171,91 @@ class Data_Akt:
 
 
 class Akt:
-    def __init__(self, name_object):
-        self.__name_object = name_object
-        self.__name_work = ''
-        self.__start_date = ''
-        self.__finish_date = ''
+    def __init__(self):
+        self.__name_object = None
+        self.__developer = None
+        self.__builder = None
+        self.__designer = None
+        self.__developer_name = None
+        self.__builder_name = None
+        self.__builder_control_name = None
+        self.__designer_name = None
+        self.__contractor_name = None
+        self.__another_person = None
+        self.__contractor = None
+        self.__work = None
 
-    def set_name_hous(self, name):
-        self.__name_object = str(name)
+        self.__start_date = None
+        self.__finish_date = None
 
-    def get_name_hous(self):
+    def set_name_object(self, obj):
+        self.__name_object = obj
+
+    def get_name_object(self):
         return self.__name_object
 
+    def set_developer(self, obj):
+        self.__developer = obj
+
+    def get_developer(self):
+        return self.__developer
+
+    def set_builder(self, obj):
+        self.__builder = obj
+
+    def set_designer(self, obj):
+        self.__designer = obj
+
+    def get_designer(self):
+        return self.__designer
+
+    def set_developer_name(self, obj):
+        self.__developer_name = obj
+
+    def get_developer_name(self):
+        return self.__developer_name
+
+    def set_builder_name(self, obj):
+        self.__builder_name = obj
+
+    def get_builder_name(self):
+        return self.__builder_name
+
+    def set_builder_control_name(self, obj):
+        self.__builder_control_name = obj
+
+    def get_builder_control_name(self):
+        return self.__builder_control_name
+
+    def set_designer_name(self, obj):
+        self.__designer_name = obj
+
+    def get_designer_name(self):
+        return self.__designer_name
+
+    def set_contractor_name(self, obj):
+        self.__contractor_name = obj
+
+    def get_contractor_name(self):
+        return self.__contractor_name
+
+    def set_another_person(self, obj):
+        self.__another_person = obj
+
+    def get_another_person(self):
+        return self.__another_person
+
+    def set_contractor(self, obj):
+        self.__contractor = obj
+
+    def get_contractor(self):
+        return self.__contractor
+
     def set_name_work(self, name):
-        self.__name_work = str(name)
+        self.__work = str(name)
 
     def get_name_work(self):
-        return self.__name_work
+        return self.__work
 
     # функции для ДАТЫ
     def entry_date(self, x_date):

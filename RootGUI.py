@@ -336,6 +336,7 @@ class Window_akt:
         self.frame_object = tkinter.LabelFrame(self.frame_window_akt, text='Объект, организации, представители')
         self.label_object = tkinter.Label(self.frame_object, text='Выберите наименование объекта')
         self.label_object.grid(row=0, column=0, stick='e')  # pack(side = 'left')
+        # Combobox наименование объекта
         self.combobox_object = ttk.Combobox(self.frame_object,
                                             width=50,
                                             values=x_data_akt.get_all_name_object_names())
@@ -343,6 +344,7 @@ class Window_akt:
 
         self.label_developer = tkinter.Label(self.frame_object, text='Выберите застройщика')
         self.label_developer.grid(row=1, column=0, stick='e')  # pack(side='left')
+        # Combobox застройщик
         self.combobox_developer = ttk.Combobox(self.frame_object,
                                                width=50,
                                                values=x_data_akt.get_all_organizations_names())
@@ -350,6 +352,7 @@ class Window_akt:
 
         self.label_builder = tkinter.Label(self.frame_object, text='Выберите лицо осуществляющее строительство')
         self.label_builder.grid(row=2, column=0, stick='e')  # pack(side='left')
+        # Combobox лицо осуществляющее строительство
         self.combobox_builder = ttk.Combobox(self.frame_object,
                                              width=50,
                                              values=x_data_akt.get_all_organizations_names())
@@ -357,6 +360,7 @@ class Window_akt:
 
         self.label_designer = tkinter.Label(self.frame_object, text='Выберите проектировщика')
         self.label_designer.grid(row=3, column=0, stick='e')  # pack(side='left')
+        # Combobox проектировщик
         self.combobox_designer = ttk.Combobox(self.frame_object,
                                               width=50,
                                               values=x_data_akt.get_all_organizations_names())
@@ -366,6 +370,7 @@ class Window_akt:
                                                   text='Выберите представителя застройщика\n' +
                                                        'по вопросам строительного контроля')
         self.label_developer_name.grid(row=4, column=0, stick='e')
+        # Combobox представитель застройщика по вопросам строительства
         self.combobox_developer_name = ttk.Combobox(self.frame_object,
                                                     width=50,
                                                     values=x_data_akt.get_all_representatives_names())
@@ -375,6 +380,7 @@ class Window_akt:
                                                 text='Выберите представителя\n' +
                                                      'лица осуществляющего строительство')
         self.label_builder_name.grid(row=5, column=0, stick='e')
+        # Combobox представитель лица осуществляющего строительство
         self.combobox_builder_name = ttk.Combobox(self.frame_object,
                                                   width=50,
                                                   values=x_data_akt.get_all_representatives_names())
@@ -384,6 +390,7 @@ class Window_akt:
                                                         text='Выберите представителя строителя\n' +
                                                              'по вопросам строительного контроля')
         self.label_builder_control_name.grid(row=6, column=0, stick='e')
+        # Combobox представитель строителя по вопросам строительного контроля
         self.combobox_builder_control_name = ttk.Combobox(self.frame_object,
                                                           width=50,
                                                           values=x_data_akt.get_all_representatives_names())
@@ -393,6 +400,7 @@ class Window_akt:
                                                  text='Выберите представителя осуществляющего\n' +
                                                       'подготовку проектной документации')
         self.label_designer_name.grid(row=7, column=0, stick='e')
+        # Combobox представитель осуществляющей подготовку строительной документации
         self.combobox_designer_name = ttk.Combobox(self.frame_object,
                                                    width=50,
                                                    values=x_data_akt.get_all_representatives_names())
@@ -402,6 +410,7 @@ class Window_akt:
                                                    text='Выберите представителя\n' +
                                                         'выполнившего работы')
         self.label_contractor_name.grid(row=8, column=0, stick='e')
+        # Combobox представитель выполняющий работы
         self.combobox_contractor_name = ttk.Combobox(self.frame_object,
                                                      width=50,
                                                      values=x_data_akt.get_all_representatives_names())
@@ -409,8 +418,9 @@ class Window_akt:
 
         self.label_another_person = tkinter.Label(self.frame_object,
                                                   text='Выберите иного представителя\n' +
-                                                       'учавствающего в осведетельствовании')
+                                                       'учавствующего в осведетельствовании')
         self.label_another_person.grid(row=9, column=0, stick='e')
+        # Combobox представитель учавствующий в осведетельствовании
         self.combobox_another_person = ttk.Combobox(self.frame_object,
                                                     width=50,
                                                     values=x_data_akt.get_all_representatives_names())
@@ -419,6 +429,7 @@ class Window_akt:
         self.label_contractor = tkinter.Label(self.frame_object,
                                               text='Выберите организацию выполняющую работы')
         self.label_contractor.grid(row=10, column=0, stick='e')
+        # Combobox организация выполняющая работы
         self.combobox_contractor = ttk.Combobox(self.frame_object,
                                                 width=50,
                                                 values=x_data_akt.get_all_organizations_names())
@@ -450,14 +461,44 @@ class Window_akt:
         self.button_akt.pack()
 
     def akt(self):
-        index_name_object = self.combobox_object.current()
-        if index_name_object == -1:
-            name_object = self.combobox_object.get()
-        else:
-            name_object = x_data_akt.get_name_object(index_name_object)
+        # функция для получения данный из полей
+        def insert_data(index, data_from_combobox, data_tuple):
+            if index == -1:
+                return data_akt.Object_element(data_from_combobox, '')
+            else:
+                return data_tuple[index]
+        # получение имени объекта
+        name_object = insert_data(self.combobox_object.current(), self.combobox_object.get(), x_data_akt.get_all_names_object())
+        developer = insert_data(self.combobox_developer.current(), self.combobox_developer.get(), x_data_akt.get_all_organizations())
+        builder = insert_data(self.combobox_builder.current(), self.combobox_builder.get(), x_data_akt.get_all_organizations())
+        designer = insert_data(self.combobox_designer.current(), self.combobox_designer.get(), x_data_akt.get_all_organizations())
+        developer_name = insert_data(self.combobox_developer_name.current(), self.combobox_developer_name.get(), x_data_akt.get_all_representatives())
+        builder_name = insert_data(self.combobox_builder_name.current(), self.combobox_builder_name.get(), x_data_akt.get_all_representatives())
+        builder_control_name = insert_data(self.combobox_builder_control_name.current(), self.combobox_builder_control_name.get(), x_data_akt.get_all_representatives())
+        designer_name = insert_data(self.combobox_designer_name.current(), self.combobox_designer_name.get(), x_data_akt.get_all_representatives())
+        contractor_name = insert_data(self.combobox_contractor_name.current(), self.combobox_contractor_name.get(), x_data_akt.get_all_representatives())
+        another_person = insert_data(self.combobox_another_person.current(), self.combobox_another_person.get(), x_data_akt.get_all_representatives())
+        contractor = insert_data(self.combobox_contractor.current(), self.combobox_contractor.get(), x_data_akt.get_all_organizations())
+        work = self.entry_work.get()
 
-        x_data_akt.set_akt(name_object)
+        akt = data_akt.Akt()
+        akt.set_name_object(name_object)
+        akt.set_developer(developer)
+        akt.set_builder(builder)
+        akt.set_designer(designer)
+        akt.set_developer_name(developer_name)
+        akt.set_builder_name(builder_name)
+        akt.set_builder_control_name(builder_control_name)
+        akt.set_designer_name(designer_name)
+        akt.set_contractor_name(contractor_name)
+        akt.set_another_person(another_person)
+        akt.set_contractor(contractor)
+        akt.set_name_work(work)
 
+        x_data_akt.set_akt(akt)
+        elements = tkinter.Variable(value=tuple(element.get_name_work() for element in x_data_akt.get_all_akts()))
+        self.__listbox.config(listvariable=elements)
+        self.window_creat_akt.destroy()
 
 if __name__ == '__main__':
     window = RootGUI()
