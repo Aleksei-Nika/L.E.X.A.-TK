@@ -41,10 +41,13 @@ class Data_Akt:
         self.__akts = tuple(self.__akts)
 
     def get_akt(self, akt_index):
-        return self.__akts(akt_index)
+        return self.__akts[akt_index]
 
     def get_all_akts(self):
         return self.__akts
+
+    def get_all_akts_names(self):
+        return tuple(akts.get_name_work() for akts in self.get_all_akts())
 
     # функции для ИМЁН ОБЪЕКТА
     # Добавление ИМЕНИ ОБЪЕКТА в конец кортежа
@@ -202,6 +205,9 @@ class Akt:
 
     def set_builder(self, obj):
         self.__builder = obj
+
+    def get_builder(self):
+        return self.__builder
 
     def set_designer(self, obj):
         self.__designer = obj

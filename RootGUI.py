@@ -114,8 +114,211 @@ class RootGUI:
         self.listbox_akts_scrollbar.pack(side='right', fill='y')
         self.listbox_akts.config(yscrollcommand=self.listbox_akts_scrollbar.set)
         self.listbox_akts.bind('<Button-3>', self.menu_listbox_akts)
+        self.listbox_akts.bind('<<ListboxSelect>>', self.view_akt)
         self.frame_listbox_akts.pack()
         self.frame_list_akts.grid(row=0, column=0)
+
+        # Создание группы виджетов ПРОСМОТР АКТА
+        self.frame_view_akt = tkinter.LabelFrame(self.frame_akt, text='Акт')
+        self.frame_for_canvas = tkinter.Frame(self.frame_view_akt)
+        self.canvas = tkinter.Canvas(self.frame_for_canvas, bg="white", width=720, height=500)
+        self.frame_in_canvas = tkinter.Frame(self.frame_for_canvas, bg="white")
+
+        self.label_object_name = tkinter.Label(self.frame_in_canvas,
+                                               background='white',
+                                               font=("Times new roman", 12, 'bold'),
+                                               text='Объект капитального строительства:')
+        self.text_object_name = tkinter.Text(self.frame_in_canvas,
+                                             height=5,
+                                             width=90,
+                                             font=("Times new roman", 12),
+                                             wrap='word')
+        self.label_developer = tkinter.Label(self.frame_in_canvas,
+                                             background='white',
+                                             font=("Times new roman", 12, 'bold'),
+                                             justify='left',
+                                             text='Застройщик, технический заказчик, лицо, ответственное за ' +
+                                             'эксплотацию здания, сооружения,\nили региональный оператор:')
+        self.text_developer = tkinter.Text(self.frame_in_canvas,
+                                           height=5,
+                                           width=90,
+                                           font=("Times new roman", 12),
+                                           wrap='word')
+        self.label_builder = tkinter.Label(self.frame_in_canvas,
+                                           background='white',
+                                           font=("Times new roman", 12, 'bold'),
+                                           text='Лицо, осуществляющее строительство, реконструкцию, ' +
+                                                'капитальный ремонт:')
+        self.text_builder = tkinter.Text(self.frame_in_canvas,
+                                         height=5,
+                                         width=90,
+                                         font=("Times new roman", 12),
+                                         wrap='word')
+        self.label_designer = tkinter.Label(self.frame_in_canvas,
+                                            background='white',
+                                            font=("Times new roman", 12, 'bold'),
+                                            text='Лицо, осуществляющее подготовку проектной документации:')
+        self.text_designer = tkinter.Text(self.frame_in_canvas,
+                                          height=5,
+                                          width=90,
+                                          font=("Times new roman", 12),
+                                          wrap='word')
+        self.label_doc1 = tkinter.Label(self.frame_in_canvas,
+                                        background='white',
+                                        font=("Times new roman", 12, 'bold'),
+                                        text='АКТ\nосвидетельствования скрытых работ')
+        self.frame_number_and_date = tkinter.Frame(self.frame_in_canvas, background='white')
+        self.label_act_number = tkinter.Label(self.frame_number_and_date,
+                                              background='white',
+                                              font=("Times new roman", 12),
+                                              text='№')
+        self.entry_act_number = tkinter.Entry(self.frame_number_and_date,
+                                              background='white',
+                                              font=("Times new roman", 12),
+                                              width=5)
+        self.entry_act_date = tkinter.Entry(self.frame_number_and_date,
+                                              background='white',
+                                              font=("Times new roman", 12))
+        self.label_developer_name = tkinter.Label(self.frame_in_canvas,
+                                              background='white',
+                                              font=("Times new roman", 12, 'bold'),
+                                              justify='left',
+                                              text='\nПредставитель застройщика, технического заказчика,' +
+                                                  'лица ответственного за эксплуатацию здания,\nсооружения,' +
+                                                  'или регионального оператора по вопросам строительного контроля:')
+        self.text_developer_name = tkinter.Text(self.frame_in_canvas,
+                                                height=5,
+                                                width=90,
+                                                font=("Times new roman", 12),
+                                                wrap='word')
+        self.label_builder_name = tkinter.Label(self.frame_in_canvas,
+                                                background='white',
+                                                font=("Times new roman", 12, 'bold'),
+                                                justify='left',
+                                                text='Представитель лица, осуществляющего строительство, ' +
+                                                     'реконструкцию, капитальный ремонт:')
+        self.text_builder_name = tkinter.Text(self.frame_in_canvas,
+                                                height=5,
+                                                width=90,
+                                                font=("Times new roman", 12),
+                                                wrap='word')
+        self.label_builder_control_name = tkinter.Label(self.frame_in_canvas,
+                                                background='white',
+                                                font=("Times new roman", 12, 'bold'),
+                                                justify='left',
+                                                text='Представитель лица, осуществляющего строительство, ' +
+                                                     'реконструкцию, капитальный ремонт,\nпо вопросам ' +
+                                                     'строительного контроля')
+        self.text_builder_control_name = tkinter.Text(self.frame_in_canvas,
+                                                height=5,
+                                                width=90,
+                                                font=("Times new roman", 12),
+                                                wrap='word')
+        self.label_designer_name = tkinter.Label(self.frame_in_canvas,
+                                                 background='white',
+                                                 font=("Times new roman", 12, 'bold'),
+                                                 justify='left',
+                                                 text='Представитель лица, осуществляющего подготовку проектной' +
+                                                 'документации (в случае\nпривлечения застройщиком лица,' +
+                                                 'осуществляющего подготовку строительной документации, для\nпроверки' +
+                                                 'соответсвия выполняемых работ проектной документации согласно' +
+                                                 'части 2 статьи 53\n'
+                                                 'Градостроительного кодекса Российской Федирации:')
+        self.text_designer_name = tkinter.Text(self.frame_in_canvas,
+                                               height=5,
+                                               width=90,
+                                               font=("Times new roman", 12),
+                                               wrap='word')
+        self.label_contractor_name = tkinter.Label(self.frame_in_canvas,
+                                                 background='white',
+                                                 font=("Times new roman", 12, 'bold'),
+                                                 justify='left',
+                                                 text='Представитель лица, выполнявщего работы, подлежащие ' +
+                                                      'освидетельствованию (в случае\nвыполнения работы по договорам о' +
+                                                      'строительстве, реконструкции, капитальном ремонте\nобъектов' +
+                                                      'капитального строительства, заключенным с иными лицами):')
+        self.text_contractor_name = tkinter.Text(self.frame_in_canvas,
+                                               height=5,
+                                               width=90,
+                                               font=("Times new roman", 12),
+                                               wrap='word')
+        self.label_another_person = tkinter.Label(self.frame_in_canvas,
+                                                 background='white',
+                                                 font=("Times new roman", 12, 'bold'),
+                                                 justify='left',
+                                                 text='а также иные представители лиц, учавствующих в ' +
+                                                      'освидетельствовании:')
+        self.text_another_person = tkinter.Text(self.frame_in_canvas,
+                                                height=5,
+                                                width=90,
+                                                font=("Times new roman", 12),
+                                                wrap='word')
+        self.frame_contractor = tkinter.Frame(self.frame_in_canvas, background='white')
+        self.label_contractor = tkinter.Label(self.frame_contractor,
+                                                 background='white',
+                                                 font=("Times new roman", 12, 'bold'),
+                                                 justify='left',
+                                                 text='приозвели осмотр работ, выполненных: ')
+        self.text_contractor = tkinter.Text(self.frame_contractor,
+                                            height=1,
+                                            width=52,
+                                            font=("Times new roman", 12),
+                                            wrap='word')
+        self.label_doc2 = tkinter.Label(self.frame_in_canvas,
+                                        background='white',
+                                        font=("Times new roman", 12, 'bold'),
+                                        text='и составили настоящий акт о нижеследующем:')
+        self.label_work = tkinter.Label(self.frame_in_canvas,
+                                        background='white',
+                                        font=("Times new roman", 12, 'bold'),
+                                        text='1. К освидетельствованию предъявлены следующие работы:')
+        self.text_work = tkinter.Text(self.frame_in_canvas,
+                                    height=3,
+                                    width=90,
+                                    font=("Times new roman", 12),
+                                    wrap='word')
+
+        self.label_object_name.grid(row=0, column=0, columnspan=1, sticky='w')
+        self.text_object_name.grid(row=1, column=0, columnspan=1, sticky='w')
+        self.label_developer.grid(row=2, column=0, columnspan=1, sticky='w')
+        self.text_developer.grid(row=3, column=0, columnspan=1, sticky='w')
+        self.label_builder.grid(row=5, column=0, columnspan=1, sticky='w')
+        self.text_builder.grid(row=6, column=0, columnspan=1, sticky='w')
+        self.label_designer.grid(row=7, column=0, columnspan=1, sticky='w')
+        self.text_designer.grid(row=8, column=0, columnspan=1, sticky='w')
+        self.label_doc1.grid(row=9, column=0, columnspan=1)
+        self.frame_number_and_date.grid(row=10, column=0, columnspan=1, sticky='we')
+        self.label_act_number.pack(side='left')
+        self.entry_act_number.pack(side='left')
+        self.entry_act_date.pack(side='right')
+        self.label_developer_name.grid(row=11, column=0, columnspan=1, sticky='w')
+        self.text_developer_name.grid(row=12, column=0, columnspan=1, sticky='w')
+        self.label_builder_name.grid(row=13, column=0, columnspan=1, sticky='w')
+        self.text_builder_name.grid(row=14, column=0, columnspan=1, sticky='w')
+        self.label_builder_control_name.grid(row=15, column=0, columnspan=1, sticky='w')
+        self.text_builder_control_name.grid(row=16, column=0, columnspan=1, sticky='w')
+        self.label_designer_name.grid(row=17, column=0, columnspan=1, sticky='w')
+        self.text_designer_name.grid(row=18, column=0, columnspan=1, sticky='w')
+        self.label_contractor_name.grid(row=19, column=0, columnspan=1, sticky='w')
+        self.text_contractor_name.grid(row=20, column=0, columnspan=1, sticky='w')
+        self.label_another_person.grid(row=21, column=0, columnspan=1, sticky='w')
+        self.text_another_person.grid(row=22, column=0, columnspan=1, sticky='w')
+        self.frame_contractor.grid(row=23, column=0, columnspan=1, sticky='w')
+        self.label_contractor.pack(side='left')
+        self.text_contractor.pack(side='left')
+        self.label_doc2.grid(row=24, column=0, columnspan=1, sticky='w')
+        self.label_work.grid(row=25, column=0, columnspan=1, sticky='w')
+        self.text_work.grid(row=26, column=0, columnspan=1, sticky='w')
+
+        self.canvas.create_window(0, 0, anchor='nw', window=self.frame_in_canvas)
+
+        self.canvas_scrollbar = tkinter.Scrollbar(self.frame_for_canvas, command=self.canvas.yview)
+        self.canvas.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"), yscrollcommand=self.canvas_scrollbar.set)
+        self.canvas.pack(side='left')
+        self.canvas_scrollbar.pack(side='right', fill='y')
+        self.frame_for_canvas.pack()
+        self.frame_view_akt.grid(row=0, column=1)
 
         self.root.mainloop()
 
@@ -125,6 +328,7 @@ class RootGUI:
         self.updater_list(self.listbox_names, x_data_akt.get_all_name_object_names())
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
         self.updater_list(self.listbox_representative, x_data_akt.get_all_representatives_names())
+        self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
 
     def load_file(self):
         global x_data_akt
@@ -133,6 +337,7 @@ class RootGUI:
         self.updater_list(self.listbox_names, x_data_akt.get_all_name_object_names())
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
         self.updater_list(self.listbox_representative, x_data_akt.get_all_representatives_names())
+        self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
 
     def save_file(self):
         self.file = tkinter.filedialog.asksaveasfilename(defaultextension='dat')
@@ -171,11 +376,11 @@ class RootGUI:
         menu.post(event.x_root, event.y_root)
 
     def add_organization(self):
-        window = Window_object_element(self.root, self.listbox_organization, 'организации')  # self.organizations,
+        window = Window_object_element(self.root, self.listbox_organization, 'организации')
 
     def change_organization(self):
         index = self.listbox_organization.curselection()[0]
-        window = Window_object_element(self.root, self.listbox_organization, 'организации', index)  # self.organizations,
+        window = Window_object_element(self.root, self.listbox_organization, 'организации', index)
 
     def delete_organization(self):
         index = self.listbox_organization.curselection()
@@ -220,6 +425,17 @@ class RootGUI:
         index = self.listbox_akts.curselection()
         x_data_akt.delete_akt(index[0])
         self.listbox_akts.delete(index[0])
+
+    def view_akt(self, event):
+        self.text_object_name.delete(0.0, 'end')
+        self.text_developer.delete(0.0, 'end')
+        self.text_builder.delete(0.0, 'end')
+        self.text_designer.delete(0.0, 'end')
+        index = self.listbox_akts.curselection()
+        self.text_object_name.insert('end', x_data_akt.get_akt(index[0]).get_name_object().get_text())
+        self.text_developer.insert('end', x_data_akt.get_akt(index[0]).get_developer().get_text())
+        self.text_builder.insert('end', x_data_akt.get_akt(index[0]).get_builder().get_text())
+        self.text_designer.insert('end', x_data_akt.get_akt(index[0]).get_designer().get_text())
 
 
 class Window_object_element:
@@ -496,7 +712,7 @@ class Window_akt:
         akt.set_name_work(work)
 
         x_data_akt.set_akt(akt)
-        elements = tkinter.Variable(value=tuple(element.get_name_work() for element in x_data_akt.get_all_akts()))
+        elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
         self.__listbox.config(listvariable=elements)
         self.window_creat_akt.destroy()
 
