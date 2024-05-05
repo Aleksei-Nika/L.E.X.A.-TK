@@ -35,6 +35,11 @@ class Data_Akt:
         self.__akts.append(akt)
         self.__akts = tuple(self.__akts)
 
+    def change_akt(self, akt, index):
+        self.__akts = list(self.__akts)
+        self.__akts[index] = akt
+        self.__akts = tuple(self.__akts)
+
     def delete_akt(self, akt_index):
         self.__akts = list(self.__akts)
         del self.__akts[akt_index]

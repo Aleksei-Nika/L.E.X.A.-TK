@@ -121,7 +121,7 @@ class RootGUI:
         # Создание группы виджетов ПРОСМОТР АКТА
         self.frame_view_akt = tkinter.LabelFrame(self.frame_akt, text='Акт')
         self.frame_for_canvas = tkinter.Frame(self.frame_view_akt)
-        self.canvas = tkinter.Canvas(self.frame_for_canvas, bg="white", width=720, height=500)
+        self.canvas = tkinter.Canvas(self.frame_for_canvas, bg="white", width=720, height=750)
         self.frame_in_canvas = tkinter.Frame(self.frame_for_canvas, bg="white")
 
         self.label_object_name = tkinter.Label(self.frame_in_canvas,
@@ -183,7 +183,7 @@ class RootGUI:
                                               background='white',
                                               font=("Times new roman", 12, 'bold'),
                                               justify='left',
-                                              text='\nПредставитель застройщика, технического заказчика,' +
+                                              text='\nПредставитель застройщика, технического заказчика, ' +
                                                   'лица ответственного за эксплуатацию здания,\nсооружения,' +
                                                   'или регионального оператора по вопросам строительного контроля:')
         self.text_developer_name = tkinter.Text(self.frame_in_canvas,
@@ -419,7 +419,8 @@ class RootGUI:
         window = Window_akt(self.root, self.listbox_akts)
 
     def change_akt(self):
-        pass
+        index = self.listbox_akts.curselection()[0]
+        window = Window_akt(self.root, self.listbox_akts, index)
 
     def delete_akt(self):
         index = self.listbox_akts.curselection()
@@ -431,11 +432,27 @@ class RootGUI:
         self.text_developer.delete(0.0, 'end')
         self.text_builder.delete(0.0, 'end')
         self.text_designer.delete(0.0, 'end')
+        self.text_developer_name.delete(0.0, 'end')
+        self.text_builder_name.delete(0.0, 'end')
+        self.text_builder_control_name.delete(0.0, 'end')
+        self.text_designer_name.delete(0.0, 'end')
+        self.text_contractor_name.delete(0.0, 'end')
+        self.text_another_person.delete(0.0, 'end')
+        self.text_contractor.delete(0.0, 'end')
+        self.text_work.delete(0.0, 'end')
         index = self.listbox_akts.curselection()
         self.text_object_name.insert('end', x_data_akt.get_akt(index[0]).get_name_object().get_text())
         self.text_developer.insert('end', x_data_akt.get_akt(index[0]).get_developer().get_text())
         self.text_builder.insert('end', x_data_akt.get_akt(index[0]).get_builder().get_text())
         self.text_designer.insert('end', x_data_akt.get_akt(index[0]).get_designer().get_text())
+        self.text_developer_name.insert('end', x_data_akt.get_akt(index[0]).get_developer_name().get_text())
+        self.text_builder_name.insert('end', x_data_akt.get_akt(index[0]).get_builder_name().get_text())
+        self.text_builder_control_name.insert('end', x_data_akt.get_akt(index[0]).get_builder_control_name().get_text())
+        self.text_designer_name.insert('end', x_data_akt.get_akt(index[0]).get_designer_name().get_text())
+        self.text_contractor_name.insert('end', x_data_akt.get_akt(index[0]).get_contractor_name().get_text())
+        self.text_another_person.insert('end', x_data_akt.get_akt(index[0]).get_another_person().get_text())
+        self.text_contractor.insert('end', x_data_akt.get_akt(index[0]).get_contractor().get_text())
+        self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work())
 
 
 class Window_object_element:
@@ -543,10 +560,42 @@ class Window_akt:
     def __init__(self, root, listbox, index=None):
         self.__root = root
         self.__listbox = listbox
+        if index is None:
+            self.__index = None
+            self.__heading = 'Создание акта'
+            self.__text_button = 'Создать акт'
+            self.__name_object = None
+            self.__developer = None
+            self.__builder = None
+            self.__designer = None
+            self.__developer_name = None
+            self.__builder_name = None
+            self.__builder_control_name = None
+            self.__designer_name = None
+            self.__contractor_name = None
+            self.__another_person = None
+            self.__contractor = None
+            self.__work = None
+        else:
+            self.__index = index
+            self.__heading = 'Изменение акта'
+            self.__text_button = 'Изменить акт'
+            self.__name_object = self.old_elements(x_data_akt.get_akt(index).get_name_object())
+            self.__developer = self.old_elements(x_data_akt.get_akt(index).get_developer())
+            self.__builder = self.old_elements(x_data_akt.get_akt(index).get_builder())
+            self.__designer = self.old_elements(x_data_akt.get_akt(index).get_designer())
+            self.__developer_name = self.old_elements(x_data_akt.get_akt(index).get_developer_name())
+            self.__builder_name = self.old_elements(x_data_akt.get_akt(index).get_builder_name())
+            self.__builder_control_name = self.old_elements(x_data_akt.get_akt(index).get_builder_control_name())
+            self.__designer_name = self.old_elements(x_data_akt.get_akt(index).get_designer_name())
+            self.__contractor_name = self.old_elements(x_data_akt.get_akt(index).get_contractor_name())
+            self.__another_person = self.old_elements(x_data_akt.get_akt(index).get_another_person())
+            self.__contractor = self.old_elements(x_data_akt.get_akt(index).get_contractor())
+            self.__work = x_data_akt.get_akt(index).get_name_work()
 
         self.window_creat_akt = Toplevel(self.__root)
-        self.window_creat_akt.title('Акт')
-        self.window_creat_akt.geometry('500x500')
+        self.window_creat_akt.title(self.__heading)
+        self.window_creat_akt.geometry('700x900')
         self.frame_window_akt = tkinter.Frame(self.window_creat_akt)
 
         self.frame_object = tkinter.LabelFrame(self.frame_window_akt, text='Объект, организации, представители')
@@ -667,51 +716,75 @@ class Window_akt:
         self.entry_work = tkinter.Entry(self.frame_work, width=50)
         self.entry_work.grid(row=0, column=1)
 
+        if index != None:
+            self.combobox_object.set(self.__name_object)
+            self.combobox_developer.set(self.__developer)
+            self.combobox_builder.set(self.__builder)
+            self.combobox_designer.set(self.__designer)
+            self.combobox_developer_name.set(self.__developer_name)
+            self.combobox_builder_name.set(self.__builder_name)
+            self.combobox_builder_control_name.set(self.__builder_control_name)
+            self.combobox_designer_name.set(self.__designer_name)
+            self.combobox_contractor_name.set(self.__contractor_name)
+            self.combobox_another_person.set(self.__another_person)
+            self.combobox_contractor.set(self.__contractor)
+            self.entry_work.insert('end', self.__work)
+
         self.frame_object.grid(row=0, column=0)
         self.frame_date.grid(row=1, column=0, stick='we')
         self.frame_work.grid(row=2, column=0, stick='we')
 
-        self.button_akt = tkinter.Button(self.window_creat_akt, text='Создать акт', command=self.akt)
+        self.button_akt = tkinter.Button(self.window_creat_akt, text=self.__text_button, command=self.akt)
 
         self.frame_window_akt.pack()
         self.button_akt.pack()
+
+    def old_elements(self, elements_of_akt):
+        if elements_of_akt.get_name() is None:
+            return elements_of_akt.get_text()
+        else:
+            return elements_of_akt.get_name()
 
     def akt(self):
         # функция для получения данный из полей
         def insert_data(index, data_from_combobox, data_tuple):
             if index == -1:
-                return data_akt.Object_element(data_from_combobox, '')
+                return data_akt.Object_element(data_from_combobox, None)
             else:
                 return data_tuple[index]
         # получение имени объекта
-        name_object = insert_data(self.combobox_object.current(), self.combobox_object.get(), x_data_akt.get_all_names_object())
-        developer = insert_data(self.combobox_developer.current(), self.combobox_developer.get(), x_data_akt.get_all_organizations())
-        builder = insert_data(self.combobox_builder.current(), self.combobox_builder.get(), x_data_akt.get_all_organizations())
-        designer = insert_data(self.combobox_designer.current(), self.combobox_designer.get(), x_data_akt.get_all_organizations())
-        developer_name = insert_data(self.combobox_developer_name.current(), self.combobox_developer_name.get(), x_data_akt.get_all_representatives())
-        builder_name = insert_data(self.combobox_builder_name.current(), self.combobox_builder_name.get(), x_data_akt.get_all_representatives())
-        builder_control_name = insert_data(self.combobox_builder_control_name.current(), self.combobox_builder_control_name.get(), x_data_akt.get_all_representatives())
-        designer_name = insert_data(self.combobox_designer_name.current(), self.combobox_designer_name.get(), x_data_akt.get_all_representatives())
-        contractor_name = insert_data(self.combobox_contractor_name.current(), self.combobox_contractor_name.get(), x_data_akt.get_all_representatives())
-        another_person = insert_data(self.combobox_another_person.current(), self.combobox_another_person.get(), x_data_akt.get_all_representatives())
-        contractor = insert_data(self.combobox_contractor.current(), self.combobox_contractor.get(), x_data_akt.get_all_organizations())
-        work = self.entry_work.get()
+        self.__name_object = insert_data(self.combobox_object.current(), self.combobox_object.get(), x_data_akt.get_all_names_object())
+        self.__developer = insert_data(self.combobox_developer.current(), self.combobox_developer.get(), x_data_akt.get_all_organizations())
+        self.__builder = insert_data(self.combobox_builder.current(), self.combobox_builder.get(), x_data_akt.get_all_organizations())
+        self.__designer = insert_data(self.combobox_designer.current(), self.combobox_designer.get(), x_data_akt.get_all_organizations())
+        self.__developer_name = insert_data(self.combobox_developer_name.current(), self.combobox_developer_name.get(), x_data_akt.get_all_representatives())
+        self.__builder_name = insert_data(self.combobox_builder_name.current(), self.combobox_builder_name.get(), x_data_akt.get_all_representatives())
+        self.__builder_control_name = insert_data(self.combobox_builder_control_name.current(), self.combobox_builder_control_name.get(), x_data_akt.get_all_representatives())
+        self.__designer_name = insert_data(self.combobox_designer_name.current(), self.combobox_designer_name.get(), x_data_akt.get_all_representatives())
+        self.__contractor_name = insert_data(self.combobox_contractor_name.current(), self.combobox_contractor_name.get(), x_data_akt.get_all_representatives())
+        self.__another_person = insert_data(self.combobox_another_person.current(), self.combobox_another_person.get(), x_data_akt.get_all_representatives())
+        self.__contractor = insert_data(self.combobox_contractor.current(), self.combobox_contractor.get(), x_data_akt.get_all_organizations())
+        self.__work = self.entry_work.get()
 
         akt = data_akt.Akt()
-        akt.set_name_object(name_object)
-        akt.set_developer(developer)
-        akt.set_builder(builder)
-        akt.set_designer(designer)
-        akt.set_developer_name(developer_name)
-        akt.set_builder_name(builder_name)
-        akt.set_builder_control_name(builder_control_name)
-        akt.set_designer_name(designer_name)
-        akt.set_contractor_name(contractor_name)
-        akt.set_another_person(another_person)
-        akt.set_contractor(contractor)
-        akt.set_name_work(work)
+        akt.set_name_object(self.__name_object)
+        akt.set_developer(self.__developer)
+        akt.set_builder(self.__builder)
+        akt.set_designer(self.__designer)
+        akt.set_developer_name(self.__developer_name)
+        akt.set_builder_name(self.__builder_name)
+        akt.set_builder_control_name(self.__builder_control_name)
+        akt.set_designer_name(self.__designer_name)
+        akt.set_contractor_name(self.__contractor_name)
+        akt.set_another_person(self.__another_person)
+        akt.set_contractor(self.__contractor)
+        akt.set_name_work(self.__work)
 
-        x_data_akt.set_akt(akt)
+        if self.__index is None:
+            x_data_akt.set_akt(akt)
+        else:
+            x_data_akt.change_akt(akt, self.__index)
+
         elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
         self.__listbox.config(listvariable=elements)
         self.window_creat_akt.destroy()
