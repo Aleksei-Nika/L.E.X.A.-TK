@@ -410,17 +410,22 @@ class RootGUI:
     # Контекстное меню для СПИСКА АКТОВ вкладке АКТЫ
     def menu_listbox_akts(self, event):
         menu = tkinter.Menu(tearoff=0)
-        menu.add_command(label='Добавить', command=self.add_akt)
+        menu.add_command(label='Создать новый акт', command=self.add_akt)
+        menu.add_command(label='Создать акт на основе выбранного', command=self.add_akt_based_on)
         menu.add_command(label='Изменить', command=self.change_akt)
         menu.add_command(label='Удалить', command=self.delete_akt)
         menu.post(event.x_root, event.y_root)
 
     def add_akt(self):
-        window = Window_akt(self.root, self.listbox_akts)
+        window = Window_akt(self.root, self.listbox_akts, 'новый')
+
+    def add_akt_based_on(self):
+        index = self.listbox_akts.curselection()[0]
+        window = Window_akt(self.root, self.listbox_akts, 'на основе другого', index)
 
     def change_akt(self):
         index = self.listbox_akts.curselection()[0]
-        window = Window_akt(self.root, self.listbox_akts, index)
+        window = Window_akt(self.root, self.listbox_akts, 'изменить', index)
 
     def delete_akt(self):
         index = self.listbox_akts.curselection()
@@ -557,13 +562,11 @@ class Window_object_element:
 
 
 class Window_akt:
-    def __init__(self, root, listbox, index=None):
+    def __init__(self, root, listbox, action, index=None):
         self.__root = root
         self.__listbox = listbox
         if index is None:
             self.__index = None
-            self.__heading = 'Создание акта'
-            self.__text_button = 'Создать акт'
             self.__name_object = None
             self.__developer = None
             self.__builder = None
@@ -575,11 +578,11 @@ class Window_akt:
             self.__contractor_name = None
             self.__another_person = None
             self.__contractor = None
+            self.__start_date = None
+            self.__finish_date = None
             self.__work = None
         else:
             self.__index = index
-            self.__heading = 'Изменение акта'
-            self.__text_button = 'Изменить акт'
             self.__name_object = self.old_elements(x_data_akt.get_akt(index).get_name_object())
             self.__developer = self.old_elements(x_data_akt.get_akt(index).get_developer())
             self.__builder = self.old_elements(x_data_akt.get_akt(index).get_builder())
@@ -591,7 +594,22 @@ class Window_akt:
             self.__contractor_name = self.old_elements(x_data_akt.get_akt(index).get_contractor_name())
             self.__another_person = self.old_elements(x_data_akt.get_akt(index).get_another_person())
             self.__contractor = self.old_elements(x_data_akt.get_akt(index).get_contractor())
+            self.__start_date = x_data_akt.get_akt(index).get_start_date().get_name()
+            self.__finish_date = x_data_akt.get_akt(index).get_finish_date().get_name()
             self.__work = x_data_akt.get_akt(index).get_name_work()
+
+        if action == 'новый':
+            self.__action = action
+            self.__heading = 'Создание акта'
+            self.__text_button = 'Создать акт'
+        elif action == 'на основе другого':
+            self.__action = action
+            self.__heading = f'Создание акта на основе "{self.__work}"'
+            self.__text_button = 'Создать акт'
+        elif action == 'изменить':
+            self.__action = action
+            self.__heading = f'Изменение акта "{self.__work}"'
+            self.__text_button = 'Изменить акт'
 
         self.window_creat_akt = Toplevel(self.__root)
         self.window_creat_akt.title(self.__heading)
@@ -700,23 +718,23 @@ class Window_akt:
                                                 values=x_data_akt.get_all_organizations_names())
         self.combobox_contractor.grid(row=10, column=1, stick='ns')
 
-        self.frame_date = tkinter.LabelFrame(self.frame_window_akt, text='Дата начала и окончания работ')
-        self.label_start_date = tkinter.Label(self.frame_date, text='Начала работ:')
-        self.label_start_date.grid(row=0, column=0)
-        self.entry_start_date = tkinter.Entry(self.frame_date, width=10)
-        self.entry_start_date.grid(row=0, column=1, padx=[0, 10])
-        self.label_start_date = tkinter.Label(self.frame_date, text='Окончание работ:')
-        self.label_start_date.grid(row=0, column=2, padx=[10, 0])
-        self.entry_start_date = tkinter.Entry(self.frame_date, width=10)
-        self.entry_start_date.grid(row=0, column=3)
-
         self.frame_work = tkinter.LabelFrame(self.frame_window_akt, text='Наименование работ')
         self.label_work = tkinter.Label(self.frame_work, text='Введите наименование работ:')
         self.label_work.grid(row=0, column=0)
         self.entry_work = tkinter.Entry(self.frame_work, width=50)
         self.entry_work.grid(row=0, column=1)
 
-        if index != None:
+        self.frame_date = tkinter.LabelFrame(self.frame_window_akt, text='Дата начала и окончания работ')
+        self.label_start_date = tkinter.Label(self.frame_date, text='Начала работ:')
+        self.label_start_date.pack(side='left')
+        self.entry_start_date = tkinter.Entry(self.frame_date, width=20)
+        self.entry_start_date.pack(side='left')
+        self.entry_finish_date = tkinter.Entry(self.frame_date, width=20)
+        self.entry_finish_date.pack(side='right')
+        self.label_finis_date = tkinter.Label(self.frame_date, text='Окончание работ:')
+        self.label_finis_date.pack(side='right')
+
+        if index is not None:
             self.combobox_object.set(self.__name_object)
             self.combobox_developer.set(self.__developer)
             self.combobox_builder.set(self.__builder)
@@ -728,16 +746,20 @@ class Window_akt:
             self.combobox_contractor_name.set(self.__contractor_name)
             self.combobox_another_person.set(self.__another_person)
             self.combobox_contractor.set(self.__contractor)
+            self.entry_start_date.insert('end', ('' if self.__start_date is None else self.__start_date))
+            self.entry_finish_date.insert('end',('' if self.__finish_date is None else self.__finish_date))
             self.entry_work.insert('end', self.__work)
 
         self.frame_object.grid(row=0, column=0)
-        self.frame_date.grid(row=1, column=0, stick='we')
-        self.frame_work.grid(row=2, column=0, stick='we')
+        self.frame_work.grid(row=1, column=0, stick='we')
+        self.frame_date.grid(row=2, column=0, stick='we')
 
         self.button_akt = tkinter.Button(self.window_creat_akt, text=self.__text_button, command=self.akt)
+        self.label_indicator = tkinter.Label(self.window_creat_akt, foreground='red')
 
         self.frame_window_akt.pack()
         self.button_akt.pack()
+        self.label_indicator.pack()
 
     def old_elements(self, elements_of_akt):
         if elements_of_akt.get_name() is None:
@@ -764,6 +786,8 @@ class Window_akt:
         self.__contractor_name = insert_data(self.combobox_contractor_name.current(), self.combobox_contractor_name.get(), x_data_akt.get_all_representatives())
         self.__another_person = insert_data(self.combobox_another_person.current(), self.combobox_another_person.get(), x_data_akt.get_all_representatives())
         self.__contractor = insert_data(self.combobox_contractor.current(), self.combobox_contractor.get(), x_data_akt.get_all_organizations())
+        self.__start_date = self.entry_start_date.get()
+        self.__finish_date = self.entry_finish_date.get()
         self.__work = self.entry_work.get()
 
         akt = data_akt.Akt()
@@ -778,11 +802,14 @@ class Window_akt:
         akt.set_contractor_name(self.__contractor_name)
         akt.set_another_person(self.__another_person)
         akt.set_contractor(self.__contractor)
+        if akt.add_deadlines(self.__start_date, self.__finish_date):
+            self.label_indicator.config(text='Дата начала не может быть позднее даты окончание')
+            return
         akt.set_name_work(self.__work)
 
-        if self.__index is None:
+        if self.__action == 'новый' or self.__action == 'на основе другого':
             x_data_akt.set_akt(akt)
-        else:
+        elif self.__action == 'изменить':
             x_data_akt.change_akt(akt, self.__index)
 
         elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())

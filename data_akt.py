@@ -269,40 +269,56 @@ class Akt:
         return self.__work
 
     # функции для ДАТЫ
-    def entry_date(self, x_date):
+    def add_deadlines(self, str_start_date, str_finish_date):
 
-        x_date_split = []
-        x_date_element = ''
+        if str_start_date == '' or str_finish_date == '':
+            self.__start_date = Object_element(None, str_start_date)
+            self.__finish_date = Object_element(None, str_finish_date)
+            return
 
-        x_date = x_date.lower()
+        start_date = self.date_modification(str_start_date)
+        finish_date = self.date_modification(str_finish_date)
 
-        x_date = x_date.replace('г', '')
+        if self.date_comparison(start_date, finish_date):
+            self.__start_date = Object_element(start_date, str_start_date)
+            self.__finish_date = Object_element(finish_date, str_finish_date)
+        else:
+            return True
 
-        for el in range(len(x_date)):
-            if el == len(x_date) - 1:
-                if x_date[el].isalnum():
-                    x_date_element += x_date[el]
-                    x_date_split.append(x_date_element)
+    def date_modification(self, date):
+
+        date_split = []
+        date_element = ''
+
+        date = date.lower()
+
+        date = date.replace('г', '')
+
+        for el in range(len(date)):
+            if el == len(date) - 1:
+                if date[el].isalnum():
+                    date_element += date[el]
+                    date_split.append(date_element)
                 else:
-                    x_date_split.append(x_date_element)
-            elif x_date[el].isalnum():
-                x_date_element += x_date[el]
+                    date_split.append(date_element)
+            elif date[el].isalnum():
+                date_element += date[el]
             else:
-                x_date_split.append(x_date_element)
-                x_date_element = ''
+                date_split.append(date_element)
+                date_element = ''
 
-        x_date = []
+        date = []
 
-        for el in x_date_split:
+        for el in date_split:
             if el:
-                x_date.append(el)
+                date.append(el)
 
-        if x_date[0].isdigit():
-            x_date[0] = int(x_date[0])
+        if date[0].isdigit():
+            date[0] = int(date[0])
 
-        if x_date[1].isdigit():
-            x_date[1] = int(x_date[1])
-        elif x_date[1].isalpha():
+        if date[1].isdigit():
+            date[1] = int(date[1])
+        elif date[1].isalpha():
             dictionary = {'января': int(1),
                           'янв': int(1),
                           'февраля': int(2),
@@ -327,25 +343,33 @@ class Akt:
                           'ноя': int(11),
                           'декабря': int(12),
                           'дек': int(12)}
-            x_date[1] = dictionary[x[1]]
+            date[1] = dictionary[date[1]]
 
-            if x_date[2].isdigit():
-                if len(x_date[2]) == 4:
-                    x_date[2] = int(x[2])
-                elif len(x_date[2]) == 2:
-                    x_date[2] = '20' + x_date[2]
-                    x_date[2] = int(x_date[2])
+            if date[2].isdigit():
+                if len(date[2]) == 4:
+                    date[2] = int(date[2])
+                elif len(date[2]) == 2:
+                    date[2] = '20' + date[2]
+                    date[2] = int(date[2])
 
-        return x_date
+        return date
 
-    def set_start_date(self, start_date):
-        self.__start_date = date(start_date)
+    def date_comparison(self, start_date, finis_date):
+        if start_date <= finis_date:
+            # self.set_start_date(start_date)
+            # self.set_finish_date(finis_date)
+            return True
+        elif start_date > finis_date:
+            return False
+
+    def set_start_date(self, obj):
+        self.__start_date = obj
+
+    def set_finish_date(self, obj):
+        self.__finis_date = obj
 
     def get_start_date(self):
         return self.__start_date
-
-    def set_finish_date(self, finis_date):
-        self.__finis_date = date(finis_date)
 
     def get_finish_date(self):
         return self.__finish_date
