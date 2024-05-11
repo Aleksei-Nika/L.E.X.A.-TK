@@ -437,6 +437,8 @@ class RootGUI:
         self.text_developer.delete(0.0, 'end')
         self.text_builder.delete(0.0, 'end')
         self.text_designer.delete(0.0, 'end')
+        self.entry_act_number.delete(0, 'end')
+        self.entry_act_date.delete(0, 'end')
         self.text_developer_name.delete(0.0, 'end')
         self.text_builder_name.delete(0.0, 'end')
         self.text_builder_control_name.delete(0.0, 'end')
@@ -450,6 +452,8 @@ class RootGUI:
         self.text_developer.insert('end', x_data_akt.get_akt(index[0]).get_developer().get_text())
         self.text_builder.insert('end', x_data_akt.get_akt(index[0]).get_builder().get_text())
         self.text_designer.insert('end', x_data_akt.get_akt(index[0]).get_designer().get_text())
+        # self.entry_act_number.insert('end', )
+        self.entry_act_date.insert('end', x_data_akt.get_akt(index[0]).get_str_finish_date())
         self.text_developer_name.insert('end', x_data_akt.get_akt(index[0]).get_developer_name().get_text())
         self.text_builder_name.insert('end', x_data_akt.get_akt(index[0]).get_builder_name().get_text())
         self.text_builder_control_name.insert('end', x_data_akt.get_akt(index[0]).get_builder_control_name().get_text())
@@ -457,6 +461,7 @@ class RootGUI:
         self.text_contractor_name.insert('end', x_data_akt.get_akt(index[0]).get_contractor_name().get_text())
         self.text_another_person.insert('end', x_data_akt.get_akt(index[0]).get_another_person().get_text())
         self.text_contractor.insert('end', x_data_akt.get_akt(index[0]).get_contractor().get_text())
+
         self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work())
 
 
@@ -594,8 +599,8 @@ class Window_akt:
             self.__contractor_name = self.old_elements(x_data_akt.get_akt(index).get_contractor_name())
             self.__another_person = self.old_elements(x_data_akt.get_akt(index).get_another_person())
             self.__contractor = self.old_elements(x_data_akt.get_akt(index).get_contractor())
-            self.__start_date = x_data_akt.get_akt(index).get_start_date().get_name()
-            self.__finish_date = x_data_akt.get_akt(index).get_finish_date().get_name()
+            self.__start_date = x_data_akt.get_akt(index).get_str_start_date()
+            self.__finish_date = x_data_akt.get_akt(index).get_str_finish_date()
             self.__work = x_data_akt.get_akt(index).get_name_work()
 
         if action == 'новый':
@@ -734,6 +739,27 @@ class Window_akt:
         self.label_finis_date = tkinter.Label(self.frame_date, text='Окончание работ:')
         self.label_finis_date.pack(side='right')
 
+        self.frame_documentation = tkinter.LabelFrame(self.frame_window_akt, text='Проектно-сметная документация')
+        self.label_org = tkinter.Label(self.frame_documentation, text='Организация')
+        self.label_doc = tkinter.Label(self.frame_documentation, text='Документация')
+        self.label_page = tkinter.Label(self.frame_documentation, text='Страница/Листы')
+        self.button_add_org = tkinter.Button(self.frame_documentation, text='>>', command=self.add_org)
+        self.label_org.grid(row=0, column=1, rowspan=1, stick='ns')
+        self.label_doc.grid(row=0, column=2, rowspan=1, stick='ns')
+        self.label_page.grid(row=0, column=3, rowspan=1, stick='ns')
+        self.button_add_org.grid(row=1, column=0, rowspan=1, stick='ns')
+
+        self.list_documentation = []
+        self.list_documentation.append(ttk.Combobox(self.frame_documentation,
+                                                    width=30,
+                                                    values=x_data_akt.get_all_organizations_names()))
+        self.list_documentation.append(ttk.Combobox(self.frame_documentation,
+                                                    width=30))
+        self.list_documentation.append(tkinter.Entry(self.frame_documentation, width=30))
+        self.list_documentation[0].grid(row=1, column=1, stick='we')
+        self.list_documentation[1].grid(row=1, column=2, stick='we')
+        self.list_documentation[2].grid(row=1, column=3, stick='we')
+
         if index is not None:
             self.combobox_object.set(self.__name_object)
             self.combobox_developer.set(self.__developer)
@@ -746,13 +772,14 @@ class Window_akt:
             self.combobox_contractor_name.set(self.__contractor_name)
             self.combobox_another_person.set(self.__another_person)
             self.combobox_contractor.set(self.__contractor)
-            self.entry_start_date.insert('end', ('' if self.__start_date is None else self.__start_date))
-            self.entry_finish_date.insert('end',('' if self.__finish_date is None else self.__finish_date))
+            self.entry_start_date.insert('end', self.__start_date)
+            self.entry_finish_date.insert('end', self.__finish_date)
             self.entry_work.insert('end', self.__work)
 
         self.frame_object.grid(row=0, column=0)
         self.frame_work.grid(row=1, column=0, stick='we')
         self.frame_date.grid(row=2, column=0, stick='we')
+        self.frame_documentation.grid(row=3, column=0, stick='we')
 
         self.button_akt = tkinter.Button(self.window_creat_akt, text=self.__text_button, command=self.akt)
         self.label_indicator = tkinter.Label(self.window_creat_akt, foreground='red')
@@ -762,19 +789,36 @@ class Window_akt:
         self.label_indicator.pack()
 
     def old_elements(self, elements_of_akt):
-        if elements_of_akt.get_name() is None:
+        if elements_of_akt is None:
+            return ''
+        elif elements_of_akt.get_name() is None:
             return elements_of_akt.get_text()
         else:
             return elements_of_akt.get_name()
 
+    def add_org(self):
+        if self.list_documentation[-2].get() != '':
+            self.list_documentation.append(ttk.Combobox(self.frame_documentation,
+                                                        width=30,
+                                                        values=x_data_akt.get_all_organizations_names()))
+            self.list_documentation.append(ttk.Combobox(self.frame_documentation,
+                                                        width=30))
+            self.list_documentation.append(tkinter.Entry(self.frame_documentation, width=30))
+            self.list_documentation[-3].grid(row=int(len(self.list_documentation)/3), column=1, stick='we')
+            self.list_documentation[-2].grid(row=int(len(self.list_documentation)/3), column=2, stick='we')
+            self.list_documentation[-1].grid(row=int(len(self.list_documentation)/3), column=3, stick='we')
+            self.button_add_org.grid(row=0, column=0, rowspan=int(len(self.list_documentation)/3)+1, stick='ns')
+
     def akt(self):
+        indicator = ''
+
         # функция для получения данный из полей
         def insert_data(index, data_from_combobox, data_tuple):
             if index == -1:
                 return data_akt.Object_element(data_from_combobox, None)
             else:
                 return data_tuple[index]
-        # получение имени объекта
+        # получение элементов объекта
         self.__name_object = insert_data(self.combobox_object.current(), self.combobox_object.get(), x_data_akt.get_all_names_object())
         self.__developer = insert_data(self.combobox_developer.current(), self.combobox_developer.get(), x_data_akt.get_all_organizations())
         self.__builder = insert_data(self.combobox_builder.current(), self.combobox_builder.get(), x_data_akt.get_all_organizations())
@@ -789,6 +833,8 @@ class Window_akt:
         self.__start_date = self.entry_start_date.get()
         self.__finish_date = self.entry_finish_date.get()
         self.__work = self.entry_work.get()
+        if self.__work == '':
+            indicator += 'Наименование работ не может быть пустым\n'
 
         akt = data_akt.Akt()
         akt.set_name_object(self.__name_object)
@@ -802,10 +848,14 @@ class Window_akt:
         akt.set_contractor_name(self.__contractor_name)
         akt.set_another_person(self.__another_person)
         akt.set_contractor(self.__contractor)
-        if akt.add_deadlines(self.__start_date, self.__finish_date):
-            self.label_indicator.config(text='Дата начала не может быть позднее даты окончание')
-            return
+        indicator_date = akt.add_deadlines(self.__start_date, self.__finish_date)
+        if indicator_date is not None:
+            indicator += indicator_date
         akt.set_name_work(self.__work)
+
+        if indicator != '':
+            self.label_indicator.config(text=indicator)
+            return
 
         if self.__action == 'новый' or self.__action == 'на основе другого':
             x_data_akt.set_akt(akt)

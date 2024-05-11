@@ -196,72 +196,86 @@ class Akt:
         self.__start_date = None
         self.__finish_date = None
 
+        self.__doc = ()
+
+    # Функции для ИМЕНИ ОБЪЕКТА
     def set_name_object(self, obj):
         self.__name_object = obj
 
     def get_name_object(self):
         return self.__name_object
 
+    # Функции для ЗАСТРОЙЩИКА
     def set_developer(self, obj):
         self.__developer = obj
 
     def get_developer(self):
         return self.__developer
 
+    # функции для ЛИЦА ОСУЩЕСТВЛЯЮЩЕГО СТРОИТЕЛЬСТВА
     def set_builder(self, obj):
         self.__builder = obj
 
     def get_builder(self):
         return self.__builder
 
+    # функции для ПРОЕКТИРОВЩИКА
     def set_designer(self, obj):
         self.__designer = obj
 
     def get_designer(self):
         return self.__designer
 
+    # функции для ПРЕДСТАВИТЕЛЯ ЗАСТРОЙЩИКА
     def set_developer_name(self, obj):
         self.__developer_name = obj
 
     def get_developer_name(self):
         return self.__developer_name
 
+    # функции для ПРЕДСТАВИТЕЛЯ ЛИЦА ОСУЩЕСТВЛЯЮЩЕГО СТРОИТЕЛЬСТВО
     def set_builder_name(self, obj):
         self.__builder_name = obj
 
     def get_builder_name(self):
         return self.__builder_name
 
+    # функции для ПРЕДСТАВИТЕЛЯ ЛИЦА ОСУЩЕСТВЛЯЮЩЕГО СТРОИТЕЛЬСТВО ПО ВОПРОСАМ СТРОИТЕЛЬНОГО КОНТРОЛЯ
     def set_builder_control_name(self, obj):
         self.__builder_control_name = obj
 
     def get_builder_control_name(self):
         return self.__builder_control_name
 
+    # функции для ПРЕДСТАВИТЕЛЯ ПРОЕКТИРОВЩИКА
     def set_designer_name(self, obj):
         self.__designer_name = obj
 
     def get_designer_name(self):
         return self.__designer_name
 
+    # функции для ПРЕДСТАВИТЕЛЯ ВЫПОЛНЯЮЩЕГО РАБОТЫ
     def set_contractor_name(self, obj):
         self.__contractor_name = obj
 
     def get_contractor_name(self):
         return self.__contractor_name
 
+    # функции для ДРУГИХ ПРЕДСТАВИТЕЛЕЙ
     def set_another_person(self, obj):
         self.__another_person = obj
 
     def get_another_person(self):
         return self.__another_person
 
+    # функции для ВЫПОЛНЯЮЩЕГО РАБОТЫ
     def set_contractor(self, obj):
         self.__contractor = obj
 
     def get_contractor(self):
         return self.__contractor
 
+    # функции для НАИМЕНОВАНИЯ РАБОТ
     def set_name_work(self, name):
         self.__work = str(name)
 
@@ -269,56 +283,66 @@ class Akt:
         return self.__work
 
     # функции для ДАТЫ
+        # добавление даты начала и окончания работ в акт
     def add_deadlines(self, str_start_date, str_finish_date):
+        try:
+            if str_start_date == '' and str_finish_date == '':
+                self.__start_date = str_start_date
+                self.__finish_date = str_finish_date
+            elif str_start_date == '':
+                self.__finish_date = self.date_modification(str_finish_date)
+                self.__start_date = ''
+                return
+            elif str_finish_date == '':
+                self.__start_date = self.date_modification(str_start_date)
+                self.__finish_date = ''
+                return
+            else:
+                start_date = self.date_modification(str_start_date)
+                finish_date = self.date_modification(str_finish_date)
+                if self.date_comparison(start_date, finish_date):
+                    self.__start_date = start_date
+                    self.__finish_date = finish_date
+                else:
+                    return 'Дата начала не может быть позднее даты окончание'
+        except (KeyError, IndexError):
+            return 'Некорректно введены даты'
 
-        if str_start_date == '' or str_finish_date == '':
-            self.__start_date = Object_element(None, str_start_date)
-            self.__finish_date = Object_element(None, str_finish_date)
-            return
-
-        start_date = self.date_modification(str_start_date)
-        finish_date = self.date_modification(str_finish_date)
-
-        if self.date_comparison(start_date, finish_date):
-            self.__start_date = Object_element(start_date, str_start_date)
-            self.__finish_date = Object_element(finish_date, str_finish_date)
-        else:
-            return True
-
-    def date_modification(self, date):
+        # создание даты из строки в объект модуля Date
+    def date_modification(self, str_date):
 
         date_split = []
         date_element = ''
 
-        date = date.lower()
+        str_date = str_date.lower()
 
-        date = date.replace('г', '')
+        str_date = str_date.replace('г', '')
 
-        for el in range(len(date)):
-            if el == len(date) - 1:
-                if date[el].isalnum():
-                    date_element += date[el]
+        for el in range(len(str_date)):
+            if el == len(str_date) - 1:
+                if str_date[el].isalnum():
+                    date_element += str_date[el]
                     date_split.append(date_element)
                 else:
                     date_split.append(date_element)
-            elif date[el].isalnum():
-                date_element += date[el]
+            elif str_date[el].isalnum():
+                date_element += str_date[el]
             else:
                 date_split.append(date_element)
                 date_element = ''
 
-        date = []
+        date_obj = []
 
         for el in date_split:
             if el:
-                date.append(el)
+                date_obj.append(el)
 
-        if date[0].isdigit():
-            date[0] = int(date[0])
+        if date_obj[0].isdigit():
+            date_obj[0] = int(date_obj[0])
 
-        if date[1].isdigit():
-            date[1] = int(date[1])
-        elif date[1].isalpha():
+        if date_obj[1].isdigit():
+            date_obj[1] = int(date_obj[1])
+        elif date_obj[1].isalpha():
             dictionary = {'января': int(1),
                           'янв': int(1),
                           'февраля': int(2),
@@ -343,21 +367,19 @@ class Akt:
                           'ноя': int(11),
                           'декабря': int(12),
                           'дек': int(12)}
-            date[1] = dictionary[date[1]]
+            date_obj[1] = dictionary[date_obj[1]]
 
-            if date[2].isdigit():
-                if len(date[2]) == 4:
-                    date[2] = int(date[2])
-                elif len(date[2]) == 2:
-                    date[2] = '20' + date[2]
-                    date[2] = int(date[2])
+        if date_obj[2].isdigit():
+            if len(date_obj[2]) == 4:
+                date_obj[2] = int(date_obj[2])
+            elif len(date_obj[2]) == 2:
+                date_obj[2] = int('20' + date_obj[2])
+                date_obj[2] = int(date_obj[2])
+        return date(date_obj[2], date_obj[1], date_obj[0])
 
-        return date
-
+    # Сравнение дат начала и окончания работ
     def date_comparison(self, start_date, finis_date):
         if start_date <= finis_date:
-            # self.set_start_date(start_date)
-            # self.set_finish_date(finis_date)
             return True
         elif start_date > finis_date:
             return False
@@ -366,13 +388,53 @@ class Akt:
         self.__start_date = obj
 
     def set_finish_date(self, obj):
-        self.__finis_date = obj
+        self.__finish_date = obj
 
     def get_start_date(self):
         return self.__start_date
 
     def get_finish_date(self):
         return self.__finish_date
+
+    def get_str_start_date(self):
+        dictionary = {'January': 'января',
+                      'February': 'февраля',
+                      'March': 'марта',
+                      'April': 'апреля',
+                      'May': 'мая',
+                      'June': 'июня',
+                      'July': 'июля',
+                      'August': 'августа',
+                      'September': 'сентября',
+                      'October': 'октября',
+                      'November': 'ноября',
+                      'December': 'декабря'}
+        if self.__start_date == '' or self.__start_date is None:
+            return ''
+        else:
+            str_date = str(self.__start_date.strftime('%d.%B.%Y'))
+            date1 = str_date.split('.')
+            return f'«{date1[0]}» {dictionary[date1[1]]} {date1[2]} г.'
+
+    def get_str_finish_date(self):
+        dictionary = {'January': 'января',
+                      'February': 'февраля',
+                      'March': 'марта',
+                      'April': 'апреля',
+                      'May': 'мая',
+                      'June': 'июня',
+                      'July': 'июля',
+                      'August': 'августа',
+                      'September': 'сентября',
+                      'October': 'октября',
+                      'November': 'ноября',
+                      'December': 'декабря'}
+        if self.__finish_date == '' or self.__finish_date is None:
+            return ''
+        else:
+            str_date = str(self.__finish_date.strftime('%d.%B.%Y'))
+            date1 = str_date.split('.')
+            return f'«{date1[0]}» {dictionary[date1[1]]} {date1[2]} г.'
 
     def __str__(self):
         return self.__name_hous
@@ -396,6 +458,24 @@ class Object_element:
     def get_name(self):
         return self.__name
 
+
+class Doc:
+    def __init__(self, organization, name_doc, page):
+        self.__organization = organization
+        self.__name_doc = name_doc
+        self.__page = page
+
+    def set_organization(self, organization):
+        self.__organization = organization
+
+    def set_name_doc(self, name_doc):
+        self.__name_doc = name_doc
+
+    def set_page(self, page):
+        self.__page = page
+
+    def page_modification(self, input_page):
+        pass
 
 if __name__ == '__main__':
     pass
