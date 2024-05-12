@@ -196,7 +196,7 @@ class Akt:
         self.__start_date = None
         self.__finish_date = None
 
-        self.__doc = ()
+        self.__documentation = None
 
     # Функции для ИМЕНИ ОБЪЕКТА
     def set_name_object(self, obj):
@@ -436,6 +436,14 @@ class Akt:
             date1 = str_date.split('.')
             return f'«{date1[0]}» {dictionary[date1[1]]} {date1[2]} г.'
 
+    # функции для ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def set_documentation(self, documentation):
+        self.__documentation = documentation
+
+    def get_documentation(self, documentation):
+        return self.__documentation
+
+
     def __str__(self):
         return self.__name_hous
 
@@ -460,7 +468,7 @@ class Object_element:
 
 
 class Doc:
-    def __init__(self, organization, name_doc, page):
+    def __init__(self, organization=None, name_doc=None, page=None):
         self.__organization = organization
         self.__name_doc = name_doc
         self.__page = page
@@ -474,8 +482,108 @@ class Doc:
     def set_page(self, page):
         self.__page = page
 
-    def page_modification(self, input_page):
-        pass
+
+def page_modification(input_page):
+    try:
+        input_sheet_number = input_page
+
+        # Отчистка введенных данных от лишних пробелов и перевод в сисписок
+        split_sheet_number = input_sheet_number.split(' ')
+        str_sheet_number = str()
+        for el in split_sheet_number:
+            str_sheet_number += el
+        input_sheet_number = str_sheet_number.split(',')
+
+        # Создание словаря для дробный чисел без точки
+        special_page = {}
+
+        # Поиск дробных чисел
+        # Удаление дробных чисел со списка полного перечня листов
+        # Если номер страницы записан через дробь, то записать через точку
+        fractional_numbers = list()
+        for el in input_sheet_number:
+            if '.' in el:
+                fractional_numbers.append(el)
+            elif '/' in el:
+                element = ''
+                for simbol in el:
+                    if simbol == '/':
+                        element += '.'
+                    else:
+                        element += simbol
+                fractional_numbers.append(float(element))
+                special_page[element] = el
+
+        for key in special_page:
+            input_sheet_number.remove(special_page[key])
+
+        # Создание списка для полного перечисления всех введеных листов
+        full_sheet_number = list()
+
+        # Анализ диапозонов листов (например 1-10) во веденных данных, их разбивка на отдельные элементы
+        # Перевод всех элементов в целочисленные данные
+        for el in range(len(input_sheet_number)):
+            if '-' in input_sheet_number[el]:
+                element = input_sheet_number[el]
+                index_tire = element.find('-')
+                first_num = element[0:index_tire]
+                second_num = element[(index_tire + 1):(len(element))]
+                first_num = int(first_num)
+                second_num = int(second_num)
+                if first_num > second_num:
+                    first_num, second_num = second_num, first_num
+                for num in range(first_num, second_num + 1):
+                    full_sheet_number.append(int(num))
+            else:
+                full_sheet_number.append(int(input_sheet_number[el]))
+
+        # Удаление повторяющихся номеров листов, путём преобразования во множество
+        full_sheet_number = set(full_sheet_number)
+        # Преобразования в список
+        full_sheet_number = list(full_sheet_number)
+        # Объединение списков целочисленых и дробных чисел
+        full_sheet_number += fractional_numbers
+        # Сортировака номеров листов по возрастанию
+        full_sheet_number.sort()
+        # Преобразование списка в кортедж
+        full_sheet_number = tuple(full_sheet_number)
+
+        # Создание списка для конечной работы
+        final_sheet_number = []
+        index = 0  # Переменная номера индекса анализируемого элемента
+        # Анализ номеров листов для поиска диапазона листов (например 1-10)
+        while index <= (len(full_sheet_number) - 1):
+            minim = full_sheet_number[index]
+            try:
+                while (full_sheet_number[index] + 1) == (full_sheet_number[index + 1]):
+                    index += 1
+            except IndexError:
+                pass
+            maxim = full_sheet_number[index]
+            index += 1
+            if minim == maxim:
+                final_sheet_number.append(str(minim))
+            elif minim < maxim:
+                str_minim = str(minim)
+                str_maxim = str(maxim)
+                final_sheet_number.append(str_minim + '-' + str_maxim)
+
+        for index in range(len(final_sheet_number)):
+            if final_sheet_number[index] in special_page:
+                final_sheet_number[index] = special_page[final_sheet_number[index]]
+
+        # Создание переменной для преобразования кортеджа в литерал
+        text_sheet_number = str()
+        # Преобразование кортеджа в литерал
+        for el in range(len(final_sheet_number)):
+            if el != (len(final_sheet_number) - 1):
+                text_sheet_number += (final_sheet_number[el] + ', ')
+            else:
+                text_sheet_number += final_sheet_number[el]
+    except:
+        return
+
+    return text_sheet_number
 
 if __name__ == '__main__':
     pass

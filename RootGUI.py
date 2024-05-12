@@ -570,6 +570,7 @@ class Window_akt:
     def __init__(self, root, listbox, action, index=None):
         self.__root = root
         self.__listbox = listbox
+        self.__indicator = ''
         if index is None:
             self.__index = None
             self.__name_object = None
@@ -586,6 +587,7 @@ class Window_akt:
             self.__start_date = None
             self.__finish_date = None
             self.__work = None
+            self.__documentation = None
         else:
             self.__index = index
             self.__name_object = self.old_elements(x_data_akt.get_akt(index).get_name_object())
@@ -743,7 +745,7 @@ class Window_akt:
         self.label_org = tkinter.Label(self.frame_documentation, text='Организация')
         self.label_doc = tkinter.Label(self.frame_documentation, text='Документация')
         self.label_page = tkinter.Label(self.frame_documentation, text='Страница/Листы')
-        self.button_add_org = tkinter.Button(self.frame_documentation, text='>>', command=self.add_org)
+        self.button_add_org = tkinter.Button(self.frame_documentation, text='>>', command=self.add_org_from_doc)
         self.label_org.grid(row=0, column=1, rowspan=1, stick='ns')
         self.label_doc.grid(row=0, column=2, rowspan=1, stick='ns')
         self.label_page.grid(row=0, column=3, rowspan=1, stick='ns')
@@ -796,7 +798,7 @@ class Window_akt:
         else:
             return elements_of_akt.get_name()
 
-    def add_org(self):
+    def add_org_from_doc(self):
         if self.list_documentation[-2].get() != '':
             self.list_documentation.append(ttk.Combobox(self.frame_documentation,
                                                         width=30,
@@ -807,34 +809,56 @@ class Window_akt:
             self.list_documentation[-3].grid(row=int(len(self.list_documentation)/3), column=1, stick='we')
             self.list_documentation[-2].grid(row=int(len(self.list_documentation)/3), column=2, stick='we')
             self.list_documentation[-1].grid(row=int(len(self.list_documentation)/3), column=3, stick='we')
-            self.button_add_org.grid(row=0, column=0, rowspan=int(len(self.list_documentation)/3)+1, stick='ns')
+            self.button_add_org.grid(row=1, column=0, rowspan=int(len(self.list_documentation)/3)+1, stick='ns')
 
     def akt(self):
-        indicator = ''
 
         # функция для получения данный из полей
-        def insert_data(index, data_from_combobox, data_tuple):
+        def insert_data(combobox, data_tuple):
+            index = combobox.current()
             if index == -1:
-                return data_akt.Object_element(data_from_combobox, None)
+                return data_akt.Object_element(combobox.get(), None)
             else:
                 return data_tuple[index]
-        # получение элементов объекта
-        self.__name_object = insert_data(self.combobox_object.current(), self.combobox_object.get(), x_data_akt.get_all_names_object())
-        self.__developer = insert_data(self.combobox_developer.current(), self.combobox_developer.get(), x_data_akt.get_all_organizations())
-        self.__builder = insert_data(self.combobox_builder.current(), self.combobox_builder.get(), x_data_akt.get_all_organizations())
-        self.__designer = insert_data(self.combobox_designer.current(), self.combobox_designer.get(), x_data_akt.get_all_organizations())
-        self.__developer_name = insert_data(self.combobox_developer_name.current(), self.combobox_developer_name.get(), x_data_akt.get_all_representatives())
-        self.__builder_name = insert_data(self.combobox_builder_name.current(), self.combobox_builder_name.get(), x_data_akt.get_all_representatives())
-        self.__builder_control_name = insert_data(self.combobox_builder_control_name.current(), self.combobox_builder_control_name.get(), x_data_akt.get_all_representatives())
-        self.__designer_name = insert_data(self.combobox_designer_name.current(), self.combobox_designer_name.get(), x_data_akt.get_all_representatives())
-        self.__contractor_name = insert_data(self.combobox_contractor_name.current(), self.combobox_contractor_name.get(), x_data_akt.get_all_representatives())
-        self.__another_person = insert_data(self.combobox_another_person.current(), self.combobox_another_person.get(), x_data_akt.get_all_representatives())
-        self.__contractor = insert_data(self.combobox_contractor.current(), self.combobox_contractor.get(), x_data_akt.get_all_organizations())
+
+        # функция для получения данный из группы виджетов Проектно-сметная документация
+        def insert_data_documentation():
+            documents_list = list()
+            for iteration in range(int(len(self.list_documentation) / 3)):
+                org = insert_data(self.list_documentation[iteration * 3 - 3], x_data_akt.get_all_organizations())
+                doc_name = insert_data(self.list_documentation[iteration * 3 - 2], None)
+                page = self.list_documentation[iteration * 3 - 1].get()
+                if page[0] == '"' or page == '':
+                    doc = data_akt.Doc(org, doc_name, page)
+                else:
+                    page = data_akt.page_modification(page)
+                    if page is None:
+                        self.__indicator += 'Некорректно введен список листов'
+                        return
+                    else:
+                        doc = data_akt.Doc(org, doc_name, page)
+                documents_list.append(doc)
+                documents_list = tuple(documents_list)
+            return documents_list
+
+        # получение элементов акта
+        self.__name_object = insert_data(self.combobox_object, x_data_akt.get_all_names_object())
+        self.__developer = insert_data(self.combobox_developer, x_data_akt.get_all_organizations())
+        self.__builder = insert_data(self.combobox_builder, x_data_akt.get_all_organizations())
+        self.__designer = insert_data(self.combobox_designer, x_data_akt.get_all_organizations())
+        self.__developer_name = insert_data(self.combobox_developer_name, x_data_akt.get_all_representatives())
+        self.__builder_name = insert_data(self.combobox_builder_name, x_data_akt.get_all_representatives())
+        self.__builder_control_name = insert_data(self.combobox_builder_control_name, x_data_akt.get_all_representatives())
+        self.__designer_name = insert_data(self.combobox_designer_name, x_data_akt.get_all_representatives())
+        self.__contractor_name = insert_data(self.combobox_contractor_name, x_data_akt.get_all_representatives())
+        self.__another_person = insert_data(self.combobox_another_person, x_data_akt.get_all_representatives())
+        self.__contractor = insert_data(self.combobox_contractor, x_data_akt.get_all_organizations())
         self.__start_date = self.entry_start_date.get()
         self.__finish_date = self.entry_finish_date.get()
         self.__work = self.entry_work.get()
         if self.__work == '':
-            indicator += 'Наименование работ не может быть пустым\n'
+            self.__indicator += 'Наименование работ не может быть пустым\n'
+        self.__documentation = insert_data_documentation()
 
         akt = data_akt.Akt()
         akt.set_name_object(self.__name_object)
@@ -850,11 +874,12 @@ class Window_akt:
         akt.set_contractor(self.__contractor)
         indicator_date = akt.add_deadlines(self.__start_date, self.__finish_date)
         if indicator_date is not None:
-            indicator += indicator_date
+            self.__indicator += indicator_date
         akt.set_name_work(self.__work)
+        akt.set_documentation(self.__documentation)
 
-        if indicator != '':
-            self.label_indicator.config(text=indicator)
+        if self.__indicator != '':
+            self.label_indicator.config(text=self.__indicator)
             return
 
         if self.__action == 'новый' or self.__action == 'на основе другого':
