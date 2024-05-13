@@ -604,6 +604,7 @@ class Window_akt:
             self.__start_date = x_data_akt.get_akt(index).get_str_start_date()
             self.__finish_date = x_data_akt.get_akt(index).get_str_finish_date()
             self.__work = x_data_akt.get_akt(index).get_name_work()
+            self.__documentation = x_data_akt.get_akt(index).get_documentation()
 
         if action == 'новый':
             self.__action = action
@@ -745,7 +746,7 @@ class Window_akt:
         self.label_org = tkinter.Label(self.frame_documentation, text='Организация')
         self.label_doc = tkinter.Label(self.frame_documentation, text='Документация')
         self.label_page = tkinter.Label(self.frame_documentation, text='Страница/Листы')
-        self.button_add_org = tkinter.Button(self.frame_documentation, text='>>', command=self.add_org_from_doc)
+        self.button_add_org = tkinter.Button(self.frame_documentation, text='>>', command=self.add_widget_from_doc)
         self.label_org.grid(row=0, column=1, rowspan=1, stick='ns')
         self.label_doc.grid(row=0, column=2, rowspan=1, stick='ns')
         self.label_page.grid(row=0, column=3, rowspan=1, stick='ns')
@@ -777,6 +778,8 @@ class Window_akt:
             self.entry_start_date.insert('end', self.__start_date)
             self.entry_finish_date.insert('end', self.__finish_date)
             self.entry_work.insert('end', self.__work)
+            self.old_doc(self.__documentation)
+
 
         self.frame_object.grid(row=0, column=0)
         self.frame_work.grid(row=1, column=0, stick='we')
@@ -798,7 +801,7 @@ class Window_akt:
         else:
             return elements_of_akt.get_name()
 
-    def add_org_from_doc(self):
+    def add_widget_from_doc(self):
         if self.list_documentation[-2].get() != '':
             self.list_documentation.append(ttk.Combobox(self.frame_documentation,
                                                         width=30,
@@ -810,6 +813,13 @@ class Window_akt:
             self.list_documentation[-2].grid(row=int(len(self.list_documentation)/3), column=2, stick='we')
             self.list_documentation[-1].grid(row=int(len(self.list_documentation)/3), column=3, stick='we')
             self.button_add_org.grid(row=1, column=0, rowspan=int(len(self.list_documentation)/3)+1, stick='ns')
+
+    def old_doc(self, documentation):
+        for component in documentation:
+            self.list_documentation[-3].set(self.old_elements(component.get_organization()))
+            self.list_documentation[-2].set(component.get_name_doc().get_text())
+            self.list_documentation[-1].insert('end', component.get_page())
+            self.add_widget_from_doc()
 
     def akt(self):
 
@@ -823,13 +833,14 @@ class Window_akt:
 
         # функция для получения данный из группы виджетов Проектно-сметная документация
         def insert_data_documentation():
-            documents_list = list()
+            documents_list = []
             for iteration in range(int(len(self.list_documentation) / 3)):
-                org = insert_data(self.list_documentation[iteration * 3 - 3], x_data_akt.get_all_organizations())
-                doc_name = insert_data(self.list_documentation[iteration * 3 - 2], None)
-                page = self.list_documentation[iteration * 3 - 1].get()
-                if page[0] == '"' or page == '':
+                org = insert_data(self.list_documentation[iteration * 3 + 0], x_data_akt.get_all_organizations())
+                doc_name = insert_data(self.list_documentation[iteration * 3 + 1], None)
+                page = self.list_documentation[iteration * 3 + 2].get()
+                if page == '' or page[0] == '"':
                     doc = data_akt.Doc(org, doc_name, page)
+                    documents_list.append(doc)
                 else:
                     page = data_akt.page_modification(page)
                     if page is None:
@@ -838,7 +849,7 @@ class Window_akt:
                     else:
                         doc = data_akt.Doc(org, doc_name, page)
                 documents_list.append(doc)
-                documents_list = tuple(documents_list)
+            documents_list = tuple(documents_list)
             return documents_list
 
         # получение элементов акта

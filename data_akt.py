@@ -440,12 +440,12 @@ class Akt:
     def set_documentation(self, documentation):
         self.__documentation = documentation
 
-    def get_documentation(self, documentation):
+    def get_documentation(self):
         return self.__documentation
 
 
     def __str__(self):
-        return self.__name_hous
+        return f'{self.__name_hous}'
 
 
 # класс ЭЛЕМЕНТЫ для АКТА
@@ -476,12 +476,20 @@ class Doc:
     def set_organization(self, organization):
         self.__organization = organization
 
+    def get_organization(self):
+        return self.__organization
+
     def set_name_doc(self, name_doc):
         self.__name_doc = name_doc
+
+    def get_name_doc(self):
+        return self.__name_doc
 
     def set_page(self, page):
         self.__page = page
 
+    def get_page(self):
+        return self.__page
 
 def page_modification(input_page):
     try:
