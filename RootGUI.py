@@ -277,6 +277,15 @@ class RootGUI:
                                     width=90,
                                     font=("Times new roman", 12),
                                     wrap='word')
+        self.label_documentation = tkinter.Label(self.frame_in_canvas,
+                                        background='white',
+                                        font=("Times new roman", 12, 'bold'),
+                                        text='2. Работы выполнены по проектно-сметной документации:')
+        self.text_documentation = tkinter.Text(self.frame_in_canvas,
+                                               height=3,
+                                               width=90,
+                                               font=("Times new roman", 12),
+                                               wrap='word')
 
         self.label_object_name.grid(row=0, column=0, columnspan=1, sticky='w')
         self.text_object_name.grid(row=1, column=0, columnspan=1, sticky='w')
@@ -309,6 +318,8 @@ class RootGUI:
         self.label_doc2.grid(row=24, column=0, columnspan=1, sticky='w')
         self.label_work.grid(row=25, column=0, columnspan=1, sticky='w')
         self.text_work.grid(row=26, column=0, columnspan=1, sticky='w')
+        self.label_documentation.grid(row=27, column=0, columnspan=1, sticky='w')
+        self.text_documentation.grid(row=28, column=0, columnspan=1, sticky='w')
 
         self.canvas.create_window(0, 0, anchor='nw', window=self.frame_in_canvas)
 
@@ -447,6 +458,7 @@ class RootGUI:
         self.text_another_person.delete(0.0, 'end')
         self.text_contractor.delete(0.0, 'end')
         self.text_work.delete(0.0, 'end')
+        self.text_documentation.delete(0.0, 'end')
         index = self.listbox_akts.curselection()
         self.text_object_name.insert('end', x_data_akt.get_akt(index[0]).get_name_object().get_text())
         self.text_developer.insert('end', x_data_akt.get_akt(index[0]).get_developer().get_text())
@@ -463,6 +475,8 @@ class RootGUI:
         self.text_contractor.insert('end', x_data_akt.get_akt(index[0]).get_contractor().get_text())
 
         self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work())
+        self.text_documentation.insert('end',x_data_akt.get_akt(index[0]).get_text_of_documentation())
+
 
 
 class Window_object_element:
@@ -838,17 +852,20 @@ class Window_akt:
                 org = insert_data(self.list_documentation[iteration * 3 + 0], x_data_akt.get_all_organizations())
                 doc_name = insert_data(self.list_documentation[iteration * 3 + 1], None)
                 page = self.list_documentation[iteration * 3 + 2].get()
-                if page == '' or page[0] == '"':
-                    doc = data_akt.Doc(org, doc_name, page)
-                    documents_list.append(doc)
+                if org.get_text() == '' and doc_name.get_text() == '' and page == '':
+                    pass
                 else:
-                    page = data_akt.page_modification(page)
-                    if page is None:
-                        self.__indicator += 'Некорректно введен список листов'
-                        return
-                    else:
+                    if page == '' or page[0] == '"':
                         doc = data_akt.Doc(org, doc_name, page)
-                documents_list.append(doc)
+                        documents_list.append(doc)
+                    else:
+                        page = data_akt.page_modification(page)
+                        if page is None:
+                            self.__indicator += 'Некорректно введен список листов'
+                            return
+                        else:
+                            doc = data_akt.Doc(org, doc_name, page)
+                    documents_list.append(doc)
             documents_list = tuple(documents_list)
             return documents_list
 

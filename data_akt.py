@@ -443,6 +443,85 @@ class Akt:
     def get_documentation(self):
         return self.__documentation
 
+    def get_text_of_documentation(self):
+        list_text_of_doc = []
+        for doc in self.__documentation:
+            org = doc.get_organization().get_name()
+            if org is None:
+                org = doc.get_organization().get_text()
+            name_doc = doc.get_name_doc().get_name()
+            if name_doc is None:
+                name_doc = doc.get_name_doc().get_text()
+            page = doc.get_page()
+            if page[0:0] == '"':
+                page = page[1: -1]
+
+            list_text_of_doc.append(f'{org} {name_doc}, л. {page}; ')
+
+        text_of_doc = ''
+        for el in list_text_of_doc:
+            text_of_doc += el
+        text_of_doc = text_of_doc[0:-2]+'.'
+
+        return text_of_doc
+
+        '''
+        list_org = []
+        list_name_doc = []
+        list_page = []
+        for doc in self.__documentation:
+            org = doc.get_organization().get_name()
+            if org is None:
+                org = doc.get_organization().get_text()
+            list_org.append(org)
+            name_doc = doc.get_name_doc().get_name()
+            if name_doc is None:
+                name_doc = doc.get_name_doc().get_text()
+            list_name_doc.append(name_doc)
+            page = doc.get_page()
+            list_page.append(page)
+        list_text_of_doc = []
+        iteration = 0
+        while len(list_org) != 0:
+            org = list_org[iteration]
+            print(org, list_org[iteration])
+            name_doc = list_name_doc[iteration]
+            print(name_doc, list_name_doc[iteration])
+            page = list_page[iteration]
+            print(page, list_page[iteration])
+            list_text_of_doc.append((org, name_doc, page))
+            print(list_text_of_doc)
+            del list_org[iteration]
+            del list_name_doc[iteration]
+            del list_page[iteration]
+            if list_text_of_doc[iteration][0] != '':
+                while list_text_of_doc[iteration][0] in list_org:
+                    next_org = ''
+                    index = list_org.index(list_text_of_doc[iteration][0])
+                    if list_text_of_doc[iteration][1] != list_name_doc[index] or list_name_doc[index] != '':
+                        next_name_doc = list_name_doc[index]
+                    else:
+                        next_name_doc = ''
+                    if list_text_of_doc[iteration][2] != list_page[index] or list_page[index] != '':
+                        next_page = list_page[index]
+                    else:
+                        next_page = ''
+                    list_text_of_doc.append((next_org, next_name_doc, next_page))
+                    del list_org[index]
+                    del list_name_doc[index]
+                    del list_page[index]
+                iteration += 1
+        text_of_doc = ''
+        for iteration in range(len(list_text_of_doc)):
+            for el in range(len(list_text_of_doc[iteration])):
+                if el == 2 and iteration == len(list_text_of_doc):
+                    text_of_doc += '.'
+                elif el != '':
+                    text_of_doc += list_text_of_doc[iteration][el] + ', '
+        return text_of_doc
+        '''
+
+
 
     def __str__(self):
         return f'{self.__name_hous}'
@@ -495,7 +574,7 @@ def page_modification(input_page):
     try:
         input_sheet_number = input_page
 
-        # Отчистка введенных данных от лишних пробелов и перевод в сисписок
+        # Отчистка введенных данных от лишних пробелов и перевод в список
         split_sheet_number = input_sheet_number.split(' ')
         str_sheet_number = str()
         for el in split_sheet_number:
