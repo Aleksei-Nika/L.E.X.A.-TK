@@ -758,7 +758,7 @@ class Window_akt:
 
         self.frame_documentation = tkinter.LabelFrame(self.frame_window_akt, text='Проектно-сметная документация')
         self.label_org = tkinter.Label(self.frame_documentation, text='Организация')
-        self.label_doc = tkinter.Label(self.frame_documentation, text='Документация')
+        self.label_doc = tkinter.Label(self.frame_documentation, text='Наименование документация')
         self.label_page = tkinter.Label(self.frame_documentation, text='Страница/Листы')
         self.button_add_org = tkinter.Button(self.frame_documentation, text='>>', command=self.add_widget_from_doc)
         self.label_org.grid(row=0, column=1, rowspan=1, stick='ns')
@@ -865,10 +865,11 @@ class Window_akt:
                             return
                         else:
                             doc = data_akt.Doc(org, doc_name, page)
-                    documents_list.append(doc)
+                            documents_list.append(doc)
             documents_list = tuple(documents_list)
             return documents_list
 
+        self.__indicator = ''
         # получение элементов акта
         self.__name_object = insert_data(self.combobox_object, x_data_akt.get_all_names_object())
         self.__developer = insert_data(self.combobox_developer, x_data_akt.get_all_organizations())
