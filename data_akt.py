@@ -25,9 +25,9 @@ class Data_Akt:
     def __init__(self):
         self.__akts = ()
         self.__names_object = ()
-        self.__names_shorts = ()
         self.__organization = ()
         self.__representative = ()
+        self.__materials = ()
 
     # функции для АКТОВ
     def set_akt(self, akt):
@@ -35,9 +35,9 @@ class Data_Akt:
         self.__akts.append(akt)
         self.__akts = tuple(self.__akts)
 
-    def change_akt(self, akt, index):
+    def change_akt(self, akt, akt_index):
         self.__akts = list(self.__akts)
-        self.__akts[index] = akt
+        self.__akts[akt_index] = akt
         self.__akts = tuple(self.__akts)
 
     def delete_akt(self, akt_index):
@@ -177,6 +177,36 @@ class Data_Akt:
     def get_all_representatives(self):
         return self.__representative
 
+    # функции для МАТЕРИАЛОВ
+        # Добавление МАТЕРИАЛа в кортеж
+    def set_material(self, material):
+        self.__materials = list(self.__materials)
+        self.__materials.append(material)
+        self.__materials = tuple(self.__materials)
+
+        # изменение МАТЕРИАЛА в кортеже
+    def change_material(self, index):
+        pass
+
+        # Удаление МАТЕРИАЛА в кортеже
+    def delete_material(self, index):
+        self.__materials = list(self.__materials)
+        del self.__materials[index]
+        self.__materials = tuple(self.__materials)
+
+        # Возвращение МАТЕРИАЛА из кортежа
+    def get_material(self, index):
+        return self.__materials[index]
+
+        # Возвращение кортежа всех МАТЕРИАЛОВ
+    def get_all_materials(self):
+        return self.__materials
+
+    def get_all_text_materials(self):
+        list_text_materials = []
+        for text_material in self.__materials:
+            list_text_materials.append(text_material.get_text_material())
+        return tuple(list_text_materials)
 
 class Akt:
     def __init__(self):
@@ -192,6 +222,7 @@ class Akt:
         self.__another_person = None
         self.__contractor = None
         self.__work = None
+        self.__materials_of_akt = None
 
         self.__start_date = None
         self.__finish_date = None
@@ -281,6 +312,10 @@ class Akt:
 
     def get_name_work(self):
         return self.__work
+
+    # функции для МАТЕРИАЛОВ
+    def set_material_of_akt(self, material):
+        self.__materials_of_akt = material
 
     # функции для ДАТЫ
         # добавление даты начала и окончания работ в акт
@@ -651,6 +686,94 @@ def page_modification(input_page):
         return
 
     return text_sheet_number
+
+class Material:
+    def __init__(self, type=None, material=None, document_name=None, documents_name=None,
+                 document_number=None, start_date=None,finish_date=None):
+        self.__type = type
+        self.__material = material
+        self.__document_name = document_name
+        self.__documents_name = documents_name
+        self.__document_number = document_number
+        self.__start_date = start_date
+        self.__finish_date = finish_date
+
+    def set_type(self, type):
+        self.__type = type
+
+    def set_material(self, material):
+        self.__material = material
+
+    def set_document_name(self, document_name):
+        self.__document_name = document_name
+
+    def set_documents_name(self, documents_name):
+        self.__documents_name = documents_name
+
+    def set_document_number(self, document_number):
+        self.__document_number = document_number
+
+    def set_start_date(self, start_date):
+        self.__start_date = start_date
+
+    def set_finish_date(self, finish_date):
+        self.__finish_date = finish_date
+
+    def get_type(self):
+        return self.__type
+
+    def get_material(self):
+        return self.__material
+
+    def get_document_name(self):
+        return self.__document_name
+
+    def get_documents_name(self):
+        return self.__documents_name
+
+    def get_document_number(self):
+        return self.__document_number
+
+    def get_start_date(self):
+        return self.__start_date
+
+    def get_finish_date(self):
+        return self.__finish_date
+
+    def get_text_material(self):
+
+        # Проверка ВИДА материала
+        def check_type(type):
+            if type is None:
+                return ''
+            else:
+                return type
+
+        # Проверка ДОКУМЕНТА материала
+        def check_data_document(document_name, document_number):
+            if document_name is None and document_number is None:
+                return ''
+            elif document_number is None:
+                return document_name
+            else:
+                return document_name + ' ' + document_number
+
+        # Проверка ДАТ ДОКУМЕНТА материала
+        def check_dates(start_date, finish_date):
+            if start_date is None:
+                return ''
+            elif finish_date is None:
+                return 'от ' + start_date
+            else:
+                return 'с ' + start_date + ' до ' + finish_date
+
+        elements_material = []
+        elements_material.append(check_type(self.__type))
+        elements_material.append(self.__material)
+        elements_material.append(check_data_document(self.__document_name, self.__document_number))
+        elements_material.append(check_dates(self.__start_date, self.__finish_date))
+
+        return tuple(elements_material)
 
 if __name__ == '__main__':
     pass

@@ -331,15 +331,44 @@ class RootGUI:
         self.frame_for_canvas.pack()
         self.frame_view_akt.grid(row=0, column=1)
 
+        # Создание вкладки МАТЕРИАЛЫ
+        self.frame_material = tkinter.Frame(self.root)
+        self.frame_material.pack()
+        self.notebook.add(self.frame_material, text='Материалы')
+
+        # Создание группы виджетов РАБОТА С МАТЕРИАЛАМИ
+        self.frame_materials_of_akt = ttk.LabelFrame(self.frame_material, text='Используемые материалы')
+        self.frame_table_materials = tkinter.Frame(self.frame_materials_of_akt)
+        self.table_material = ttk.Treeview(self.frame_table_materials,
+                                           columns=('type', 'material', 'document', 'date'),
+                                           show='headings',
+                                           height=5)
+        self.table_material_scrollbar = tkinter.Scrollbar(self.frame_table_materials, command=self.table_material.yview)
+        self.table_material.config(yscrollcommand=self.listbox_akts_scrollbar.set)
+        self.table_material_scrollbar.pack(side='right', fill='y')
+        self.table_material.heading('type', text='Вид')
+        self.table_material.heading('material', text='Материал')
+        self.table_material.heading('document', text='Документ')
+        self.table_material.heading('date', text='Дата')
+        self.table_material.bind('<Button-3>', self.menu_table_material)
+
+        #self.table_material.insert('', 'end', values=('8A500C', 'документ о качестве №2200031', 'от 01.01.22'))
+
+        self.frame_materials_of_akt.pack()
+        self.frame_table_materials.pack()
+        self.table_material.pack()
+
         self.root.mainloop()
 
     # Функция ОТКРЫТЬ из МЕНЮ
     def new_file(self):
+        global x_data_akt
         x_data_akt = data_akt.Data_Akt()
         self.updater_list(self.listbox_names, x_data_akt.get_all_name_object_names())
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
         self.updater_list(self.listbox_representative, x_data_akt.get_all_representatives_names())
         self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
+        self.updater_table_materials()
 
     def load_file(self):
         global x_data_akt
@@ -349,6 +378,7 @@ class RootGUI:
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
         self.updater_list(self.listbox_representative, x_data_akt.get_all_representatives_names())
         self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
+        self.updater_table_materials()
 
     def save_file(self):
         self.file = tkinter.filedialog.asksaveasfilename(defaultextension='dat')
@@ -357,6 +387,12 @@ class RootGUI:
     def updater_list(self, list_object, var):
         elements = tkinter.Variable(value=var)
         list_object.config(listvariable=elements)
+
+    def updater_table_materials(self):
+        for item in self.table_material.get_children():
+            self.table_material.delete(item)
+        for material in x_data_akt.get_all_text_materials():
+            self.table_material.insert('', 'end', values=material)
 
     # Контекстное меню для НАИМЕНОВАНИЯ ОБЪЕКТА во вкладке ОБЪЕКТ
     def menu_names_object(self, event):
@@ -477,7 +513,18 @@ class RootGUI:
         self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work())
         self.text_documentation.insert('end',x_data_akt.get_akt(index[0]).get_text_of_documentation())
 
+    def menu_table_material(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Cоздать новый', command=self.create_material)
+        menu.add_command(label='Добавить материал из БД', )
+        menu.add_command(label='Изменить', )
+        menu.add_command(label='Удалить', )
+        menu.post(event.x_root, event.y_root)
 
+
+
+    def create_material(self):
+        window = Window_material(self.root, self.table_material)
 
 class Window_object_element:
     def __init__(self, root, listbox, type_element, index=None):
@@ -633,10 +680,11 @@ class Window_akt:
             self.__heading = f'Изменение акта "{self.__work}"'
             self.__text_button = 'Изменить акт'
 
-        self.window_creat_akt = Toplevel(self.__root)
-        self.window_creat_akt.title(self.__heading)
-        self.window_creat_akt.geometry('700x900')
-        self.frame_window_akt = tkinter.Frame(self.window_creat_akt)
+        self.window_create_akt = Toplevel(self.__root)
+        self.window_create_akt.title(self.__heading)
+        self.window_create_akt.geometry('700x900')
+        self.window_create_akt.grab_set()
+        self.frame_window_akt = tkinter.Frame(self.window_create_akt)
 
         self.frame_object = tkinter.LabelFrame(self.frame_window_akt, text='Объект, организации, представители')
         self.label_object = tkinter.Label(self.frame_object, text='Выберите наименование объекта')
@@ -800,8 +848,8 @@ class Window_akt:
         self.frame_date.grid(row=2, column=0, stick='we')
         self.frame_documentation.grid(row=3, column=0, stick='we')
 
-        self.button_akt = tkinter.Button(self.window_creat_akt, text=self.__text_button, command=self.akt)
-        self.label_indicator = tkinter.Label(self.window_creat_akt, foreground='red')
+        self.button_akt = tkinter.Button(self.window_create_akt, text=self.__text_button, command=self.akt)
+        self.label_indicator = tkinter.Label(self.window_create_akt, foreground='red')
 
         self.frame_window_akt.pack()
         self.button_akt.pack()
@@ -918,7 +966,108 @@ class Window_akt:
 
         elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
         self.__listbox.config(listvariable=elements)
-        self.window_creat_akt.destroy()
+        self.window_create_akt.destroy()
+
+
+class Window_material:
+    def __init__(self, root, table):
+        self.__root = root
+        self.__table = table
+        self.__indicator = ''
+        self.__type = None
+        self.__material = None
+        self.__document_name = None
+        self.__documents_name = None
+        self.__document_number = None
+        self.__start_date = None
+        self.__finish_date = None
+        self.__heading = 'Добавление материала'
+        self.__text_button = 'Добавить материал'
+
+        self.window_create_material = Toplevel(self.__root)
+        self.window_create_material.title(self.__heading)
+        self.window_create_material.geometry('500x500')
+        self.window_create_material.grab_set()
+
+        self.frame_material = ttk.LabelFrame(self.window_create_material, text='Данные о материале')
+        self.label_type = tkinter.Label(self.frame_material, text='Вид')
+        self.combobox_type = ttk.Combobox(self.frame_material, width=35)
+        self.label_material = tkinter.Label(self.frame_material, text='Наименование')
+        self.combobox_material = ttk.Combobox(self.frame_material, width=35)
+        self.label_document_name = tkinter.Label(self.frame_material, text='Наименование документа')
+        self.combobox_document_name = ttk.Combobox(self.frame_material, width=35)
+        self.label_documents_name = tkinter.Label(self.frame_material, text='Наименование документов')
+        self.combobox_documents_name = ttk.Combobox(self.frame_material, width=35)
+        self.label_document_number = tkinter.Label(self.frame_material, text='Номер документа')
+        self.entry_document_number = tkinter.Entry(self.frame_material, width=35)
+        self.label_start_date = tkinter.Label(self.frame_material, text='Дата начала')
+        self.entry_start_date = tkinter.Entry(self.frame_material, width=35)
+        self.label_finish_date = tkinter.Label(self.frame_material, text='Дата окончания')
+        self.entry_finish_date = tkinter.Entry(self.frame_material, width=35)
+
+        self.frame_material.pack()
+
+        self.label_type.grid(row=0, column=0, stick='we', sticky='e')
+        self.label_material.grid(row=1, column=0, stick='we', sticky='e')
+        self.label_document_name.grid(row=2, column=0, stick='we', sticky='e')
+        self.label_documents_name.grid(row=3, column=0, stick='we', sticky='e')
+        self.label_document_number.grid(row=4, column=0, stick='we', sticky='e')
+        self.label_start_date.grid(row=5, column=0, stick='we', sticky='e')
+        self.label_finish_date.grid(row=6, column=0, stick='we', sticky='e')
+
+        self.combobox_type.grid(row=0, column=1, stick='we')
+        self.combobox_material.grid(row=1, column=1, stick='we')
+        self.combobox_document_name.grid(row=2, column=1, stick='we')
+        self.combobox_documents_name.grid(row=3, column=1, stick='we')
+        self.entry_document_number.grid(row=4, column=1, stick='we')
+        self.entry_start_date.grid(row=5, column=1, stick='we')
+        self.entry_finish_date.grid(row=6, column=1, stick='we')
+
+        self.label_indicator = tkinter.Label(self.window_create_material, foreground='red')
+        self.button_material = tkinter.Button(self.window_create_material, text=self.__text_button, command=self.material)
+
+        self.label_indicator.pack()
+        self.button_material.pack()
+
+    def material(self):
+        self.__indicator = ''
+
+        self.__type = self.combobox_type.get() if self.combobox_type.get() != '' else None
+        self.__material = self.combobox_material.get()
+        self.__document_name = self.combobox_document_name.get() if self.combobox_document_name.get() != '' else None
+        self.__documents_name = self.combobox_documents_name.get() if self.combobox_documents_name.get() != '' else None
+        self.__document_number = self.entry_document_number.get() if self.entry_document_number.get() != '' else None
+        self.__start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
+        self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
+
+        if self.__material == '':
+            self.__indicator += 'Поле "Наименование" не может быть пустым\n'
+        if self.__document_name is None and self.__documents_name is not None:
+            self.__indicator += ('Поле "Наименование документа" не может быть пустым, '+
+                                 'если поле "Наименование документов" заполнено\n')
+        if self.__start_date is None and self.__finish_date is not None:
+            self.__indicator += ('Поле "Дата начала" не может быть пустым, '+
+                                 'если поле "Дата окончания" заполнено\n')
+
+        if self.__indicator != '':
+            self.label_indicator.config(text=self.__indicator)
+        else:
+            material = data_akt.Material()
+
+            material.set_type(self.__type)
+            material.set_material(self.__material)
+            material.set_document_name(self.__document_name)
+            material.set_documents_name(self.__documents_name)
+            material.set_document_number(self.__document_number)
+            material.set_start_date(self.__start_date)
+            material.set_finish_date(self.__finish_date)
+
+            x_data_akt.set_material(material)
+
+            self.__table.insert('', 'end', values=material.get_text_material())
+
+            self.window_create_material.destroy()
+
 
 if __name__ == '__main__':
     window = RootGUI()
