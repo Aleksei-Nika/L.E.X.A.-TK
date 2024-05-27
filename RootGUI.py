@@ -340,19 +340,18 @@ class RootGUI:
         self.frame_materials_of_akt = ttk.LabelFrame(self.frame_material, text='Используемые материалы')
         self.frame_table_materials = tkinter.Frame(self.frame_materials_of_akt)
         self.table_material = ttk.Treeview(self.frame_table_materials,
-                                           columns=('type', 'material', 'document', 'date'),
+                                           columns=('id', 'type', 'material', 'document', 'date'),
                                            show='headings',
                                            height=5)
         self.table_material_scrollbar = tkinter.Scrollbar(self.frame_table_materials, command=self.table_material.yview)
         self.table_material.config(yscrollcommand=self.listbox_akts_scrollbar.set)
         self.table_material_scrollbar.pack(side='right', fill='y')
+        self.table_material.heading('id', text='id')
         self.table_material.heading('type', text='Вид')
         self.table_material.heading('material', text='Материал')
         self.table_material.heading('document', text='Документ')
         self.table_material.heading('date', text='Дата')
         self.table_material.bind('<Button-3>', self.menu_table_material)
-
-        #self.table_material.insert('', 'end', values=('8A500C', 'документ о качестве №2200031', 'от 01.01.22'))
 
         self.frame_materials_of_akt.pack()
         self.frame_table_materials.pack()
@@ -516,15 +515,29 @@ class RootGUI:
     def menu_table_material(self, event):
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Cоздать новый', command=self.create_material)
-        menu.add_command(label='Добавить материал из БД', )
-        menu.add_command(label='Изменить', )
-        menu.add_command(label='Удалить', )
+        menu.add_command(label='Добавить материал из БД', command=self.add_from_database)
+        menu.add_command(label='Изменить', command=self.change_material)
+        menu.add_command(label='Удалить', command=self.delete_material)
         menu.post(event.x_root, event.y_root)
-
-
 
     def create_material(self):
         window = Window_material(self.root, self.table_material)
+
+    def add_from_database(self):
+        print(self.table_material.selection())
+
+    def change_material(self):
+        line = self.table_material.get_children('')[0]
+        id = self.table_material.item(line)['values'][0]
+        index_material = x_data_akt.get_all_id_materials().index(id)
+        window = Window_material(self.root, self.table_material, index_material, line)
+
+    def delete_material(self):
+        for line in self.table_material.get_children(''):
+            id = self.table_material.item(line)['values'][0]
+            x_data_akt.delete_material(x_data_akt.get_all_id_materials().index(id))
+            self.table_material.delete(line)
+
 
 class Window_object_element:
     def __init__(self, root, listbox, type_element, index=None):
@@ -970,19 +983,33 @@ class Window_akt:
 
 
 class Window_material:
-    def __init__(self, root, table):
+    def __init__(self, root, table, index=None, item=None):
         self.__root = root
         self.__table = table
         self.__indicator = ''
-        self.__type = None
-        self.__material = None
-        self.__document_name = None
-        self.__documents_name = None
-        self.__document_number = None
-        self.__start_date = None
-        self.__finish_date = None
-        self.__heading = 'Добавление материала'
-        self.__text_button = 'Добавить материал'
+        if index is None:
+            self.__index = None
+            self.__type = None
+            self.__material = None
+            self.__document_name = None
+            self.__documents_name = None
+            self.__document_number = None
+            self.__start_date = None
+            self.__finish_date = None
+            self.__heading = 'Добавление материала'
+            self.__text_button = 'Добавить материал'
+        else:
+            self.__index = index
+            self.__item = item
+            self.__type = x_data_akt.get_material(index).get_type()
+            self.__material = x_data_akt.get_material(index).get_material()
+            self.__document_name = x_data_akt.get_material(index).get_document_name()
+            self.__documents_name = x_data_akt.get_material(index).get_documents_name()
+            self.__document_number = x_data_akt.get_material(index).get_document_number()
+            self.__start_date = x_data_akt.get_material(index).get_start_date()
+            self.__finish_date = x_data_akt.get_material(index).get_finish_date()
+            self.__heading = 'Изменение материала'
+            self.__text_button = 'Изменить материал'
 
         self.window_create_material = Toplevel(self.__root)
         self.window_create_material.title(self.__heading)
@@ -1023,6 +1050,15 @@ class Window_material:
         self.entry_start_date.grid(row=5, column=1, stick='we')
         self.entry_finish_date.grid(row=6, column=1, stick='we')
 
+        if self.__index is not None:
+            self.combobox_type.set(self.__type if self.__type is not None else '')
+            self.combobox_material.set(self.__material if self.__material is not None else '')
+            self.combobox_document_name.set(self.__document_name if self.__document_name is not None else '')
+            self.combobox_documents_name.set(self.__documents_name if self.__documents_name is not None else '')
+            self.entry_document_number.insert('end', self.__document_number if self.__document_number is not None else '')
+            self.entry_start_date.insert('end', self.__start_date if self.__start_date is not None else '')
+            self.entry_finish_date.insert('end', self.__finish_date if self.__finish_date is not None else '')
+
         self.label_indicator = tkinter.Label(self.window_create_material, foreground='red')
         self.button_material = tkinter.Button(self.window_create_material, text=self.__text_button, command=self.material)
 
@@ -1052,21 +1088,31 @@ class Window_material:
         if self.__indicator != '':
             self.label_indicator.config(text=self.__indicator)
         else:
-            material = data_akt.Material()
+            if self.__index is None:
+                material = data_akt.Material()
 
-            material.set_type(self.__type)
-            material.set_material(self.__material)
-            material.set_document_name(self.__document_name)
-            material.set_documents_name(self.__documents_name)
-            material.set_document_number(self.__document_number)
-            material.set_start_date(self.__start_date)
-            material.set_finish_date(self.__finish_date)
+                material.set_type(self.__type)
+                material.set_material(self.__material)
+                material.set_document_name(self.__document_name)
+                material.set_documents_name(self.__documents_name)
+                material.set_document_number(self.__document_number)
+                material.set_start_date(self.__start_date)
+                material.set_finish_date(self.__finish_date)
 
-            x_data_akt.set_material(material)
+                x_data_akt.set_material(material)
+                self.__table.insert('', 'end', values=material.get_in_tabel())
+                self.window_create_material.destroy()
+            else:
+                x_data_akt.get_material(self.__index).set_type(self.__type)
+                x_data_akt.get_material(self.__index).set_material(self.__material)
+                x_data_akt.get_material(self.__index).set_document_name(self.__document_name)
+                x_data_akt.get_material(self.__index).set_documents_name(self.__documents_name)
+                x_data_akt.get_material(self.__index).set_document_number(self.__document_number)
+                x_data_akt.get_material(self.__index).set_start_date(self.__start_date)
+                x_data_akt.get_material(self.__index).set_finish_date(self.__finish_date)
 
-            self.__table.insert('', 'end', values=material.get_text_material())
-
-            self.window_create_material.destroy()
+                self.__table.item(self.__item, values=x_data_akt.get_material(self.__index).get_in_tabel())
+                self.window_create_material.destroy()
 
 
 if __name__ == '__main__':

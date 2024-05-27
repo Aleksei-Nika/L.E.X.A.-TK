@@ -180,6 +180,11 @@ class Data_Akt:
     # функции для МАТЕРИАЛОВ
         # Добавление МАТЕРИАЛа в кортеж
     def set_material(self, material):
+        id = 0
+        for el in self.get_all_id_materials():
+            if el == id:
+                id += 1
+        material.set_id(id)
         self.__materials = list(self.__materials)
         self.__materials.append(material)
         self.__materials = tuple(self.__materials)
@@ -202,10 +207,14 @@ class Data_Akt:
     def get_all_materials(self):
         return self.__materials
 
+        # Возвращение всех ID МАТЕРИАЛОВ
+    def get_all_id_materials(self):
+        return tuple(material.get_id() for material in self.__materials)
+
     def get_all_text_materials(self):
         list_text_materials = []
         for text_material in self.__materials:
-            list_text_materials.append(text_material.get_text_material())
+            list_text_materials.append(text_material.get_in_tabel())
         return tuple(list_text_materials)
 
 class Akt:
@@ -689,7 +698,8 @@ def page_modification(input_page):
 
 class Material:
     def __init__(self, type=None, material=None, document_name=None, documents_name=None,
-                 document_number=None, start_date=None,finish_date=None):
+                 document_number=None, start_date=None, finish_date=None):
+        self.__id = None
         self.__type = type
         self.__material = material
         self.__document_name = document_name
@@ -697,6 +707,9 @@ class Material:
         self.__document_number = document_number
         self.__start_date = start_date
         self.__finish_date = finish_date
+
+    def set_id(self, id):
+        self.__id = id
 
     def set_type(self, type):
         self.__type = type
@@ -719,6 +732,9 @@ class Material:
     def set_finish_date(self, finish_date):
         self.__finish_date = finish_date
 
+    def get_id(self):
+        return self.__id
+
     def get_type(self):
         return self.__type
 
@@ -740,7 +756,7 @@ class Material:
     def get_finish_date(self):
         return self.__finish_date
 
-    def get_text_material(self):
+    def get_in_tabel(self):
 
         # Проверка ВИДА материала
         def check_type(type):
@@ -768,11 +784,11 @@ class Material:
                 return 'с ' + start_date + ' до ' + finish_date
 
         elements_material = []
+        elements_material.append(self.__id)
         elements_material.append(check_type(self.__type))
         elements_material.append(self.__material)
         elements_material.append(check_data_document(self.__document_name, self.__document_number))
         elements_material.append(check_dates(self.__start_date, self.__finish_date))
-
         return tuple(elements_material)
 
 if __name__ == '__main__':
