@@ -211,6 +211,45 @@ class Data_Akt:
     def get_all_id_materials(self):
         return tuple(material.get_id() for material in self.__materials)
 
+        # Возвращение уникальных ТИПОВ МАТЕРИАЛОВ
+    def get_all_unique_type_materials(self):
+        all_unique_type_materials = set()
+        for material in self.__materials:
+            if material.get_type() is not None:
+                all_unique_type_materials.add(material.get_type())
+        return tuple(all_unique_type_materials)
+
+        # Возвращение уникальных НАИМЕНОВАНИЙ МАТЕРИАЛОВ
+    def get_all_unique_material_materials(self):
+        all_unique_material_materials = set()
+        for material in self.__materials:
+            if material.get_material() is not None:
+                all_unique_material_materials.add(material.get_material())
+        return tuple(all_unique_material_materials)
+
+        # Возвращение уникальных ИМЁН ДОКУМЕНТА МАТЕРИАЛОВ
+    def get_all_unique_document_names_materials(self):
+        all_unique_document_name_materials = set()
+        for material in self.__materials:
+            if material.get_document_name() is not None:
+                all_unique_document_name_materials.add(material.get_document_name())
+        return tuple(all_unique_document_name_materials)
+
+        # Возвращение уникальных ИМЁН ДОКУМЕНТОВ (множественное число имени) МАТЕРИАЛОВ
+    def get_all_unique_documents_names_materials(self):
+        all_unique_documents_names_materials = set()
+        for material in self.__materials:
+            if material.get_documents_name() is not None:
+                all_unique_documents_names_materials.add(material.get_documents_name())
+        return tuple(all_unique_documents_names_materials)
+
+        # Возвращение соответсвующего ИМЕНИ ДОКУМЕНТОВ (множественное число имени) МАТЕРИАЛОВ
+    def get_corresponding_documents_name_materials(self, document_name):
+        for material in self.__materials:
+            if material.get_document_name() == document_name:
+                return material.get_documents_name()
+
+
     def get_all_text_materials(self):
         list_text_materials = []
         for text_material in self.__materials:

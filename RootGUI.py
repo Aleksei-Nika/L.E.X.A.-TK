@@ -327,6 +327,9 @@ class RootGUI:
         self.canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"), yscrollcommand=self.canvas_scrollbar.set)
         self.canvas.pack(side='left')
+        # Прокрутка canvas просмотр акта
+        self.canvas.bind_all('<MouseWheel>',
+                             lambda event: self.canvas.yview_scroll(int(-1 * event.delta/120), 'units'))
         self.canvas_scrollbar.pack(side='right', fill='y')
         self.frame_for_canvas.pack()
         self.frame_view_akt.grid(row=0, column=1)
@@ -343,8 +346,8 @@ class RootGUI:
                                            columns=('id', 'type', 'material', 'document', 'date'),
                                            show='headings',
                                            height=5)
-        self.table_material_scrollbar = tkinter.Scrollbar(self.frame_table_materials, command=self.table_material.yview)
-        self.table_material.config(yscrollcommand=self.listbox_akts_scrollbar.set)
+        self.table_material_scrollbar = ttk.Scrollbar(self.frame_table_materials, orient='vertical', command=self.table_material.yview)
+        self.table_material.config(yscrollcommand=self.table_material_scrollbar.set)
         self.table_material_scrollbar.pack(side='right', fill='y')
         self.table_material.heading('id', text='id')
         self.table_material.heading('type', text='Вид')
@@ -1018,13 +1021,21 @@ class Window_material:
 
         self.frame_material = ttk.LabelFrame(self.window_create_material, text='Данные о материале')
         self.label_type = tkinter.Label(self.frame_material, text='Вид')
-        self.combobox_type = ttk.Combobox(self.frame_material, width=35)
+        self.combobox_type = ttk.Combobox(self.frame_material,
+                                          width=35,
+                                          values=x_data_akt.get_all_unique_type_materials())
         self.label_material = tkinter.Label(self.frame_material, text='Наименование')
-        self.combobox_material = ttk.Combobox(self.frame_material, width=35)
+        self.combobox_material = ttk.Combobox(self.frame_material,
+                                              width=35,
+                                              values=x_data_akt.get_all_unique_material_materials())
         self.label_document_name = tkinter.Label(self.frame_material, text='Наименование документа')
-        self.combobox_document_name = ttk.Combobox(self.frame_material, width=35)
+        self.combobox_document_name = ttk.Combobox(self.frame_material,
+                                                   width=35,
+                                                   values=x_data_akt.get_all_unique_document_names_materials())
         self.label_documents_name = tkinter.Label(self.frame_material, text='Наименование документов')
-        self.combobox_documents_name = ttk.Combobox(self.frame_material, width=35)
+        self.combobox_documents_name = ttk.Combobox(self.frame_material,
+                                                    width=35,
+                                                    values=x_data_akt.get_all_unique_documents_names_materials())
         self.label_document_number = tkinter.Label(self.frame_material, text='Номер документа')
         self.entry_document_number = tkinter.Entry(self.frame_material, width=35)
         self.label_start_date = tkinter.Label(self.frame_material, text='Дата начала')
@@ -1050,6 +1061,11 @@ class Window_material:
         self.entry_start_date.grid(row=5, column=1, stick='we')
         self.entry_finish_date.grid(row=6, column=1, stick='we')
 
+        # self.combobox_documents_name.config(state='disabled')
+        # self.entry_finish_date.config(state='disabled')FocusOut
+
+        self.combobox_document_name.bind('<FocusOut>', self.corresponding_documents_name)
+
         if self.__index is not None:
             self.combobox_type.set(self.__type if self.__type is not None else '')
             self.combobox_material.set(self.__material if self.__material is not None else '')
@@ -1064,6 +1080,12 @@ class Window_material:
 
         self.label_indicator.pack()
         self.button_material.pack()
+
+    # Автозаполнение combobox_documents_name
+    def corresponding_documents_name(self, event):
+        documents_name = x_data_akt.get_corresponding_documents_name_materials(self.combobox_document_name.get())
+        if documents_name is not None:
+            self.combobox_documents_name.set(documents_name)
 
     def material(self):
         self.__indicator = ''
