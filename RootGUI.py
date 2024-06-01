@@ -354,6 +354,11 @@ class RootGUI:
         self.table_material.heading('material', text='Материал')
         self.table_material.heading('document', text='Документ')
         self.table_material.heading('date', text='Дата')
+        self.table_material.column('#1', width=30)
+        self.table_material.column('#2', width=100)
+        self.table_material.column('#3', width=300)
+        self.table_material.column('#4', width=300)
+        self.table_material.column('#5', width=200)
         self.table_material.bind('<Button-3>', self.menu_table_material)
 
         self.frame_materials_of_akt.pack()
@@ -858,7 +863,6 @@ class Window_akt:
             self.entry_work.insert('end', self.__work)
             self.old_doc(self.__documentation)
 
-
         self.frame_object.grid(row=0, column=0)
         self.frame_work.grid(row=1, column=0, stick='we')
         self.frame_date.grid(row=2, column=0, stick='we')
@@ -901,6 +905,25 @@ class Window_akt:
 
     def akt(self):
 
+        # Функция для проверки корректности введенных дат и перевод их в объект класса Date
+        def checking_deadline():
+            good_data_date = True
+            if self.__start_date is not None:
+                try:
+                    self.__start_date = data_akt.Date(self.__start_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата начала" введеные некоректные данные\n'
+                    good_data_date = False
+            if self.__finish_date is not None:
+                try:
+                    self.__finish_date = data_akt.Date(self.__finish_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата окончания" введеные некоректные данные\n'
+                    good_data_date = False
+            if self.__start_date is not None and self.__finish_date is not None and good_data_date:
+                if data_akt.date_comparison(self.__start_date, self.__finish_date):
+                    self.__indicator += '"Дата начала" не может быть позднее "Даты окончания"\n'
+
         # функция для получения данный из полей
         def insert_data(combobox, data_tuple):
             index = combobox.current()
@@ -933,7 +956,9 @@ class Window_akt:
             documents_list = tuple(documents_list)
             return documents_list
 
+        # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
         self.__indicator = ''
+
         # получение элементов акта
         self.__name_object = insert_data(self.combobox_object, x_data_akt.get_all_names_object())
         self.__developer = insert_data(self.combobox_developer, x_data_akt.get_all_organizations())
@@ -946,39 +971,54 @@ class Window_akt:
         self.__contractor_name = insert_data(self.combobox_contractor_name, x_data_akt.get_all_representatives())
         self.__another_person = insert_data(self.combobox_another_person, x_data_akt.get_all_representatives())
         self.__contractor = insert_data(self.combobox_contractor, x_data_akt.get_all_organizations())
-        self.__start_date = self.entry_start_date.get()
-        self.__finish_date = self.entry_finish_date.get()
+        self.__start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
+        self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
         self.__work = self.entry_work.get()
-        if self.__work == '':
-            self.__indicator += 'Наименование работ не может быть пустым\n'
         self.__documentation = insert_data_documentation()
 
-        akt = data_akt.Akt()
-        akt.set_name_object(self.__name_object)
-        akt.set_developer(self.__developer)
-        akt.set_builder(self.__builder)
-        akt.set_designer(self.__designer)
-        akt.set_developer_name(self.__developer_name)
-        akt.set_builder_name(self.__builder_name)
-        akt.set_builder_control_name(self.__builder_control_name)
-        akt.set_designer_name(self.__designer_name)
-        akt.set_contractor_name(self.__contractor_name)
-        akt.set_another_person(self.__another_person)
-        akt.set_contractor(self.__contractor)
-        indicator_date = akt.add_deadlines(self.__start_date, self.__finish_date)
-        if indicator_date is not None:
-            self.__indicator += indicator_date
-        akt.set_name_work(self.__work)
-        akt.set_documentation(self.__documentation)
+        # проверка корректности введенных данный
+        if self.__work == '':
+            self.__indicator = 'Наименование работ не может быть пустым\n' + self.__indicator
+        checking_deadline()
 
         if self.__indicator != '':
             self.label_indicator.config(text=self.__indicator)
             return
 
         if self.__action == 'новый' or self.__action == 'на основе другого':
+            akt = data_akt.Akt()
+            akt.set_name_object(self.__name_object)
+            akt.set_developer(self.__developer)
+            akt.set_builder(self.__builder)
+            akt.set_designer(self.__designer)
+            akt.set_developer_name(self.__developer_name)
+            akt.set_builder_name(self.__builder_name)
+            akt.set_builder_control_name(self.__builder_control_name)
+            akt.set_designer_name(self.__designer_name)
+            akt.set_contractor_name(self.__contractor_name)
+            akt.set_another_person(self.__another_person)
+            akt.set_contractor(self.__contractor)
+            akt.set_object_start_date(self.__start_date)
+            akt.set_object_finish_date(self.__finish_date)
+            akt.set_name_work(self.__work)
+            akt.set_documentation(self.__documentation)
             x_data_akt.set_akt(akt)
         elif self.__action == 'изменить':
-            x_data_akt.change_akt(akt, self.__index)
+            x_data_akt.get_akt(self.__index).set_name_object(self.__name_object)
+            x_data_akt.get_akt(self.__index).set_developer(self.__developer)
+            x_data_akt.get_akt(self.__index).set_builder(self.__builder)
+            x_data_akt.get_akt(self.__index).set_designer(self.__designer)
+            x_data_akt.get_akt(self.__index).set_developer_name(self.__developer_name)
+            x_data_akt.get_akt(self.__index).set_builder_name(self.__builder_name)
+            x_data_akt.get_akt(self.__index).set_builder_control_name(self.__builder_control_name)
+            x_data_akt.get_akt(self.__index).set_designer_name(self.__designer_name)
+            x_data_akt.get_akt(self.__index).set_contractor_name(self.__contractor_name)
+            x_data_akt.get_akt(self.__index).set_another_person(self.__another_person)
+            x_data_akt.get_akt(self.__index).set_contractor(self.__contractor)
+            x_data_akt.get_akt(self.__index).set_object_start_date(self.__start_date)
+            x_data_akt.get_akt(self.__index).set_object_finish_date(self.__finish_date)
+            x_data_akt.get_akt(self.__index).set_name_work(self.__work)
+            x_data_akt.get_akt(self.__index).set_documentation(self.__documentation)
 
         elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
         self.__listbox.config(listvariable=elements)
@@ -1009,8 +1049,8 @@ class Window_material:
             self.__document_name = x_data_akt.get_material(index).get_document_name()
             self.__documents_name = x_data_akt.get_material(index).get_documents_name()
             self.__document_number = x_data_akt.get_material(index).get_document_number()
-            self.__start_date = x_data_akt.get_material(index).get_start_date()
-            self.__finish_date = x_data_akt.get_material(index).get_finish_date()
+            self.__start_date = x_data_akt.get_material(index).get_str_start_date()
+            self.__finish_date = x_data_akt.get_material(index).get_str_finish_date()
             self.__heading = 'Изменение материала'
             self.__text_button = 'Изменить материал'
 
@@ -1075,11 +1115,13 @@ class Window_material:
             self.entry_start_date.insert('end', self.__start_date if self.__start_date is not None else '')
             self.entry_finish_date.insert('end', self.__finish_date if self.__finish_date is not None else '')
 
+        self.button_material = tkinter.Button(self.window_create_material, text=self.__text_button,
+                                              command=self.material)
         self.label_indicator = tkinter.Label(self.window_create_material, foreground='red')
-        self.button_material = tkinter.Button(self.window_create_material, text=self.__text_button, command=self.material)
 
-        self.label_indicator.pack()
         self.button_material.pack()
+        self.label_indicator.pack()
+
 
     # Автозаполнение combobox_documents_name
     def corresponding_documents_name(self, event):
@@ -1088,8 +1130,34 @@ class Window_material:
             self.combobox_documents_name.set(documents_name)
 
     def material(self):
+
+        # Функция для проверки корректности введенных дат и перевод их в объект класса Date
+        def checking_deadline():
+            if self.__start_date is None and self.__finish_date is not None:
+                self.__indicator += 'Поле "Дата начала" не может быть пустым, если поле "Дата окончания" заполнено\n'
+                return
+            good_data_date = True
+            if self.__start_date is not None:
+                try:
+                    self.__start_date = data_akt.Date(self.__start_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата начала" введеные некоректные данные\n'
+                    good_data_date = False
+            if self.__finish_date is not None:
+                try:
+                    self.__finish_date = data_akt.Date(self.__finish_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата окончания" введеные некоректные данные\n'
+                    good_data_date = False
+            if self.__start_date is not None and self.__finish_date is not None and good_data_date:
+                if data_akt.date_comparison(self.__start_date, self.__finish_date):
+                    self.__indicator += '"Дата начала" не может быть позднее "Даты окончания"\n'
+
+
+        # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
         self.__indicator = ''
 
+        # Получение данный с полей ввода
         self.__type = self.combobox_type.get() if self.combobox_type.get() != '' else None
         self.__material = self.combobox_material.get()
         self.__document_name = self.combobox_document_name.get() if self.combobox_document_name.get() != '' else None
@@ -1098,18 +1166,19 @@ class Window_material:
         self.__start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
         self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
 
+        # проверка корректности введенных данный
         if self.__material == '':
             self.__indicator += 'Поле "Наименование" не может быть пустым\n'
         if self.__document_name is None and self.__documents_name is not None:
             self.__indicator += ('Поле "Наименование документа" не может быть пустым, '+
                                  'если поле "Наименование документов" заполнено\n')
-        if self.__start_date is None and self.__finish_date is not None:
-            self.__indicator += ('Поле "Дата начала" не может быть пустым, '+
-                                 'если поле "Дата окончания" заполнено\n')
+        checking_deadline()
 
+        # Если данные введены некорректно выводит ошибки в веденных данных
         if self.__indicator != '':
             self.label_indicator.config(text=self.__indicator)
         else:
+            # Создание нового материала, назначение его атрибутов и добавление в таблицу
             if self.__index is None:
                 material = data_akt.Material()
 
@@ -1118,20 +1187,21 @@ class Window_material:
                 material.set_document_name(self.__document_name)
                 material.set_documents_name(self.__documents_name)
                 material.set_document_number(self.__document_number)
-                material.set_start_date(self.__start_date)
-                material.set_finish_date(self.__finish_date)
+                material.set_object_start_date(self.__start_date)
+                material.set_object_finish_date(self.__finish_date)
 
                 x_data_akt.set_material(material)
                 self.__table.insert('', 'end', values=material.get_in_tabel())
                 self.window_create_material.destroy()
+            # Изменение атрибутов ранее созданного объекта класса "Материалы"
             else:
                 x_data_akt.get_material(self.__index).set_type(self.__type)
                 x_data_akt.get_material(self.__index).set_material(self.__material)
                 x_data_akt.get_material(self.__index).set_document_name(self.__document_name)
                 x_data_akt.get_material(self.__index).set_documents_name(self.__documents_name)
                 x_data_akt.get_material(self.__index).set_document_number(self.__document_number)
-                x_data_akt.get_material(self.__index).set_start_date(self.__start_date)
-                x_data_akt.get_material(self.__index).set_finish_date(self.__finish_date)
+                x_data_akt.get_material(self.__index).set_object_start_date(self.__start_date)
+                x_data_akt.get_material(self.__index).set_object_finish_date(self.__finish_date)
 
                 self.__table.item(self.__item, values=x_data_akt.get_material(self.__index).get_in_tabel())
                 self.window_create_material.destroy()

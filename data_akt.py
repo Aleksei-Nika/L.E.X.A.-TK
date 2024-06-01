@@ -365,113 +365,38 @@ class Akt:
     def set_material_of_akt(self, material):
         self.__materials_of_akt = material
 
-    # функции для ДАТЫ
+    # функции для ДАТ
+    def set_object_start_date(self, start_date):
+        self.__start_date = start_date
+
+    def set_object_finish_date(self, finish_date):
+        self.__finish_date = finish_date
+
+    def set_start_date(self, str_start_date):
+        self.__start_date = Date(str_start_date)
+
+    def set_finish_date(self, str_finish_date):
+        self.__finish_date = Date(str_finish_date)
+
         # добавление даты начала и окончания работ в акт
-    def add_deadlines(self, str_start_date, str_finish_date):
+    def add_deadline(self, str_start_date, str_finish_date):
         try:
-            if str_start_date == '' and str_finish_date == '':
-                self.__start_date = str_start_date
-                self.__finish_date = str_finish_date
-            elif str_start_date == '':
-                self.__finish_date = self.date_modification(str_finish_date)
-                self.__start_date = ''
+            if str_start_date is None and str_finish_date is None:
+                self.__start_date = None
+                self.__finish_date = None
+            elif str_start_date is None:
+                self.__finish_date = Date(str_finish_date)
+                self.__start_date = None
                 return
-            elif str_finish_date == '':
-                self.__start_date = self.date_modification(str_start_date)
-                self.__finish_date = ''
+            elif str_finish_date is None:
+                self.__start_date = Date(str_start_date)
+                self.__finish_date = None
                 return
             else:
-                start_date = self.date_modification(str_start_date)
-                finish_date = self.date_modification(str_finish_date)
-                if self.date_comparison(start_date, finish_date):
-                    self.__start_date = start_date
-                    self.__finish_date = finish_date
-                else:
-                    return 'Дата начала не может быть позднее даты окончание'
+                self.__start_date = Date(str_start_date)
+                self.__finish_date = Date(str_finish_date)
         except (KeyError, IndexError):
-            return 'Некорректно введены даты'
-
-        # создание даты из строки в объект модуля Date
-    def date_modification(self, str_date):
-
-        date_split = []
-        date_element = ''
-
-        str_date = str_date.lower()
-
-        str_date = str_date.replace('г', '')
-
-        for el in range(len(str_date)):
-            if el == len(str_date) - 1:
-                if str_date[el].isalnum():
-                    date_element += str_date[el]
-                    date_split.append(date_element)
-                else:
-                    date_split.append(date_element)
-            elif str_date[el].isalnum():
-                date_element += str_date[el]
-            else:
-                date_split.append(date_element)
-                date_element = ''
-
-        date_obj = []
-
-        for el in date_split:
-            if el:
-                date_obj.append(el)
-
-        if date_obj[0].isdigit():
-            date_obj[0] = int(date_obj[0])
-
-        if date_obj[1].isdigit():
-            date_obj[1] = int(date_obj[1])
-        elif date_obj[1].isalpha():
-            dictionary = {'января': int(1),
-                          'янв': int(1),
-                          'февраля': int(2),
-                          'фев': int(2),
-                          'марта': int(3),
-                          'мар': int(3),
-                          'апреля': int(4),
-                          'апр': int(4),
-                          'майя': int(5),
-                          'май': int(5),
-                          'июня': int(6),
-                          'июн': int(6),
-                          'июля': int(7),
-                          'июл': int(7),
-                          'августа': int(8),
-                          'авг': int(8),
-                          'сентября': int(9),
-                          'сен': int(9),
-                          'октября': int(10),
-                          'окт': int(10),
-                          'ноября': int(11),
-                          'ноя': int(11),
-                          'декабря': int(12),
-                          'дек': int(12)}
-            date_obj[1] = dictionary[date_obj[1]]
-
-        if date_obj[2].isdigit():
-            if len(date_obj[2]) == 4:
-                date_obj[2] = int(date_obj[2])
-            elif len(date_obj[2]) == 2:
-                date_obj[2] = int('20' + date_obj[2])
-                date_obj[2] = int(date_obj[2])
-        return date(date_obj[2], date_obj[1], date_obj[0])
-
-    # Сравнение дат начала и окончания работ
-    def date_comparison(self, start_date, finis_date):
-        if start_date <= finis_date:
-            return True
-        elif start_date > finis_date:
-            return False
-
-    def set_start_date(self, obj):
-        self.__start_date = obj
-
-    def set_finish_date(self, obj):
-        self.__finish_date = obj
+            return
 
     def get_start_date(self):
         return self.__start_date
@@ -479,6 +404,7 @@ class Akt:
     def get_finish_date(self):
         return self.__finish_date
 
+        # возвращение строки даты начала для акта
     def get_str_start_date(self):
         dictionary = {'January': 'января',
                       'February': 'февраля',
@@ -495,10 +421,11 @@ class Akt:
         if self.__start_date == '' or self.__start_date is None:
             return ''
         else:
-            str_date = str(self.__start_date.strftime('%d.%B.%Y'))
+            str_date = str(self.__start_date.get_date().strftime('%d.%B.%Y'))
             date1 = str_date.split('.')
             return f'«{date1[0]}» {dictionary[date1[1]]} {date1[2]} г.'
 
+        # возвращение строки даты начала для акта
     def get_str_finish_date(self):
         dictionary = {'January': 'января',
                       'February': 'февраля',
@@ -515,7 +442,7 @@ class Akt:
         if self.__finish_date == '' or self.__finish_date is None:
             return ''
         else:
-            str_date = str(self.__finish_date.strftime('%d.%B.%Y'))
+            str_date = str(self.__finish_date.get_date().strftime('%d.%B.%Y'))
             date1 = str_date.split('.')
             return f'«{date1[0]}» {dictionary[date1[1]]} {date1[2]} г.'
 
@@ -735,6 +662,83 @@ def page_modification(input_page):
 
     return text_sheet_number
 
+class Date:
+    def __init__(self, str_date):
+        self.__Object_date = self.set_date(str_date)
+
+    # создание объекта дата из строки в объект модуля Date
+    def set_date(self, str_date):
+
+        date_split = []
+        date_element = ''
+
+        str_date = str_date.lower()
+
+        str_date = str_date.replace('г', '')
+
+        for el in range(len(str_date)):
+            if el == len(str_date) - 1:
+                if str_date[el].isalnum():
+                    date_element += str_date[el]
+                    date_split.append(date_element)
+                else:
+                    date_split.append(date_element)
+            elif str_date[el].isalnum():
+                date_element += str_date[el]
+            else:
+                date_split.append(date_element)
+                date_element = ''
+
+        date_obj = []
+
+        for el in date_split:
+            if el:
+                date_obj.append(el)
+
+        if date_obj[0].isdigit():
+            date_obj[0] = int(date_obj[0])
+
+        if date_obj[1].isdigit():
+            date_obj[1] = int(date_obj[1])
+        elif date_obj[1].isalpha():
+            dictionary = {'января': int(1),
+                          'янв': int(1),
+                          'февраля': int(2),
+                          'фев': int(2),
+                          'марта': int(3),
+                          'мар': int(3),
+                          'апреля': int(4),
+                          'апр': int(4),
+                          'мая': int(5),
+                          'май': int(5),
+                          'июня': int(6),
+                          'июн': int(6),
+                          'июля': int(7),
+                          'июл': int(7),
+                          'августа': int(8),
+                          'авг': int(8),
+                          'сентября': int(9),
+                          'сен': int(9),
+                          'октября': int(10),
+                          'окт': int(10),
+                          'ноября': int(11),
+                          'ноя': int(11),
+                          'декабря': int(12),
+                          'дек': int(12)}
+            date_obj[1] = dictionary[date_obj[1]]
+
+        if date_obj[2].isdigit():
+            if len(date_obj[2]) == 4:
+                date_obj[2] = int(date_obj[2])
+            elif len(date_obj[2]) == 2:
+                date_obj[2] = int('20' + date_obj[2])
+                date_obj[2] = int(date_obj[2])
+        return date(date_obj[2], date_obj[1], date_obj[0])
+
+    # возвращение объекта дата
+    def get_date(self):
+        return self.__Object_date
+
 class Material:
     def __init__(self, type=None, material=None, document_name=None, documents_name=None,
                  document_number=None, start_date=None, finish_date=None):
@@ -765,11 +769,34 @@ class Material:
     def set_document_number(self, document_number):
         self.__document_number = document_number
 
-    def set_start_date(self, start_date):
-        self.__start_date = start_date
+    def set_str_start_date(self, str_start_date):
+        self.__start_date = Date(str_start_date)
 
-    def set_finish_date(self, finish_date):
-        self.__finish_date = finish_date
+    def set_str_finish_date(self, str_finish_date):
+        self.__finish_date = Date(str_finish_date)
+
+    def set_object_start_date(self, object_start_date):
+        self.__start_date = object_start_date
+
+    def set_object_finish_date(self, object_finish_date):
+        self.__finish_date = object_finish_date
+
+    def add_deadline(self, str_start_date, str_finish_date):
+        try:
+            if str_start_date is None and str_finish_date is None:
+                self.__start_date = None
+                self.__finish_date = None
+            elif str_start_date is None:
+                self.__finish_date = Date(str_finish_date)
+                self.__start_date = None
+            elif str_finish_date is None:
+                self.__start_date = Date(str_start_date)
+                self.__finish_date = None
+            else:
+                self.__start_date = Date(str_start_date)
+                self.__finish_date = Date(str_finish_date)
+        except (KeyError, IndexError):
+            return
 
     def get_id(self):
         return self.__id
@@ -818,9 +845,9 @@ class Material:
             if start_date is None:
                 return ''
             elif finish_date is None:
-                return 'от ' + start_date
+                return 'от ' + self.get_str_start_date()
             else:
-                return 'с ' + start_date + ' до ' + finish_date
+                return 'с ' + self.get_str_start_date() + ' до ' + self.get_str_finish_date()
 
         elements_material = []
         elements_material.append(self.__id)
@@ -829,6 +856,32 @@ class Material:
         elements_material.append(check_data_document(self.__document_name, self.__document_number))
         elements_material.append(check_dates(self.__start_date, self.__finish_date))
         return tuple(elements_material)
+
+        # возвращение строки даты начала для акта
+    def get_str_start_date(self):
+        if self.__start_date == '' or self.__start_date is None:
+            return None
+        else:
+            str_date = str(self.__start_date.get_date().strftime('%d.%m.%Y'))
+            date1 = str_date.split('.')
+            return f'{date1[0]}.{date1[1]}.{date1[2]}'
+
+        # возвращение строки даты начала
+    def get_str_finish_date(self):
+        if self.__finish_date == '' or self.__finish_date is None:
+            return None
+        else:
+            str_date = str(self.__finish_date.get_date().strftime('%d.%m.%Y'))
+            date1 = str_date.split('.')
+            return f'{date1[0]}.{date1[1]}.{date1[2]}'
+
+
+# Сравнение дат
+def date_comparison(start_date, finish_date):
+    if start_date.get_date() <= finish_date.get_date():
+        return False
+    elif start_date.get_date() > finish_date.get_date():
+        return True
 
 if __name__ == '__main__':
     pass
