@@ -1,5 +1,6 @@
 import pickle
 from datetime import date
+import sqlite3
 
 
 def new():
@@ -19,6 +20,11 @@ def save(path_file, file):
     output_file = open(path_file, 'wb')
     pickle.dump(file, output_file)
     output_file.close()
+
+
+def connection_base_data(path_file):
+    conn = sqlite3.connect(path_file)
+    return Data_base_materials(conn)
 
 
 class Data_Akt:
@@ -255,6 +261,7 @@ class Data_Akt:
         for text_material in self.__materials:
             list_text_materials.append(text_material.get_in_tabel())
         return tuple(list_text_materials)
+
 
 class Akt:
     def __init__(self):
@@ -874,6 +881,43 @@ class Material:
             str_date = str(self.__finish_date.get_date().strftime('%d.%m.%Y'))
             date1 = str_date.split('.')
             return f'{date1[0]}.{date1[1]}.{date1[2]}'
+
+
+class Data_base_materials:
+    def __init__(self, connection):
+        self.__conn = connection
+        self.__cur = self.__conn.cursor()
+        self.__cur.execute('''CREATE TABLE IF NOT EXISTS materials (ItemID INTEGER PRIMARY KEY NOT NULL,
+                                type TEXT,
+                                material TEXT,
+                                document_name TEXT,
+                                documents_name TEXT,
+                                document_number TEXT,
+                                start_date TEXT,
+                                finish_date TEXT)''')
+        self.__type = None
+        self.__material = None
+        self.__document_name = None
+        self.__documents_name = None
+        self.__document_number = None
+        self.__start_date = None
+        self.__finish_date = None
+
+    def extract_all_data_from_database(self):
+        #self.__cur.execute('''SELECT * FROM materials''')
+        self.__cur.execute('''SELECT ItemID, type, material, document_name, start_date FROM materials''')
+        return self.__cur.fetchall()
+
+    def insert_data(self, type, material, document_name, documents_name, document_number, start_date, finish_date):
+        self.__cur.execute('''INSERT INTO materials(type, material, document_name, documents_name, document_number,
+                            start_date, finish_date) VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                           (type, material, document_name, documents_name, document_number, start_date, finish_date))
+
+    def commit_data_base(self):
+        self.__conn.commit()
+
+    def close_date_base(self):
+        self.__conn.close()
 
 
 # Сравнение дат

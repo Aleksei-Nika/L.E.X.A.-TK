@@ -12,7 +12,11 @@ class RootGUI:
         # Создание и настройка основного окна
         self.root = tkinter.Tk()
         self.root.title('L.E.X.A.')
+        #self.root.attributes('-fullscreen', True)
+        #self.root.attributes("-alpha", 0.5)
+        #self.root.attributes("-toolwindow", True)
         self.root.geometry('700x700')
+        #self.root.geometry(f'{self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}')
 
         # Создание МЕНЮ
         self.main_menu = tkinter.Menu(self.root)
@@ -348,7 +352,6 @@ class RootGUI:
                                            height=5)
         self.table_material_scrollbar = ttk.Scrollbar(self.frame_table_materials, orient='vertical', command=self.table_material.yview)
         self.table_material.config(yscrollcommand=self.table_material_scrollbar.set)
-        self.table_material_scrollbar.pack(side='right', fill='y')
         self.table_material.heading('id', text='id')
         self.table_material.heading('type', text='Вид')
         self.table_material.heading('material', text='Материал')
@@ -363,7 +366,16 @@ class RootGUI:
 
         self.frame_materials_of_akt.pack()
         self.frame_table_materials.pack()
-        self.table_material.pack()
+        self.table_material_scrollbar.pack(side='right', fill='y')
+        self.table_material.pack(side='left')
+
+        self.frame_base_data = ttk.LabelFrame(self.frame_material, text='База данных материалов')
+        self.entry_base_data = tkinter.Entry(self.frame_base_data, width=142)
+        self.entry_base_data.bind('<Button-3>', self.menu_base_data)
+        self.button_base_data = tkinter.Button(self.frame_base_data, text='Подключить', command=self.connect_database)
+        self.frame_base_data.pack()
+        self.entry_base_data.pack(side='left')
+        self.button_base_data.pack(side='right', fill='y')
 
         self.root.mainloop()
 
@@ -388,7 +400,7 @@ class RootGUI:
         self.updater_table_materials()
 
     def save_file(self):
-        self.file = tkinter.filedialog.asksaveasfilename(defaultextension='dat')
+        self.file = tkinter.filedialog.asksaveasfilename(confirmoverwrite = True, defaultextension='dat')
         data_akt.save(self.file, x_data_akt)
 
     def updater_list(self, list_object, var):
@@ -520,6 +532,7 @@ class RootGUI:
         self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work())
         self.text_documentation.insert('end',x_data_akt.get_akt(index[0]).get_text_of_documentation())
 
+    # Функции меню для таблицы материалов
     def menu_table_material(self, event):
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Cоздать новый', command=self.create_material)
@@ -535,16 +548,37 @@ class RootGUI:
         print(self.table_material.selection())
 
     def change_material(self):
-        line = self.table_material.get_children('')[0]
+        line = self.table_material.selection()[0]
         id = self.table_material.item(line)['values'][0]
         index_material = x_data_akt.get_all_id_materials().index(id)
         window = Window_material(self.root, self.table_material, index_material, line)
 
     def delete_material(self):
-        for line in self.table_material.get_children(''):
+        for line in self.table_material.selection():
             id = self.table_material.item(line)['values'][0]
             x_data_akt.delete_material(x_data_akt.get_all_id_materials().index(id))
             self.table_material.delete(line)
+
+    # Функции для БД материалов
+    def connect_database(self):
+        object_base_materials = data_akt.connection_base_data(self.entry_base_data.get())
+        Window = Window_data_base(self.root, object_base_materials)
+
+    def menu_base_data(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Cоздать новую БД', command=self.create_base_data)
+        menu.add_command(label='Загрузить БД', command=self.load_base_data)
+        menu.post(self.entry_base_data.winfo_rootx(), self.entry_base_data.winfo_rooty()+20)
+        #menu.post(event.x_root, event.y_root)
+
+    def create_base_data(self):
+        self.file_db = tkinter.filedialog.asksaveasfilename(confirmoverwrite = True, defaultextension='db',
+                                                            initialfile='new_date_base_material.db')
+        self.entry_base_data.insert('end', self.file_db)
+
+    def load_base_data(self):
+        self.file_db = tkinter.filedialog.askopenfilename(defaultextension='db')
+        self.entry_base_data.insert('end', self.file_db)
 
 
 class Window_object_element:
@@ -1054,12 +1088,12 @@ class Window_material:
             self.__heading = 'Изменение материала'
             self.__text_button = 'Изменить материал'
 
-        self.window_create_material = Toplevel(self.__root)
-        self.window_create_material.title(self.__heading)
-        self.window_create_material.geometry('500x500')
-        self.window_create_material.grab_set()
+        self.window = Toplevel(self.__root)
+        self.window.title(self.__heading)
+        self.window.geometry('500x500')
+        self.window.grab_set()
 
-        self.frame_material = ttk.LabelFrame(self.window_create_material, text='Данные о материале')
+        self.frame_material = ttk.LabelFrame(self.window, text='Данные о материале')
         self.label_type = tkinter.Label(self.frame_material, text='Вид')
         self.combobox_type = ttk.Combobox(self.frame_material,
                                           width=35,
@@ -1115,13 +1149,12 @@ class Window_material:
             self.entry_start_date.insert('end', self.__start_date if self.__start_date is not None else '')
             self.entry_finish_date.insert('end', self.__finish_date if self.__finish_date is not None else '')
 
-        self.button_material = tkinter.Button(self.window_create_material, text=self.__text_button,
+        self.button_material = tkinter.Button(self.window, text=self.__text_button,
                                               command=self.material)
-        self.label_indicator = tkinter.Label(self.window_create_material, foreground='red')
+        self.label_indicator = tkinter.Label(self.window, foreground='red')
 
         self.button_material.pack()
         self.label_indicator.pack()
-
 
     # Автозаполнение combobox_documents_name
     def corresponding_documents_name(self, event):
@@ -1192,7 +1225,7 @@ class Window_material:
 
                 x_data_akt.set_material(material)
                 self.__table.insert('', 'end', values=material.get_in_tabel())
-                self.window_create_material.destroy()
+                self.window.destroy()
             # Изменение атрибутов ранее созданного объекта класса "Материалы"
             else:
                 x_data_akt.get_material(self.__index).set_type(self.__type)
@@ -1204,7 +1237,123 @@ class Window_material:
                 x_data_akt.get_material(self.__index).set_object_finish_date(self.__finish_date)
 
                 self.__table.item(self.__item, values=x_data_akt.get_material(self.__index).get_in_tabel())
-                self.window_create_material.destroy()
+                self.window.destroy()
+
+class Window_data_base:
+    def __init__(self, root, object_data_base):
+        self.__root = root
+        self.__object_data_base = object_data_base
+
+        self.window = Toplevel(self.__root)
+        self.window.title('База данный материалов')
+        self.window.geometry('500x500')
+        self.window.grab_set()
+
+        self.frame_table_materials = tkinter.Frame(self.window)
+        self.table_material = ttk.Treeview(self.frame_table_materials,
+                                           columns=('id', 'type', 'material', 'document', 'date'),
+                                           show='headings',
+                                           height=7)
+        self.table_material_scrollbar_y = ttk.Scrollbar(self.frame_table_materials, orient='vertical',
+                                                      command=self.table_material.yview)
+        self.table_material_scrollbar_x = ttk.Scrollbar(self.frame_table_materials, orient='horizontal',
+                                                        command=self.table_material.xview)
+        self.table_material.config(yscrollcommand=self.table_material_scrollbar_y.set)
+        self.table_material.config(xscrollcommand=self.table_material_scrollbar_x.set)
+
+        self.table_material.heading('id', text='id')
+        self.table_material.heading('type', text='Вид')
+        self.table_material.heading('material', text='Материал')
+        self.table_material.heading('document', text='Документ')
+        self.table_material.heading('date', text='Дата')
+        self.table_material.column('#1', width=30)
+        self.table_material.column('#2', width=100)
+        self.table_material.column('#3', width=300)
+        self.table_material.column('#4', width=300)
+        self.table_material.column('#5', width=200)
+        self.table_material.grid(row=0, column=0)
+        self.table_material_scrollbar_y.grid(row=0, column=1, sticky='ns')
+        self.table_material_scrollbar_x.grid(row=1, column=0, rowspan=2, sticky='we')
+
+        self.frame_material = ttk.LabelFrame(self.window, text='Материал')
+        self.label_type = tkinter.Label(self.frame_material, text='Вид')
+        self.combobox_id = ttk.Combobox(self.frame_material,
+                                          width=35,
+                                          values=x_data_akt.get_all_unique_type_materials())
+        self.label_id = tkinter.Label(self.frame_material, text='ID в базе')
+        self.combobox_type = ttk.Combobox(self.frame_material,
+                                          width=35,
+                                          values=x_data_akt.get_all_unique_type_materials())
+        self.label_material = tkinter.Label(self.frame_material, text='Наименование')
+        self.combobox_material = ttk.Combobox(self.frame_material,
+                                              width=35,
+                                              values=x_data_akt.get_all_unique_material_materials())
+        self.label_document_name = tkinter.Label(self.frame_material, text='Наименование документа')
+        self.combobox_document_name = ttk.Combobox(self.frame_material,
+                                                   width=35,
+                                                   values=x_data_akt.get_all_unique_document_names_materials())
+        self.label_documents_name = tkinter.Label(self.frame_material, text='Наименование документов')
+        self.combobox_documents_name = ttk.Combobox(self.frame_material,
+                                                    width=35,
+                                                    values=x_data_akt.get_all_unique_documents_names_materials())
+        self.label_document_number = tkinter.Label(self.frame_material, text='Номер документа')
+        self.entry_document_number = tkinter.Entry(self.frame_material, width=35)
+        self.label_start_date = tkinter.Label(self.frame_material, text='Дата начала')
+        self.entry_start_date = tkinter.Entry(self.frame_material, width=35)
+        self.label_finish_date = tkinter.Label(self.frame_material, text='Дата окончания')
+        self.entry_finish_date = tkinter.Entry(self.frame_material, width=35)
+
+        self.label_id.grid(row=0, column=0, stick='we', sticky='e')
+        self.label_type.grid(row=1, column=0, stick='we', sticky='e')
+        self.label_material.grid(row=2, column=0, stick='we', sticky='e')
+        self.label_document_name.grid(row=3, column=0, stick='we', sticky='e')
+        self.label_documents_name.grid(row=4, column=0, stick='we', sticky='e')
+        self.label_document_number.grid(row=5, column=0, stick='we', sticky='e')
+        self.label_start_date.grid(row=6, column=0, stick='we', sticky='e')
+        self.label_finish_date.grid(row=7, column=0, stick='we', sticky='e')
+
+        self.combobox_id.grid(row=0, column=1, stick='we')
+        self.combobox_type.grid(row=1, column=1, stick='we')
+        self.combobox_material.grid(row=2, column=1, stick='we')
+        self.combobox_document_name.grid(row=3, column=1, stick='we')
+        self.combobox_documents_name.grid(row=4, column=1, stick='we')
+        self.entry_document_number.grid(row=5, column=1, stick='we')
+        self.entry_start_date.grid(row=6, column=1, stick='we')
+        self.entry_finish_date.grid(row=7, column=1, stick='we')
+
+        self.frame_table_materials.grid(row=0, column=0, stick='ns')
+        self.frame_material.grid(row=1, column=0)
+
+        self.but = tkinter.Button(self.window, text='добавить', command=self.add_data)
+        self.but.grid(row=3, column=0, stick='ns')
+
+        self.but1 = tkinter.Button(self.window, text='ЗАКРЫТЬ', command=self.close)
+        self.but1.grid(row=4, column=0, stick='ns')
+
+        self.update_table_material()
+
+    def add_data(self):
+        type = self.combobox_type.get()
+        material = self.combobox_material.get()
+        document_name = self.combobox_document_name.get()
+        documents_name = self.combobox_documents_name.get()
+        document_number = self.entry_document_number.get()
+        start_date = self.entry_start_date.get()
+        finish_date = self.entry_finish_date.get()
+        self.__object_data_base.insert_data(type, material, document_name, documents_name, document_number, start_date,
+                                            finish_date)
+        self.update_table_material()
+
+    def update_table_material(self):
+        for line in self.table_material.get_children():
+            self.table_material.delete(line)
+        for material in self.__object_data_base.extract_all_data_from_database():
+            self.table_material.insert('', 'end', values=material)
+
+    def close(self):
+        self.__object_data_base.commit_data_base()
+        self.__object_data_base.close_date_base()
+        self.window.destroy()
 
 
 if __name__ == '__main__':
