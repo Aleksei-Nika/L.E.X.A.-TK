@@ -1,8 +1,6 @@
 import data_akt
 import tkinter
-from tkinter import ttk
-from tkinter import Toplevel
-from tkinter import filedialog
+from tkinter import ttk, Toplevel, filedialog, messagebox
 
 x_data_akt = data_akt.Data_Akt()
 
@@ -1248,6 +1246,7 @@ class Window_data_base:
         self.window.title('База данный материалов')
         self.window.geometry('500x500')
         self.window.grab_set()
+        self.window.protocol("WM_DELETE_WINDOW", self.close_window)
 
         self.frame_table_materials = tkinter.Frame(self.window)
         self.table_material = ttk.Treeview(self.frame_table_materials,
@@ -1321,18 +1320,22 @@ class Window_data_base:
         self.entry_start_date.grid(row=6, column=1, stick='we')
         self.entry_finish_date.grid(row=7, column=1, stick='we')
 
+        self.frame_button = tkinter.Frame(self.window)
+        self.but_add = tkinter.Button(self.frame_button, text='добавить', command=self.add_material)
+        self.but_del = tkinter.Button(self.frame_button, text='удалить', command=self.delete_material)
+
         self.frame_table_materials.grid(row=0, column=0, stick='ns')
         self.frame_material.grid(row=1, column=0)
+        self.frame_button.grid(row=2, column=0)
 
-        self.but = tkinter.Button(self.window, text='добавить', command=self.add_data)
-        self.but.grid(row=3, column=0, stick='ns')
+        self.but_add.grid(row=0, column=0, stick='ns')
+        self.but_del.grid(row=0, column=1, stick='ns')
 
-        self.but1 = tkinter.Button(self.window, text='ЗАКРЫТЬ', command=self.close)
-        self.but1.grid(row=4, column=0, stick='ns')
+        self.table_material.bind("<<TreeviewSelect>>", self.select_material)
 
         self.update_table_material()
 
-    def add_data(self):
+    def add_material(self):
         type = self.combobox_type.get()
         material = self.combobox_material.get()
         document_name = self.combobox_document_name.get()
@@ -1350,8 +1353,53 @@ class Window_data_base:
         for material in self.__object_data_base.extract_all_data_from_database():
             self.table_material.insert('', 'end', values=material)
 
-    def close(self):
+    def select_material(self, event):
+        self.clear_input()
+        row = self.table_material.selection()[0]
+        id = self.table_material.item(row)['values'][0]
+        material = self.__object_data_base.material_selection_by_id(id)
+        self.combobox_id.set(material[0])
+        self.combobox_type.set(material[1] if material[1] is not None else '')
+        self.combobox_material.set(material[2] if material[2] is not None else '')
+        self.combobox_document_name.set(material[3] if material[3] is not None else '')
+        self.combobox_documents_name.set(material[4] if material[4] is not None else '')
+        self.entry_document_number.insert('end', material[5] if material[5] is not None else '')
+        self.entry_start_date.insert('end', material[6] if material[6] is not None else '')
+        self.entry_finish_date.insert('end', material[7] if material[7] is not None else '')
+
+    def delete_material(self):
+        row = self.table_material.selection()[0]
+        id = self.table_material.item(row)['values'][0]
+        self.__object_data_base.delete_data(id)
+        self.table_material.delete(row)
+        self.clear_input()
+
+    def clear_input(self):
+        self.combobox_id.set('')
+        self.combobox_type.set('')
+        self.combobox_material.set('')
+        self.combobox_document_name.set('')
+        self.combobox_documents_name.set('')
+        self.entry_document_number.delete(0, 'end')
+        self.entry_start_date.delete(0, 'end')
+        self.entry_finish_date.delete(0, 'end')
+
+
+    def close_window(self):
+        result = tkinter.messagebox.askyesnocancel(title='Закрыть базу данных материалов',
+                                             message='Сохранить базу данных перед закрытием?')
+        if result:
+            self.data_base_commit()
+            self.data_base_close()
+        elif not result:
+            self.data_base_close()
+        else:
+            pass
+
+    def data_base_commit(self):
         self.__object_data_base.commit_data_base()
+
+    def data_base_close(self):
         self.__object_data_base.close_date_base()
         self.window.destroy()
 

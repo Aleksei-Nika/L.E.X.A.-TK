@@ -908,14 +908,26 @@ class Data_base_materials:
         self.__cur.execute('''SELECT ItemID, type, material, document_name, start_date FROM materials''')
         return self.__cur.fetchall()
 
+        # Добавить новый материал в базу данных
     def insert_data(self, type, material, document_name, documents_name, document_number, start_date, finish_date):
         self.__cur.execute('''INSERT INTO materials(type, material, document_name, documents_name, document_number,
                             start_date, finish_date) VALUES (?, ?, ?, ?, ?, ?, ?)''',
                            (type, material, document_name, documents_name, document_number, start_date, finish_date))
 
+        # Удаление материала по ID
+    def delete_data(self, material_id):
+        self.__cur.execute('''DELETE FROM materials WHERE ItemID = ?''', (material_id,))
+
+        # Найти материал по ID
+    def material_selection_by_id(self, material_id):
+        self.__cur.execute('''SELECT * FROM materials WHERE ItemID = ?''', (material_id,))
+        return self.__cur.fetchone()
+
+        # Сохранить базу данных
     def commit_data_base(self):
         self.__conn.commit()
 
+        # Отключить базу данных
     def close_date_base(self):
         self.__conn.close()
 
