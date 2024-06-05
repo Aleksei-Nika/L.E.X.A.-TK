@@ -1277,8 +1277,8 @@ class Window_data_base:
         self.frame_material = ttk.LabelFrame(self.window, text='Материал')
         self.label_type = tkinter.Label(self.frame_material, text='Вид')
         self.combobox_id = ttk.Combobox(self.frame_material,
-                                          width=35,
-                                          values=x_data_akt.get_all_unique_type_materials())
+                                        state="readonly",
+                                        width=35)
         self.label_id = tkinter.Label(self.frame_material, text='ID в базе')
         self.combobox_type = ttk.Combobox(self.frame_material,
                                           width=35,
@@ -1331,9 +1331,11 @@ class Window_data_base:
         self.but_add.grid(row=0, column=0, stick='ns')
         self.but_del.grid(row=0, column=1, stick='ns')
 
-        self.table_material.bind("<<TreeviewSelect>>", self.select_material)
+        self.table_material.bind('<<TreeviewSelect>>', self.select_material_via_tabel)
+        self.combobox_id.bind('<<ComboboxSelected>>', self.select_material_via_combobox_id)
 
         self.update_table_material()
+
 
     def add_material(self):
         type = self.combobox_type.get()
@@ -1343,21 +1345,28 @@ class Window_data_base:
         document_number = self.entry_document_number.get()
         start_date = self.entry_start_date.get()
         finish_date = self.entry_finish_date.get()
-        self.__object_data_base.insert_data(type, material, document_name, documents_name, document_number, start_date,
-                                            finish_date)
+        material_id = self.combobox_id.get()
+        if material_id == '<Добавить материал>':
+            self.__object_data_base.insert_data(type, material, document_name, documents_name, document_number,
+                                                start_date, finish_date)
+        else:
+            self.__object_data_base.change_data(material_id, type, material, document_name, documents_name,
+                                                document_number, start_date, finish_date)
         self.update_table_material()
+        self.clear_input()
 
     def update_table_material(self):
-        for line in self.table_material.get_children():
-            self.table_material.delete(line)
+        for row in self.table_material.get_children():
+            self.table_material.delete(row)
         for material in self.__object_data_base.extract_all_data_from_database():
             self.table_material.insert('', 'end', values=material)
+        self.combobox_id.config(values=('<Добавить материал>',) + self.__object_data_base.all_id_material())
+        self.combobox_id.current(0)
 
-    def select_material(self, event):
+    def select_material(self, material_id):
         self.clear_input()
-        row = self.table_material.selection()[0]
-        id = self.table_material.item(row)['values'][0]
-        material = self.__object_data_base.material_selection_by_id(id)
+        self.but_add.config(text='изменить')
+        material = self.__object_data_base.material_selection_by_id(material_id)
         self.combobox_id.set(material[0])
         self.combobox_type.set(material[1] if material[1] is not None else '')
         self.combobox_material.set(material[2] if material[2] is not None else '')
@@ -1368,11 +1377,27 @@ class Window_data_base:
         self.entry_finish_date.insert('end', material[7] if material[7] is not None else '')
 
     def delete_material(self):
+        for row in self.table_material.selection():
+            material_id = self.table_material.item(row)['values'][0]
+            self.__object_data_base.delete_data(material_id)
+            self.table_material.delete(row)
+            self.clear_input()
+
+    def select_material_via_combobox_id(self, event):
+        material_id = self.combobox_id.get()
+        if material_id == '<Добавить материал>':
+            self.but_add.config(text='добавить')
+            return
+        self.select_material(material_id)
+        for row in self.table_material.get_children(''):
+            if self.table_material.item(row)['values'][0] == int(material_id):
+                self.table_material.selection_set(row)
+                break
+
+    def select_material_via_tabel(self, event):
         row = self.table_material.selection()[0]
         id = self.table_material.item(row)['values'][0]
-        self.__object_data_base.delete_data(id)
-        self.table_material.delete(row)
-        self.clear_input()
+        self.select_material(id)
 
     def clear_input(self):
         self.combobox_id.set('')
@@ -1384,17 +1409,17 @@ class Window_data_base:
         self.entry_start_date.delete(0, 'end')
         self.entry_finish_date.delete(0, 'end')
 
-
     def close_window(self):
         result = tkinter.messagebox.askyesnocancel(title='Закрыть базу данных материалов',
                                              message='Сохранить базу данных перед закрытием?')
+        print(result)
         if result:
             self.data_base_commit()
             self.data_base_close()
+        elif result is None:
+            return
         elif not result:
             self.data_base_close()
-        else:
-            pass
 
     def data_base_commit(self):
         self.__object_data_base.commit_data_base()

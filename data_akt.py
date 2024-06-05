@@ -914,14 +914,38 @@ class Data_base_materials:
                             start_date, finish_date) VALUES (?, ?, ?, ?, ?, ?, ?)''',
                            (type, material, document_name, documents_name, document_number, start_date, finish_date))
 
+        # Изменить материал в базе данных
+    def change_data(self, material_id, type, material, document_name, documents_name, document_number, start_date,
+                    finish_date):
+        self.__cur.execute('''UPDATE materials
+                            SET type = ?,
+                                material = ?,
+                                document_name = ?,
+                                documents_name = ?,
+                                document_number = ?,
+                                start_date = ?,
+                                finish_date = ?
+                            WHERE ItemID == ?''',
+                           (type, material, document_name, documents_name, document_number, start_date, finish_date,
+                            material_id))
+
         # Удаление материала по ID
     def delete_data(self, material_id):
         self.__cur.execute('''DELETE FROM materials WHERE ItemID = ?''', (material_id,))
 
         # Найти материал по ID
     def material_selection_by_id(self, material_id):
-        self.__cur.execute('''SELECT * FROM materials WHERE ItemID = ?''', (material_id,))
+        self.__cur.execute('''SELECT * FROM materials WHERE ItemID == ?''', (material_id,))
         return self.__cur.fetchone()
+
+        # Выдать все ID материалов из базы данных
+    def all_id_material(self):
+        self.__cur.execute('''SELECT ItemID FROM materials''')
+        result = self.__cur.fetchall()
+        list_id = []
+        for el in result:
+            list_id.append(el[0])
+        return tuple(list_id)
 
         # Сохранить базу данных
     def commit_data_base(self):
