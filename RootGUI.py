@@ -1241,6 +1241,7 @@ class Window_data_base:
     def __init__(self, root, object_data_base):
         self.__root = root
         self.__object_data_base = object_data_base
+        self.__indicator = ''
 
         self.window = Toplevel(self.__root)
         self.window.title('База данный материалов')
@@ -1252,7 +1253,7 @@ class Window_data_base:
         self.table_material = ttk.Treeview(self.frame_table_materials,
                                            columns=('id', 'type', 'material', 'document', 'date'),
                                            show='headings',
-                                           height=7)
+                                           height=25)
         self.table_material_scrollbar_y = ttk.Scrollbar(self.frame_table_materials, orient='vertical',
                                                       command=self.table_material.yview)
         self.table_material_scrollbar_x = ttk.Scrollbar(self.frame_table_materials, orient='horizontal',
@@ -1260,9 +1261,15 @@ class Window_data_base:
         self.table_material.config(yscrollcommand=self.table_material_scrollbar_y.set)
         self.table_material.config(xscrollcommand=self.table_material_scrollbar_x.set)
 
-        self.table_material.heading('id', text='id')
-        self.table_material.heading('type', text='Вид')
-        self.table_material.heading('material', text='Материал')
+        self.table_material.heading('id', text='id', command=self.menu_sorting_by_id_materials)
+        self.table_material.heading('type', text='Вид',
+                                    command=lambda: self.menu_sorting(1, self.type_sort,
+                                                                      self.__object_data_base.all_type_material()))
+        self.type_sort = {}
+        self.table_material.heading('material', text='Материал',
+                                    command=lambda: self.menu_sorting(2, self.material_sort,
+                                                                      self.__object_data_base.all_name_material()))
+        self.material_sort = {}
         self.table_material.heading('document', text='Документ')
         self.table_material.heading('date', text='Дата')
         self.table_material.column('#1', width=30)
@@ -1278,29 +1285,29 @@ class Window_data_base:
         self.label_type = tkinter.Label(self.frame_material, text='Вид')
         self.combobox_id = ttk.Combobox(self.frame_material,
                                         state="readonly",
-                                        width=35)
+                                        width=50)
         self.label_id = tkinter.Label(self.frame_material, text='ID в базе')
         self.combobox_type = ttk.Combobox(self.frame_material,
-                                          width=35,
+                                          width=50,
                                           values=x_data_akt.get_all_unique_type_materials())
         self.label_material = tkinter.Label(self.frame_material, text='Наименование')
         self.combobox_material = ttk.Combobox(self.frame_material,
-                                              width=35,
+                                              width=50,
                                               values=x_data_akt.get_all_unique_material_materials())
         self.label_document_name = tkinter.Label(self.frame_material, text='Наименование документа')
         self.combobox_document_name = ttk.Combobox(self.frame_material,
-                                                   width=35,
+                                                   width=50,
                                                    values=x_data_akt.get_all_unique_document_names_materials())
         self.label_documents_name = tkinter.Label(self.frame_material, text='Наименование документов')
         self.combobox_documents_name = ttk.Combobox(self.frame_material,
-                                                    width=35,
+                                                    width=50,
                                                     values=x_data_akt.get_all_unique_documents_names_materials())
         self.label_document_number = tkinter.Label(self.frame_material, text='Номер документа')
-        self.entry_document_number = tkinter.Entry(self.frame_material, width=35)
+        self.entry_document_number = tkinter.Entry(self.frame_material, width=50)
         self.label_start_date = tkinter.Label(self.frame_material, text='Дата начала')
-        self.entry_start_date = tkinter.Entry(self.frame_material, width=35)
+        self.entry_start_date = tkinter.Entry(self.frame_material, width=50)
         self.label_finish_date = tkinter.Label(self.frame_material, text='Дата окончания')
-        self.entry_finish_date = tkinter.Entry(self.frame_material, width=35)
+        self.entry_finish_date = tkinter.Entry(self.frame_material, width=50)
 
         self.label_id.grid(row=0, column=0, stick='we', sticky='e')
         self.label_type.grid(row=1, column=0, stick='we', sticky='e')
@@ -1320,32 +1327,142 @@ class Window_data_base:
         self.entry_start_date.grid(row=6, column=1, stick='we')
         self.entry_finish_date.grid(row=7, column=1, stick='we')
 
-        self.frame_button = tkinter.Frame(self.window)
+        self.frame_button = tkinter.Frame(self.frame_material)
         self.but_add = tkinter.Button(self.frame_button, text='добавить', command=self.add_material)
         self.but_del = tkinter.Button(self.frame_button, text='удалить', command=self.delete_material)
-
-        self.frame_table_materials.grid(row=0, column=0, stick='ns')
-        self.frame_material.grid(row=1, column=0)
-        self.frame_button.grid(row=2, column=0)
-
         self.but_add.grid(row=0, column=0, stick='ns')
         self.but_del.grid(row=0, column=1, stick='ns')
+        self.frame_button.grid(row=8, column=0, columnspan=2, sticky='w')
+
+        self.label_indicator = tkinter.Label(self.frame_material, foreground='red')
+        self.label_indicator.grid(row=9, column=0, columnspan=2, sticky='w')
+
+        self.frame_material.grid(row=0, column=0, stick='we')
+        self.frame_table_materials.grid(row=1, column=0, stick='ns')
 
         self.table_material.bind('<<TreeviewSelect>>', self.select_material_via_tabel)
         self.combobox_id.bind('<<ComboboxSelected>>', self.select_material_via_combobox_id)
 
         self.update_table_material()
 
+        # функции для контекстного меню столбца "ID"
+    def menu_sorting_by_id_materials(self):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
+        menu.add_separator()
+        menu.add_command(label='Сортировать А-Я', command=lambda: self.sorting_material(0, False))
+        menu.add_command(label='Сортировать Я-A', command=lambda: self.sorting_material(0, True))
+        menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
+        # функции для контекстного меню столбца "ВИД", "МАТЕРИАЛ"
+    def menu_sorting(self, index, sorting_dictionary, list_signs):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
+        menu.add_separator()
+        menu.add_command(label='Сортировать А-Я',
+                         command=lambda: self.sorting_material(index, False))
+        menu.add_command(label='Сортировать Я-A',
+                         command=lambda: self.sorting_material(index, True))
+        menu.add_separator()
+        for el in list_signs:
+            var_type = sorting_dictionary[el]
+            menu.add_checkbutton(label=el, onvalue=True, offvalue=False,
+                                 variable=var_type, command=self.switching_type)
+        menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
+        #menu.post(self.table_material.winfo_rootx(), self.table_material.winfo_rooty())
+
+    def sorting_material(self, index, reverse):
+        material = []
+        for row in self.table_material.get_children():
+            material.append(self.table_material.item(row)['values'])
+            self.table_material.delete(row)
+        material.sort(key=lambda el: el[index], reverse=reverse)
+        for el in material:
+            self.table_material.insert('', 'end', values=el)
+
+    def switching_type(self):
+        for row in self.table_material.get_children():
+            self.table_material.delete(row)
+        for row_db in self.__object_data_base.extract_all_data_from_database():
+            flag = True
+            if not self.type_sort[row_db[1]].get():
+                flag = False
+            if not self.material_sort[row_db[2]].get():
+                flag = False
+            if flag:
+                material = []
+                material.append(row_db[0])
+                material.append(row_db[1])
+                material.append(row_db[2])
+                material.append(f'{row_db[3]} {row_db[5]}')
+                if row_db[7] is not None:
+                    material.append(f'с {row_db[6]} до {row_db[7]}')
+                else:
+                    material.append(f'от {row_db[6]}')
+                self.table_material.insert('', 'end', values=material)
+        self.checking_sorting()
+
+    def checking_sorting(self):
+        for el in self.type_sort:
+            self.type_sort[el].set(False)
+        for el in self.material_sort:
+            self.material_sort[el].set(False)
+        for row in self.table_material.get_children():
+            material_type = self.table_material.item(row)['values'][1]
+            name_material = self.table_material.item(row)['values'][2]
+            self.type_sort[material_type].set(True)
+            self.material_sort[name_material].set(True)
+
+    # функция для добавления и изменения материала
     def add_material(self):
-        type = self.combobox_type.get()
-        material = self.combobox_material.get()
-        document_name = self.combobox_document_name.get()
-        documents_name = self.combobox_documents_name.get()
-        document_number = self.entry_document_number.get()
-        start_date = self.entry_start_date.get()
-        finish_date = self.entry_finish_date.get()
+        self.__indicator = ''
+        self.label_indicator.config(text=self.__indicator)
+        def checking_deadline(start_date, finish_date):
+            if start_date is None and finish_date is not None:
+                self.__indicator += 'Поле "Дата начала" не может быть пустым, если поле "Дата окончания" заполнено\n'
+                return
+            good_data_date = True
+            if start_date is not None:
+                try:
+                    start_date = data_akt.Date(start_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата начала" введеные некоректные данные\n'
+                    good_data_date = False
+            if finish_date is not None:
+                try:
+                    finish_date = data_akt.Date(finish_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата окончания" введеные некоректные данные\n'
+                    good_data_date = False
+            if start_date is not None and finish_date is not None and good_data_date:
+                if data_akt.date_comparison(start_date, finish_date):
+                    self.__indicator += '"Дата начала" не может быть позднее "Даты окончания"\n'
+
+        type = self.combobox_type.get() if self.combobox_type.get() != '' else None
+        material = self.combobox_material.get() if self.combobox_material.get() != '' else None
+        document_name = self.combobox_document_name.get() if self.combobox_document_name.get() != '' else None
+        documents_name = self.combobox_documents_name.get() if self.combobox_documents_name.get() != '' else None
+        document_number = self.entry_document_number.get() if self.entry_document_number.get() != '' else None
+        start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
+        finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
         material_id = self.combobox_id.get()
+
+        if type is None:
+            self.__indicator += 'Поле "Вид" не должно быть пустым\n'
+        if material is None:
+            self.__indicator += 'Поле "Наименование" не должно быть пустым\n'
+        if document_name is None:
+            self.__indicator += 'Поле "Наименование документа" не должно быть пустым\n'
+        if documents_name is None:
+            self.__indicator += 'Поле "Наименование документов" не должно быть пустым\n'
+        if document_number is None:
+            self.__indicator += 'Поле "Номер документа" не должно быть пустым\n'
+        checking_deadline(start_date, finish_date)
+
+        if self.__indicator !='':
+            self.label_indicator.config(text=self.__indicator[:-1])
+            return
+
         if material_id == '<Добавить материал>':
             self.__object_data_base.insert_data(type, material, document_name, documents_name, document_number,
                                                 start_date, finish_date)
@@ -1355,14 +1472,31 @@ class Window_data_base:
         self.update_table_material()
         self.clear_input()
 
+    # функция для обновления таблицы материалов
     def update_table_material(self):
         for row in self.table_material.get_children():
             self.table_material.delete(row)
-        for material in self.__object_data_base.extract_all_data_from_database():
+        for row_db in self.__object_data_base.extract_all_data_from_database():
+            material = []
+            material.append(row_db[0])
+            material.append(row_db[1])
+            material.append(row_db[2])
+            material.append(f'{row_db[3]} {row_db[5]}')
+            if row_db[7] is not None:
+                material.append(f'с {row_db[6]} до {row_db[7]}')
+            else:
+                material.append(f'от {row_db[6]}')
             self.table_material.insert('', 'end', values=material)
         self.combobox_id.config(values=('<Добавить материал>',) + self.__object_data_base.all_id_material())
         self.combobox_id.current(0)
+        for el in self.__object_data_base.all_type_material():
+            self.type_sort[el] = tkinter.BooleanVar()
+            self.type_sort[el].set(True)
+        for el in self.__object_data_base.all_name_material():
+            self.material_sort[el] = tkinter.BooleanVar()
+            self.material_sort[el].set(True)
 
+    # выбор материала
     def select_material(self, material_id):
         self.clear_input()
         self.but_add.config(text='изменить')
@@ -1376,6 +1510,7 @@ class Window_data_base:
         self.entry_start_date.insert('end', material[6] if material[6] is not None else '')
         self.entry_finish_date.insert('end', material[7] if material[7] is not None else '')
 
+    # удаление материала
     def delete_material(self):
         for row in self.table_material.selection():
             material_id = self.table_material.item(row)['values'][0]
@@ -1383,6 +1518,7 @@ class Window_data_base:
             self.table_material.delete(row)
             self.clear_input()
 
+    # выбор материала через combobox id
     def select_material_via_combobox_id(self, event):
         material_id = self.combobox_id.get()
         if material_id == '<Добавить материал>':
@@ -1394,13 +1530,15 @@ class Window_data_base:
                 self.table_material.selection_set(row)
                 break
 
+    # выбор материала через таблицу материалов
     def select_material_via_tabel(self, event):
         row = self.table_material.selection()[0]
         id = self.table_material.item(row)['values'][0]
         self.select_material(id)
 
+    # отчистка полей ввода материалов
     def clear_input(self):
-        self.combobox_id.set('')
+        self.combobox_id.set('<Добавить материал>')
         self.combobox_type.set('')
         self.combobox_material.set('')
         self.combobox_document_name.set('')
@@ -1409,10 +1547,10 @@ class Window_data_base:
         self.entry_start_date.delete(0, 'end')
         self.entry_finish_date.delete(0, 'end')
 
+    # вызов окна с предложением сохранить БЗ бри закрытии окна
     def close_window(self):
         result = tkinter.messagebox.askyesnocancel(title='Закрыть базу данных материалов',
                                              message='Сохранить базу данных перед закрытием?')
-        print(result)
         if result:
             self.data_base_commit()
             self.data_base_close()
@@ -1421,9 +1559,11 @@ class Window_data_base:
         elif not result:
             self.data_base_close()
 
+    # сохранение базы данных
     def data_base_commit(self):
         self.__object_data_base.commit_data_base()
 
+    # закрытие окна
     def data_base_close(self):
         self.__object_data_base.close_date_base()
         self.window.destroy()

@@ -904,8 +904,7 @@ class Data_base_materials:
         self.__finish_date = None
 
     def extract_all_data_from_database(self):
-        #self.__cur.execute('''SELECT * FROM materials''')
-        self.__cur.execute('''SELECT ItemID, type, material, document_name, start_date FROM materials''')
+        self.__cur.execute('''SELECT * FROM materials''')
         return self.__cur.fetchall()
 
         # Добавить новый материал в базу данных
@@ -946,6 +945,30 @@ class Data_base_materials:
         for el in result:
             list_id.append(el[0])
         return tuple(list_id)
+
+        # Выдать все типы материалов из базы данных
+    def all_type_material(self):
+        self.__cur.execute('''SELECT type FROM materials''')
+        result = self.__cur.fetchall()
+        list_type = []
+        for el in result:
+            list_type.append(el[0])
+        list_type = set(list_type)
+        list_type = list(list_type)
+        list_type.sort()
+        return tuple(list_type)
+
+        # Выдать все наименования материалов из базы данных
+    def all_name_material(self):
+        self.__cur.execute('''SELECT material FROM materials''')
+        result = self.__cur.fetchall()
+        list_material = []
+        for el in result:
+            list_material.append(el[0])
+        list_material = set(list_material)
+        list_material = list(list_material)
+        list_material.sort()
+        return tuple(list_material)
 
         # Сохранить базу данных
     def commit_data_base(self):
