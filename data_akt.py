@@ -932,6 +932,42 @@ class Data_base_materials:
     def delete_data(self, material_id):
         self.__cur.execute('''DELETE FROM materials WHERE ItemID = ?''', (material_id,))
 
+    def selection_materials_for_table(self, material_names, document_number, column_for_order):
+        str_request_material = ''
+        str_request_document_number = ''
+        str_where = 'WHERE'
+        str_and1 = ' AND '
+
+        for el in material_names:
+            str_request_material += f'material != "{el}" AND '
+        if str_request_material != '':
+            str_request_material = '(' + str_request_material[:-5] + ')'
+
+        for el in document_number:
+            str_request_document_number += f'document_number != "{el}" AND '
+        if str_request_document_number != '':
+            str_request_document_number = '(' + str_request_document_number[:-5] + ')'
+
+        if str_request_material == '' and str_request_document_number == '':
+            str_where = ''
+            str_and1 = ''
+        elif str_request_material == '' or str_request_document_number == '':
+            str_and1 = ' '
+
+        if column_for_order is not None:
+            str_order = f'ORDER BY {column_for_order}'
+        else:
+            str_order = ''
+        self.__cur.execute(f'''SELECT * FROM materials
+                            {str_where} {str_request_material}{str_and1}{str_request_document_number}
+                            {str_order}''')
+        return self.__cur.fetchall()
+
+        # Выборка материалов по столбцу и условию
+    def selection_materials(self, column, condition):
+        self.__cur.execute(f'''SELECT * FROM materials WHERE {column} == ?''', (condition,))
+        return self.__cur.fetchall()
+
         # Найти материал по ID
     def material_selection_by_id(self, material_id):
         self.__cur.execute('''SELECT * FROM materials WHERE ItemID == ?''', (material_id,))
@@ -959,8 +995,11 @@ class Data_base_materials:
         return tuple(list_type)
 
         # Выдать все наименования материалов из базы данных
-    def all_name_material(self):
-        self.__cur.execute('''SELECT material FROM materials''')
+    def all_name_material(self, type_material=None):
+        if type_material is None:
+            self.__cur.execute('''SELECT material FROM materials''')
+        else:
+            self.__cur.execute('''SELECT material FROM materials WHERE type == ?''', (type_material,))
         result = self.__cur.fetchall()
         list_material = []
         for el in result:
@@ -969,6 +1008,33 @@ class Data_base_materials:
         list_material = list(list_material)
         list_material.sort()
         return tuple(list_material)
+
+        # Выдать все наименования документов из базы данных
+    def all_document_name(self):
+        self.__cur.execute('''SELECT document_name FROM materials''')
+        result = self.__cur.fetchall()
+        list_document_name = []
+        for el in result:
+            list_document_name.append(el[0])
+        list_document_name = set(list_document_name)
+        list_document_name = list(list_document_name)
+        list_document_name.sort()
+        return tuple(list_document_name)
+
+        # Выдать все номера документов из базы данных
+    def all_document_number(self, document_name=None):
+        if document_name is None:
+            self.__cur.execute('''SELECT document_number FROM materials''')
+        else:
+            self.__cur.execute('''SELECT document_number FROM materials WHERE document_name == ?''', (document_name,))
+        result = self.__cur.fetchall()
+        list_document_number = []
+        for el in result:
+            list_document_number.append(el[0])
+        list_document_number = set(list_document_number)
+        list_document_number = list(list_document_number)
+        list_document_number.sort()
+        return tuple(list_document_number)
 
         # Сохранить базу данных
     def commit_data_base(self):

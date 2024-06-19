@@ -1263,14 +1263,13 @@ class Window_data_base:
 
         self.table_material.heading('id', text='id', command=self.menu_sorting_by_id_materials)
         self.table_material.heading('type', text='Вид',
-                                    command=lambda: self.menu_sorting(1, self.type_sort,
-                                                                      self.__object_data_base.all_type_material()))
+                                    command=self.menu_sorting_by_type)
         self.type_sort = {}
-        self.table_material.heading('material', text='Материал',
-                                    command=lambda: self.menu_sorting(2, self.material_sort,
-                                                                      self.__object_data_base.all_name_material()))
+        self.table_material.heading('material', text='Материал', command=self.menu_sorting_by_name_materials)
         self.material_sort = {}
-        self.table_material.heading('document', text='Документ')
+        self.table_material.heading('document', text='Документ', command=self.menu_sorting_by_document_name)
+        self.document_name_sort = {}
+        self.document_number_sort = {}
         self.table_material.heading('date', text='Дата')
         self.table_material.column('#1', width=30)
         self.table_material.column('#2', width=100)
@@ -1282,18 +1281,16 @@ class Window_data_base:
         self.table_material_scrollbar_x.grid(row=1, column=0, rowspan=2, sticky='we')
 
         self.frame_material = ttk.LabelFrame(self.window, text='Материал')
-        self.label_type = tkinter.Label(self.frame_material, text='Вид')
+        self.label_id = tkinter.Label(self.frame_material, text='ID в базе')
         self.combobox_id = ttk.Combobox(self.frame_material,
                                         state="readonly",
                                         width=50)
-        self.label_id = tkinter.Label(self.frame_material, text='ID в базе')
+        self.label_type = tkinter.Label(self.frame_material, text='Вид')
         self.combobox_type = ttk.Combobox(self.frame_material,
-                                          width=50,
-                                          values=x_data_akt.get_all_unique_type_materials())
+                                          width=50)
         self.label_material = tkinter.Label(self.frame_material, text='Наименование')
         self.combobox_material = ttk.Combobox(self.frame_material,
-                                              width=50,
-                                              values=x_data_akt.get_all_unique_material_materials())
+                                              width=50)
         self.label_document_name = tkinter.Label(self.frame_material, text='Наименование документа')
         self.combobox_document_name = ttk.Combobox(self.frame_material,
                                                    width=50,
@@ -1350,70 +1347,155 @@ class Window_data_base:
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
         menu.add_separator()
-        menu.add_command(label='Сортировать А-Я', command=lambda: self.sorting_material(0, False))
-        menu.add_command(label='Сортировать Я-A', command=lambda: self.sorting_material(0, True))
+        menu.add_command(label='Сортировать А-Я', command=lambda: self.sort_material('ItemID'))
+        menu.add_command(label='Сортировать Я-A', command=lambda: self.sort_material('ItemID DESC'))
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
-        # функции для контекстного меню столбца "ВИД", "МАТЕРИАЛ"
-    def menu_sorting(self, index, sorting_dictionary, list_signs):
+    def menu_sorting_by_type(self):
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
         menu.add_separator()
         menu.add_command(label='Сортировать А-Я',
-                         command=lambda: self.sorting_material(index, False))
+                         command=lambda: self.sort_material('type'))
         menu.add_command(label='Сортировать Я-A',
-                         command=lambda: self.sorting_material(index, True))
+                         command=lambda: self.sort_material('type DESC'))
         menu.add_separator()
-        for el in list_signs:
-            var_type = sorting_dictionary[el]
-            menu.add_checkbutton(label=el, onvalue=True, offvalue=False,
-                                 variable=var_type, command=self.switching_type)
+        for el_type in self.__object_data_base.all_type_material():
+            var_type = self.type_sort[el_type]
+            menu.add_checkbutton(label=el_type, onvalue=True, offvalue=False, variable=var_type,
+                                 command=self.switching_by_type)
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
-        #menu.post(self.table_material.winfo_rootx(), self.table_material.winfo_rooty())
 
-    def sorting_material(self, index, reverse):
-        material = []
-        for row in self.table_material.get_children():
-            material.append(self.table_material.item(row)['values'])
-            self.table_material.delete(row)
-        material.sort(key=lambda el: el[index], reverse=reverse)
-        for el in material:
-            self.table_material.insert('', 'end', values=el)
+        # функции для контекстного меню столбца "МАТЕРИАЛ"
+    def menu_sorting_by_name_materials(self):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
+        menu.add_separator()
+        menu.add_command(label='Сортировать А-Я',
+                         command=lambda: self.sort_material('material'))
+        menu.add_command(label='Сортировать Я-A',
+                         command=lambda: self.sort_material('material DESC'))
+        menu.add_separator()
+        list_menu_materials = []
+        for el_type in self.__object_data_base.all_type_material():
+            list_menu_materials.append(tkinter.Menu(tearoff=0))
+            for el_material in self.__object_data_base.all_name_material(el_type):
+                var_material = self.material_sort[el_material]
+                list_menu_materials[-1].add_checkbutton(label=el_material, onvalue=True, offvalue=False,
+                                                    variable=var_material, command=self.switching_by_materials)
+            menu.add_cascade(label=el_type, menu=list_menu_materials[-1])
+        menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
-    def switching_type(self):
+        # функции для контекстного меню столбца "ДОКУМЕНТЫ"
+    def menu_sorting_by_document_name(self):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
+        menu.add_separator()
+        menu.add_command(label='Сортировать А-Я',
+                         command=lambda: self.sort_material('document_name'))
+        menu.add_command(label='Сортировать Я-A',
+                         command=lambda: self.sort_material('document_name DESC'))
+        menu.add_separator()
+        list_menu_document_name = []
+        for el_document_name in self.__object_data_base.all_document_name():
+            list_menu_document_name.append(tkinter.Menu(tearoff=0))
+            var_document_name = self.document_name_sort[el_document_name]
+            menu.add_checkbutton(label=el_document_name, onvalue=True, offvalue=False, variable=var_document_name,
+                                 command=self.switching_by_document_name)
+            for el_document_number in self.__object_data_base.all_document_number(el_document_name):
+                var_document_number = self.document_number_sort[el_document_number]
+                list_menu_document_name[-1].add_checkbutton(label=el_document_number, onvalue=True, offvalue=False,
+                                                            variable=var_document_number,
+                                                            command=self.switching_by_document_number)
+            menu.add_cascade(label=el_document_name, menu=list_menu_document_name[-1])
+            menu.add_separator()
+        menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
+
+        # Сортировка материалов
+    def sort_material(self, column_for_order=None):
+        material_names = []
+        for key_0 in self.material_sort:
+            if not self.material_sort[key_0].get():
+                material_names.append(key_0)
+        document_number = []
+        for key_1 in self.document_number_sort:
+            if not self.document_number_sort[key_1].get():
+                document_number.append(key_1)
+        result = self.__object_data_base.selection_materials_for_table(material_names, document_number,
+                                                                       column_for_order)
         for row in self.table_material.get_children():
             self.table_material.delete(row)
-        for row_db in self.__object_data_base.extract_all_data_from_database():
-            flag = True
-            if not self.type_sort[row_db[1]].get():
-                flag = False
-            if not self.material_sort[row_db[2]].get():
-                flag = False
-            if flag:
-                material = []
-                material.append(row_db[0])
-                material.append(row_db[1])
-                material.append(row_db[2])
-                material.append(f'{row_db[3]} {row_db[5]}')
-                if row_db[7] is not None:
-                    material.append(f'с {row_db[6]} до {row_db[7]}')
+        self.show_in_table(result)
+
+        # Переключатель типа по материалу:
+    def switching_by_materials(self):
+        for key in self.type_sort:
+            self.type_sort[key].set(True)
+            for el in self.__object_data_base.all_name_material(key):
+                if not self.material_sort[el].get():
+                    self.type_sort[key].set(False)
+                    for row in self.__object_data_base.selection_materials('material', el):
+                        self.document_number_sort[row[5]].set(False)
                 else:
-                    material.append(f'от {row_db[6]}')
-                self.table_material.insert('', 'end', values=material)
-        self.checking_sorting()
+                    for row in self.__object_data_base.selection_materials('material', el):
+                        self.document_number_sort[row[5]].set(True)
+        self.sort_material()
 
-    def checking_sorting(self):
-        for el in self.type_sort:
-            self.type_sort[el].set(False)
-        for el in self.material_sort:
-            self.material_sort[el].set(False)
-        for row in self.table_material.get_children():
-            material_type = self.table_material.item(row)['values'][1]
-            name_material = self.table_material.item(row)['values'][2]
-            self.type_sort[material_type].set(True)
-            self.material_sort[name_material].set(True)
+        # Переключение материалов по типу:
+    def switching_by_type(self):
+        for key in self.document_name_sort:
+            self.document_name_sort[key].set(True)
+        for key in self.type_sort:
+            if self.type_sort[key].get():
+                for el in self.__object_data_base.all_name_material(key):
+                    self.material_sort[el].set(True)
+                for row in self.__object_data_base.selection_materials('type', key):
+                    self.document_number_sort[row[5]].set(True)
+            else:
+                for el in self.__object_data_base.all_name_material(key):
+                    self.material_sort[el].set(False)
+                for row in self.__object_data_base.selection_materials('type', key):
+                    self.document_number_sort[row[5]].set(False)
+                    print(row[3])
+                    self.document_name_sort[row[3]].set(False)
+        self.sort_material()
 
-    # функция для добавления и изменения материала
+        # Переключатель типа по номеру документов:
+    def switching_by_document_number(self):
+        for key in self.document_name_sort:
+            self.document_name_sort[key].set(True)
+            for el in self.__object_data_base.all_document_number(key):
+                if not self.document_number_sort[el].get():
+                    self.document_name_sort[key].set(False)
+                    for row in self.__object_data_base.selection_materials('document_number', el):
+                        self.material_sort[row[2]].set(False)
+                else:
+                    for row in self.__object_data_base.selection_materials('document_number', el):
+                        self.material_sort[row[2]].set(True)
+        self.sort_material()
+
+        # Переключатель типа по наименованию документов:
+    def switching_by_document_name(self):
+        for key in self.type_sort:
+            self.type_sort[key].set(True)
+        for key in self.document_name_sort:
+            if self.document_name_sort[key].get():
+                for el in self.__object_data_base.all_document_number(key):
+                    self.document_number_sort[el].set(True)
+                for row in self.__object_data_base.selection_materials('document_name', key):
+                    self.material_sort[row[2]].set(True)
+            else:
+                for el in self.__object_data_base.all_document_number(key):
+                    self.document_number_sort[el].set(False)
+                for row in self.__object_data_base.selection_materials('document_name', key):
+                    self.material_sort[row[2]].set(False)
+                    self.type_sort[row[1]].set(False)
+        self.sort_material()
+
+
+
+
+        # функция для добавления и изменения материала
     def add_material(self):
         self.__indicator = ''
         self.label_indicator.config(text=self.__indicator)
@@ -1476,7 +1558,27 @@ class Window_data_base:
     def update_table_material(self):
         for row in self.table_material.get_children():
             self.table_material.delete(row)
-        for row_db in self.__object_data_base.extract_all_data_from_database():
+        self.show_in_table(self.__object_data_base.extract_all_data_from_database())
+        self.combobox_id.config(values=('<Добавить материал>',) + self.__object_data_base.all_id_material())
+        self.combobox_id.current(0)
+        self.combobox_type.config(values=self.__object_data_base.all_type_material())
+        self.combobox_material.config(values=self.__object_data_base.all_name_material())
+        for el in self.__object_data_base.all_type_material():
+            self.type_sort[el] = tkinter.BooleanVar()
+            self.type_sort[el].set(True)
+        for el in self.__object_data_base.all_name_material():
+            self.material_sort[el] = tkinter.BooleanVar()
+            self.material_sort[el].set(True)
+        for el in self.__object_data_base.all_document_number():
+            self.document_number_sort[el] = tkinter.BooleanVar()
+            self.document_number_sort[el].set(True)
+        for el in self.__object_data_base.all_document_name():
+            self.document_name_sort[el] = tkinter.BooleanVar()
+            self.document_name_sort[el].set(True)
+
+    # показать базу данных в таблице
+    def show_in_table(self, selection):
+        for row_db in selection:
             material = []
             material.append(row_db[0])
             material.append(row_db[1])
@@ -1487,14 +1589,6 @@ class Window_data_base:
             else:
                 material.append(f'от {row_db[6]}')
             self.table_material.insert('', 'end', values=material)
-        self.combobox_id.config(values=('<Добавить материал>',) + self.__object_data_base.all_id_material())
-        self.combobox_id.current(0)
-        for el in self.__object_data_base.all_type_material():
-            self.type_sort[el] = tkinter.BooleanVar()
-            self.type_sort[el].set(True)
-        for el in self.__object_data_base.all_name_material():
-            self.material_sort[el] = tkinter.BooleanVar()
-            self.material_sort[el].set(True)
 
     # выбор материала
     def select_material(self, material_id):
