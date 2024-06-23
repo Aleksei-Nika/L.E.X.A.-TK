@@ -2,6 +2,7 @@ import data_akt
 import tkinter
 from tkinter import ttk, Toplevel, filedialog, messagebox
 
+
 x_data_akt = data_akt.Data_Akt()
 
 
@@ -1249,6 +1250,15 @@ class Window_data_base:
         self.window.grab_set()
         self.window.protocol("WM_DELETE_WINDOW", self.close_window)
 
+        # МЕНЮ окна
+        self.main_menu = tkinter.Menu(self.window)
+        self.window.config(menu=self.main_menu)
+        self.file_menu = tkinter.Menu(self.main_menu, tearoff=0)
+        self.main_menu.add_cascade(label='Файл', menu=self.file_menu)
+        self.file_menu.add_command(label='Новый', command=self.new_db)
+        self.file_menu.add_command(label='Открыть', command=self.load_db)
+        self.file_menu.add_command(label='Сохранить', command=self.data_base_commit)
+
         self.frame_table_materials = tkinter.Frame(self.window)
         self.table_material = ttk.Treeview(self.frame_table_materials,
                                            columns=('id', 'type', 'material', 'document', 'date'),
@@ -1270,7 +1280,9 @@ class Window_data_base:
         self.table_material.heading('document', text='Документ', command=self.menu_sorting_by_document_name)
         self.document_name_sort = {}
         self.document_number_sort = {}
-        self.table_material.heading('date', text='Дата')
+        self.table_material.heading('date', text='Дата', command=self.menu_sorting_by_date)
+        self.start_date_sort = {}
+        self.finish_date_sort = {}
         self.table_material.column('#1', width=30)
         self.table_material.column('#2', width=100)
         self.table_material.column('#3', width=300)
@@ -1279,6 +1291,13 @@ class Window_data_base:
         self.table_material.grid(row=0, column=0)
         self.table_material_scrollbar_y.grid(row=0, column=1, sticky='ns')
         self.table_material_scrollbar_x.grid(row=1, column=0, rowspan=2, sticky='we')
+
+        self.frame_search_materials = ttk.LabelFrame(self.window, text='Поиск материалов')
+        self.entry_search = tkinter.Entry(self.frame_search_materials, width=150)
+        self.button_search = tkinter.Button(self.frame_search_materials, text='Поиск',
+                                            command=lambda: self.search_materials(None))
+        self.entry_search.grid(row=0, column=0, sticky='ns')
+        self.button_search.grid(row=0, column=1, sticky='we')
 
         self.frame_material = ttk.LabelFrame(self.window, text='Материал')
         self.label_id = tkinter.Label(self.frame_material, text='ID в базе')
@@ -1305,6 +1324,8 @@ class Window_data_base:
         self.entry_start_date = tkinter.Entry(self.frame_material, width=50)
         self.label_finish_date = tkinter.Label(self.frame_material, text='Дата окончания')
         self.entry_finish_date = tkinter.Entry(self.frame_material, width=50)
+        self.label_file = tkinter.Label(self.frame_material, text='Файл документа')
+        self.entry_file = tkinter.Entry(self.frame_material, width=50)
 
         self.label_id.grid(row=0, column=0, stick='we', sticky='e')
         self.label_type.grid(row=1, column=0, stick='we', sticky='e')
@@ -1314,6 +1335,7 @@ class Window_data_base:
         self.label_document_number.grid(row=5, column=0, stick='we', sticky='e')
         self.label_start_date.grid(row=6, column=0, stick='we', sticky='e')
         self.label_finish_date.grid(row=7, column=0, stick='we', sticky='e')
+        self.label_file.grid(row=8, column=0, stick='we', sticky='e')
 
         self.combobox_id.grid(row=0, column=1, stick='we')
         self.combobox_type.grid(row=1, column=1, stick='we')
@@ -1323,23 +1345,46 @@ class Window_data_base:
         self.entry_document_number.grid(row=5, column=1, stick='we')
         self.entry_start_date.grid(row=6, column=1, stick='we')
         self.entry_finish_date.grid(row=7, column=1, stick='we')
+        self.entry_file.grid(row=8, column=1, stick='we')
 
         self.frame_button = tkinter.Frame(self.frame_material)
         self.but_add = tkinter.Button(self.frame_button, text='добавить', command=self.add_material)
         self.but_del = tkinter.Button(self.frame_button, text='удалить', command=self.delete_material)
+        self.but_view = tkinter.Button(self.frame_button, text='просмотр', command=self.view_file)
         self.but_add.grid(row=0, column=0, stick='ns')
         self.but_del.grid(row=0, column=1, stick='ns')
-        self.frame_button.grid(row=8, column=0, columnspan=2, sticky='w')
+        self.but_view.grid(row=0, column=2, stick='ns')
+        self.frame_button.grid(row=9, column=0, columnspan=2, sticky='w')
 
         self.label_indicator = tkinter.Label(self.frame_material, foreground='red')
-        self.label_indicator.grid(row=9, column=0, columnspan=2, sticky='w')
+        self.label_indicator.grid(row=10, column=0, columnspan=2, sticky='w')
 
         self.frame_material.grid(row=0, column=0, stick='we')
-        self.frame_table_materials.grid(row=1, column=0, stick='ns')
+        self.frame_search_materials.grid(row=1, column=0, stick='we')
+        self.frame_table_materials.grid(row=2, column=0, stick='ns')
 
         self.table_material.bind('<<TreeviewSelect>>', self.select_material_via_tabel)
         self.combobox_id.bind('<<ComboboxSelected>>', self.select_material_via_combobox_id)
+        self.entry_file.bind('<ButtonPress-3>', self.get_file_path_file_material)
+        self.entry_search.bind('<Return>', self.search_materials)
 
+        self.update_table_material()
+
+        # функция для новой база данных
+    def new_db(self):
+        path_file = tkinter.filedialog.asksaveasfilename(confirmoverwrite = True,
+                                                         defaultextension= 'db',
+                                                         initialfile='new_date_base_material.db',
+                                                         title='Создание базы данных')
+        self.__object_data_base = data_akt.connection_new_base_data(path_file, self.__object_data_base)
+        self.update_table_material()
+
+        # функция для загрузки база данных
+    def load_db(self):
+        path_file = tkinter.filedialog.askopenfilename(defaultextension='db',
+                                                       initialfile='new_date_base_material.db',
+                                                       title='Загрузка базы данных')
+        self.__object_data_base = data_akt.connection_base_data(path_file)
         self.update_table_material()
 
         # функции для контекстного меню столбца "ID"
@@ -1411,8 +1456,37 @@ class Window_data_base:
             menu.add_separator()
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
+        # функции для контекстного меню столбца "ДАТА"
+    def menu_sorting_by_date(self):
+        menu = tkinter.Menu(tearoff=0)
+        menu_start_date = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
+        menu_start_date.add_command(label='Сортировать А-Я', command=lambda: self.sort_material('start_date'))
+        menu_start_date.add_command(label='Сортировать Я-A', command=lambda: self.sort_material('start_date DESC'))
+        menu.add_cascade(label='Сортировка даты начала', menu=menu_start_date)
+        menu_finish_date = tkinter.Menu(tearoff=0)
+        menu_finish_date.add_command(label='Сортировать А-Я', command=lambda: self.sort_material('finish_date'))
+        menu_finish_date.add_command(label='Сортировать Я-A', command=lambda: self.sort_material('finish_date DESC'))
+        menu.add_cascade(label='Сортировка даты окончания', menu=menu_finish_date)
+
+        menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
+
         # Сортировка материалов
     def sort_material(self, column_for_order=None):
+        def sort_finish_date(list_data, revers):
+            list_none_date = []
+            list_finish_date = []
+            for row in list_data:
+                if row[7] is None:
+                    list_none_date.append(row)
+                else:
+                    list_finish_date.append(row)
+            if revers:
+                list_finish_date.sort(key=lambda row: data_akt.Date(row[7]).get_date(), reverse=True)
+            else:
+                list_finish_date.sort(key=lambda row: data_akt.Date(row[7]).get_date())
+            return tuple(list_finish_date + list_none_date)
+
         material_names = []
         for key_0 in self.material_sort:
             if not self.material_sort[key_0].get():
@@ -1423,6 +1497,15 @@ class Window_data_base:
                 document_number.append(key_1)
         result = self.__object_data_base.selection_materials_for_table(material_names, document_number,
                                                                        column_for_order)
+        if column_for_order == 'start_date':
+            result.sort(key=lambda row: data_akt.Date(row[6]).get_date())
+        elif column_for_order == 'start_date DESC':
+            result.sort(key=lambda row: data_akt.Date(row[6]).get_date(), reverse=True)
+        elif column_for_order == 'finish_date':
+            result = sort_finish_date(result, False)
+        elif column_for_order == 'finish_date DESC':
+            result = sort_finish_date(result, True)
+
         for row in self.table_material.get_children():
             self.table_material.delete(row)
         self.show_in_table(result)
@@ -1456,7 +1539,6 @@ class Window_data_base:
                     self.material_sort[el].set(False)
                 for row in self.__object_data_base.selection_materials('type', key):
                     self.document_number_sort[row[5]].set(False)
-                    print(row[3])
                     self.document_name_sort[row[3]].set(False)
         self.sort_material()
 
@@ -1492,8 +1574,13 @@ class Window_data_base:
                     self.type_sort[row[1]].set(False)
         self.sort_material()
 
-
-
+        # функция для поиска материалов в базе данных
+    def search_materials(self, event):
+        search = self.entry_search.get()
+        result = self.__object_data_base.selection_materials_for_search(search)
+        for row in self.table_material.get_children():
+            self.table_material.delete(row)
+        self.show_in_table(result)
 
         # функция для добавления и изменения материала
     def add_material(self):
@@ -1520,16 +1607,17 @@ class Window_data_base:
                 if data_akt.date_comparison(start_date, finish_date):
                     self.__indicator += '"Дата начала" не может быть позднее "Даты окончания"\n'
 
-        type = self.combobox_type.get() if self.combobox_type.get() != '' else None
+        type_material = self.combobox_type.get() if self.combobox_type.get() != '' else None
         material = self.combobox_material.get() if self.combobox_material.get() != '' else None
         document_name = self.combobox_document_name.get() if self.combobox_document_name.get() != '' else None
         documents_name = self.combobox_documents_name.get() if self.combobox_documents_name.get() != '' else None
         document_number = self.entry_document_number.get() if self.entry_document_number.get() != '' else None
         start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
         finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
+        path_file_material = self.entry_file.get() if self.entry_file.get() != '' else None
         material_id = self.combobox_id.get()
 
-        if type is None:
+        if type_material is None:
             self.__indicator += 'Поле "Вид" не должно быть пустым\n'
         if material is None:
             self.__indicator += 'Поле "Наименование" не должно быть пустым\n'
@@ -1546,13 +1634,38 @@ class Window_data_base:
             return
 
         if material_id == '<Добавить материал>':
-            self.__object_data_base.insert_data(type, material, document_name, documents_name, document_number,
-                                                start_date, finish_date)
+            self.__object_data_base.insert_data(type_material, material, document_name, documents_name, document_number,
+                                                start_date, finish_date, path_file_material)
         else:
-            self.__object_data_base.change_data(material_id, type, material, document_name, documents_name,
-                                                document_number, start_date, finish_date)
+            self.__object_data_base.change_data(material_id, type_material, material, document_name, documents_name,
+                                                document_number, start_date, finish_date, path_file_material)
         self.update_table_material()
         self.clear_input()
+
+    # функция для получения пути до файла документа
+    def get_file_path_file_material(self, event):
+        path_file_material = tkinter.filedialog.askopenfilename(defaultextension='db',
+                                                       initialfile='new_date_base_material.db',
+                                                       title='Загрузка файл документа в базу данных')
+        self.entry_file.insert('end', path_file_material)
+
+    def view_file(self):
+        row = self.table_material.selection()[0]
+        id = self.table_material.item(row)['values'][0]
+        images = self.__object_data_base.get_file_material(id)
+        window_PDF = PDF_Material(self.window, images)
+        #window_pdf = Toplevel(self.window)
+        #window_pdf.geometry('700x500')
+        #label = tkinter.Label(window_pdf)
+        #label.config(image=xyd)
+        #label.pack()
+        #canvas = tkinter.Canvas(window_pdf)
+        #canvas.pack()
+        #canvas.create_image(0, 0, anchor="nw", image=xyd)
+        #window_pdf.mainloop()
+
+
+
 
     # функция для обновления таблицы материалов
     def update_table_material(self):
@@ -1575,6 +1688,11 @@ class Window_data_base:
         for el in self.__object_data_base.all_document_name():
             self.document_name_sort[el] = tkinter.BooleanVar()
             self.document_name_sort[el].set(True)
+        for el in self.__object_data_base.all_start_date():
+            self.start_date_sort[data_akt.Date(el)] = el
+        for el in self.__object_data_base.all_finish_date():
+            if el is not None:
+                self.finish_date_sort[data_akt.Date(el)] = el
 
     # показать базу данных в таблице
     def show_in_table(self, selection):
@@ -1662,6 +1780,42 @@ class Window_data_base:
         self.__object_data_base.close_date_base()
         self.window.destroy()
 
+class PDF_Material:
+    def __init__(self, window, images):
+        self.__window = Toplevel(window)
+        self.__window.geometry('700x500')
+        self.images = images
+        self.num_page = 1
+        self.frame_page = tkinter.Frame(self.__window)
+        self.but_left = tkinter.Button(self.frame_page, text='<', command=lambda: self.next_page(-1))
+        self.but_right = tkinter.Button(self.frame_page, text='>', command=lambda: self.next_page(1))
+        self.label_page = tkinter.Label(self.frame_page, text=f'{self.num_page}/{len(self.images)}')
+        self.label = tkinter.Label(self.__window)
+
+        self.frame_page.pack()
+        self.but_left.grid(row=0, column=0)
+        self.label_page.grid(row=0, column=1)
+        self.but_right.grid(row=0, column=2)
+        self.label.pack()
+
+        self.next_page(0)
+
+        self.fuck = tkinter.Label(self.__window)
+        self.fuck.pack()
+
+        self.__window.mainloop()
+
+    def next_page(self, page):
+        if (self.num_page + page) <= 0:
+            self.num_page = 1
+        elif (self.num_page + page) > len(self.images):
+            self.num_page = len(self.images)
+        else:
+            self.num_page += page
+        self.label_page.config(text=f'{self.num_page}/{len(self.images)}')
+        image_tk = tkinter.PhotoImage(data=self.images[self.num_page-1])
+        self.label.config(image=image_tk)
+        self.label.photo = image_tk
 
 if __name__ == '__main__':
     window = RootGUI()

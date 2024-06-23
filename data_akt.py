@@ -1,6 +1,8 @@
 import pickle
 from datetime import date
 import sqlite3
+import fitz
+import os
 
 
 def new():
@@ -23,6 +25,16 @@ def save(path_file, file):
 
 
 def connection_base_data(path_file):
+    conn = sqlite3.connect(path_file)
+    return Data_base_materials(conn)
+
+
+def connection_new_base_data(path_file, db):
+    try:
+        os.remove(path_file)
+    except PermissionError:
+        db.close_date_base()
+        os.remove(path_file)
     conn = sqlite3.connect(path_file)
     return Data_base_materials(conn)
 
@@ -520,9 +532,6 @@ class Akt:
 
         return text_of_doc + '.'
 
-    def __str__(self):
-        return f'{self.__name_hous}'
-
 
 # класс ЭЛЕМЕНТЫ для АКТА
 class Object_element:
@@ -894,28 +903,36 @@ class Data_base_materials:
                                 documents_name TEXT,
                                 document_number TEXT,
                                 start_date TEXT,
-                                finish_date TEXT)''')
-        self.__type = None
-        self.__material = None
-        self.__document_name = None
-        self.__documents_name = None
-        self.__document_number = None
-        self.__start_date = None
-        self.__finish_date = None
+                                finish_date TEXT,
+                                file BLOB)''')
+        # self.__type = None
+        # self.__material = None
+        # self.__document_name = None
+        # self.__documents_name = None
+        # self.__document_number = None
+        # self.__start_date = None
+        # self.__finish_date = None
 
     def extract_all_data_from_database(self):
         self.__cur.execute('''SELECT * FROM materials''')
         return self.__cur.fetchall()
 
         # Добавить новый материал в базу данных
-    def insert_data(self, type, material, document_name, documents_name, document_number, start_date, finish_date):
+    def insert_data(self, type, material, document_name, documents_name, document_number, start_date, finish_date,
+                    path_file):
+        file = fitz.open(path_file)
+        list_image = []
+        for page in file:
+            list_image.append(page.get_pixmap().tobytes("ppm"))
+        file_bin = pickle.dumps(tuple(list_image))
         self.__cur.execute('''INSERT INTO materials(type, material, document_name, documents_name, document_number,
-                            start_date, finish_date) VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                           (type, material, document_name, documents_name, document_number, start_date, finish_date))
+                            start_date, finish_date, file) VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                           (type, material, document_name, documents_name, document_number, start_date, finish_date,
+                            file_bin))
 
         # Изменить материал в базе данных
     def change_data(self, material_id, type, material, document_name, documents_name, document_number, start_date,
-                    finish_date):
+                    finish_date, file):
         self.__cur.execute('''UPDATE materials
                             SET type = ?,
                                 material = ?,
@@ -924,13 +941,25 @@ class Data_base_materials:
                                 document_number = ?,
                                 start_date = ?,
                                 finish_date = ?
+                                file = ?
                             WHERE ItemID == ?''',
                            (type, material, document_name, documents_name, document_number, start_date, finish_date,
-                            material_id))
+                            file, material_id))
 
         # Удаление материала по ID
     def delete_data(self, material_id):
         self.__cur.execute('''DELETE FROM materials WHERE ItemID = ?''', (material_id,))
+
+    def selection_materials_for_search(self, search):
+        self.__cur.execute(f'''SELECT * FROM materials
+                            WHERE type LIKE "%{search}%" OR
+                            material LIKE "%{search}%" OR
+                            document_name LIKE "%{search}%" OR
+                            documents_name LIKE "%{search}%" OR
+                            document_number LIKE "%{search}%" OR
+                            start_date LIKE "%{search}%" OR
+                            finish_date LIKE "%{search}%"''')# (search, search, search, search, search, search, search))
+        return self.__cur.fetchall()
 
     def selection_materials_for_table(self, material_names, document_number, column_for_order):
         str_request_material = ''
@@ -1036,6 +1065,37 @@ class Data_base_materials:
         list_document_number.sort()
         return tuple(list_document_number)
 
+        # Выдать все даты начала документов
+    def all_start_date(self):
+        self.__cur.execute('''SELECT start_date FROM materials''')
+        result = self.__cur.fetchall()
+        list_start_date = []
+        for el in result:
+            list_start_date.append(el[0])
+        list_start_date = set(list_start_date)
+        list_start_date = list(list_start_date)
+        return tuple(list_start_date)
+
+        # Выдать все даты окончания документов
+    def all_finish_date(self):
+        self.__cur.execute('''SELECT finish_date FROM materials''')
+        result = self.__cur.fetchall()
+        list_finish_date = []
+        for el in result:
+            if el[0] is not None:
+                list_finish_date.append(el[0])
+        list_finish_date = set(list_finish_date)
+        list_finish_date = list(list_finish_date)
+        list_finish_date.sort()
+        return tuple(list_finish_date)
+
+        # Выдать файл материала
+    def get_file_material(self, material_id):
+        self.__cur.execute('''SELECT file FROM materials WHERE ItemID == ?''', (material_id,))
+        file_bit = self.__cur.fetchone()
+        file = pickle.loads(file_bit[0])
+        return file
+
         # Сохранить базу данных
     def commit_data_base(self):
         self.__conn.commit()
@@ -1043,6 +1103,7 @@ class Data_base_materials:
         # Отключить базу данных
     def close_date_base(self):
         self.__conn.close()
+
 
 
 # Сравнение дат
