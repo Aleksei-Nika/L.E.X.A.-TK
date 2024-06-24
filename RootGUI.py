@@ -346,7 +346,7 @@ class RootGUI:
         self.frame_materials_of_akt = ttk.LabelFrame(self.frame_material, text='Используемые материалы')
         self.frame_table_materials = tkinter.Frame(self.frame_materials_of_akt)
         self.table_material = ttk.Treeview(self.frame_table_materials,
-                                           columns=('id', 'type', 'material', 'document', 'date'),
+                                           columns=('id', 'type', 'material', 'document', 'date', 'file'),
                                            show='headings',
                                            height=5)
         self.table_material_scrollbar = ttk.Scrollbar(self.frame_table_materials, orient='vertical', command=self.table_material.yview)
@@ -356,11 +356,13 @@ class RootGUI:
         self.table_material.heading('material', text='Материал')
         self.table_material.heading('document', text='Документ')
         self.table_material.heading('date', text='Дата')
+        self.table_material.heading('file', text='Изображения')
         self.table_material.column('#1', width=30)
         self.table_material.column('#2', width=100)
         self.table_material.column('#3', width=300)
         self.table_material.column('#4', width=300)
         self.table_material.column('#5', width=200)
+        self.table_material.column('#6', width=100)
         self.table_material.bind('<Button-3>', self.menu_table_material)
 
         self.frame_materials_of_akt.pack()
@@ -369,7 +371,7 @@ class RootGUI:
         self.table_material.pack(side='left')
 
         self.frame_base_data = ttk.LabelFrame(self.frame_material, text='База данных материалов')
-        self.entry_base_data = tkinter.Entry(self.frame_base_data, width=142)
+        self.entry_base_data = tkinter.Entry(self.frame_base_data, width=161)
         self.entry_base_data.bind('<Button-3>', self.menu_base_data)
         self.button_base_data = tkinter.Button(self.frame_base_data, text='Подключить', command=self.connect_database)
         self.frame_base_data.pack()
@@ -533,12 +535,29 @@ class RootGUI:
 
     # Функции меню для таблицы материалов
     def menu_table_material(self, event):
-        menu = tkinter.Menu(tearoff=0)
-        menu.add_command(label='Cоздать новый', command=self.create_material)
-        menu.add_command(label='Добавить материал из БД', command=self.add_from_database)
-        menu.add_command(label='Изменить', command=self.change_material)
-        menu.add_command(label='Удалить', command=self.delete_material)
-        menu.post(event.x_root, event.y_root)
+        if self.table_material.selection() != ():
+            menu = tkinter.Menu(tearoff=0)
+            menu.add_command(label='Просмотр документа', command=self.view_file)
+            menu.add_command(label='Удаление документа', command=self.del_file)
+            menu.add_separator()
+            menu.add_command(label='Cоздать новый', command=self.create_material)
+            menu.add_command(label='Добавить материал из БД', command=self.add_from_database)
+            menu.add_command(label='Изменить', command=self.change_material)
+            menu.add_command(label='Удалить', command=self.delete_material)
+            menu.post(event.x_root, event.y_root)
+
+    def view_file(self):
+        line = self.table_material.selection()[0]
+        id = self.table_material.item(line)['values'][0]
+        index_material = x_data_akt.get_all_id_materials().index(id)
+        images = x_data_akt.get_material(index_material).get_bin_images()
+        window = Window_veiw_doc(self.root, images)
+
+    def del_file(self):
+        for line in self.table_material.selection():
+            id = self.table_material.item(line)['values'][0]
+            index_material = x_data_akt.get_all_id_materials().index(id)
+            x_data_akt.get_material(index_material).del_bin_images()
 
     def create_material(self):
         window = Window_material(self.root, self.table_material)
@@ -571,11 +590,13 @@ class RootGUI:
         #menu.post(event.x_root, event.y_root)
 
     def create_base_data(self):
+        self.entry_base_data.delete(0, 'end')
         self.file_db = tkinter.filedialog.asksaveasfilename(confirmoverwrite = True, defaultextension='db',
                                                             initialfile='new_date_base_material.db')
         self.entry_base_data.insert('end', self.file_db)
 
     def load_base_data(self):
+        self.entry_base_data.delete(0, 'end')
         self.file_db = tkinter.filedialog.askopenfilename(defaultextension='db')
         self.entry_base_data.insert('end', self.file_db)
 
@@ -1072,6 +1093,7 @@ class Window_material:
             self.__document_number = None
             self.__start_date = None
             self.__finish_date = None
+            self.__file = None
             self.__heading = 'Добавление материала'
             self.__text_button = 'Добавить материал'
         else:
@@ -1084,6 +1106,10 @@ class Window_material:
             self.__document_number = x_data_akt.get_material(index).get_document_number()
             self.__start_date = x_data_akt.get_material(index).get_str_start_date()
             self.__finish_date = x_data_akt.get_material(index).get_str_finish_date()
+            if x_data_akt.get_material(index).get_bin_images() is None:
+                self.__file = '<Файл не загружен>'
+            else:
+                self.__file = '<Есть загруженный файл>'
             self.__heading = 'Изменение материала'
             self.__text_button = 'Изменить материал'
 
@@ -1115,6 +1141,8 @@ class Window_material:
         self.entry_start_date = tkinter.Entry(self.frame_material, width=35)
         self.label_finish_date = tkinter.Label(self.frame_material, text='Дата окончания')
         self.entry_finish_date = tkinter.Entry(self.frame_material, width=35)
+        self.label_file = tkinter.Label(self.frame_material, text='Файл документа')
+        self.entry_file = tkinter.Entry(self.frame_material, width=35)
 
         self.frame_material.pack()
 
@@ -1125,6 +1153,7 @@ class Window_material:
         self.label_document_number.grid(row=4, column=0, stick='we', sticky='e')
         self.label_start_date.grid(row=5, column=0, stick='we', sticky='e')
         self.label_finish_date.grid(row=6, column=0, stick='we', sticky='e')
+        self.label_file.grid(row=7, column=0, stick='we', sticky='e')
 
         self.combobox_type.grid(row=0, column=1, stick='we')
         self.combobox_material.grid(row=1, column=1, stick='we')
@@ -1133,11 +1162,13 @@ class Window_material:
         self.entry_document_number.grid(row=4, column=1, stick='we')
         self.entry_start_date.grid(row=5, column=1, stick='we')
         self.entry_finish_date.grid(row=6, column=1, stick='we')
+        self.entry_file.grid(row=7, column=1, stick='we')
 
         # self.combobox_documents_name.config(state='disabled')
         # self.entry_finish_date.config(state='disabled')FocusOut
 
         self.combobox_document_name.bind('<FocusOut>', self.corresponding_documents_name)
+        self.entry_file.bind('<Double-ButtonPress-3>', self.get_file_path_file_material)
 
         if self.__index is not None:
             self.combobox_type.set(self.__type if self.__type is not None else '')
@@ -1147,6 +1178,7 @@ class Window_material:
             self.entry_document_number.insert('end', self.__document_number if self.__document_number is not None else '')
             self.entry_start_date.insert('end', self.__start_date if self.__start_date is not None else '')
             self.entry_finish_date.insert('end', self.__finish_date if self.__finish_date is not None else '')
+            self.entry_file.insert('end', self.__file)
 
         self.button_material = tkinter.Button(self.window, text=self.__text_button,
                                               command=self.material)
@@ -1160,6 +1192,12 @@ class Window_material:
         documents_name = x_data_akt.get_corresponding_documents_name_materials(self.combobox_document_name.get())
         if documents_name is not None:
             self.combobox_documents_name.set(documents_name)
+
+        # Функция для получения пути до файла документа
+    def get_file_path_file_material(self, event):
+        self.entry_file.delete(0, 'end')
+        path_file_material = tkinter.filedialog.askopenfilename(title='Загрузка файл документа')
+        self.entry_file.insert('end', path_file_material)
 
     def material(self):
 
@@ -1197,6 +1235,10 @@ class Window_material:
         self.__document_number = self.entry_document_number.get() if self.entry_document_number.get() != '' else None
         self.__start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
         self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
+        if self.entry_file.get() == '<Файл не загружен>' or self.entry_file.get() == '<Есть загруженный файл>' or self.entry_file.get() =='':
+            self.__file = None
+        else:
+            self.__file = self.entry_file.get()
 
         # проверка корректности введенных данный
         if self.__material == '':
@@ -1221,6 +1263,7 @@ class Window_material:
                 material.set_document_number(self.__document_number)
                 material.set_object_start_date(self.__start_date)
                 material.set_object_finish_date(self.__finish_date)
+                material.set_bin_images(self.__file)
 
                 x_data_akt.set_material(material)
                 self.__table.insert('', 'end', values=material.get_in_tabel())
@@ -1234,6 +1277,7 @@ class Window_material:
                 x_data_akt.get_material(self.__index).set_document_number(self.__document_number)
                 x_data_akt.get_material(self.__index).set_object_start_date(self.__start_date)
                 x_data_akt.get_material(self.__index).set_object_finish_date(self.__finish_date)
+                x_data_akt.get_material(self.__index).set_bin_images(self.__file)
 
                 self.__table.item(self.__item, values=x_data_akt.get_material(self.__index).get_in_tabel())
                 self.window.destroy()
@@ -1351,9 +1395,11 @@ class Window_data_base:
         self.but_add = tkinter.Button(self.frame_button, text='добавить', command=self.add_material)
         self.but_del = tkinter.Button(self.frame_button, text='удалить', command=self.delete_material)
         self.but_view = tkinter.Button(self.frame_button, text='просмотр', command=self.view_file)
+        self.but_del_file = tkinter.Button(self.frame_button, text='удалить файл', command=self.delete_file)
         self.but_add.grid(row=0, column=0, stick='ns')
         self.but_del.grid(row=0, column=1, stick='ns')
         self.but_view.grid(row=0, column=2, stick='ns')
+        self.but_del_file.grid(row=0, column=3, stick='ns')
         self.frame_button.grid(row=9, column=0, columnspan=2, sticky='w')
 
         self.label_indicator = tkinter.Label(self.frame_material, foreground='red')
@@ -1364,8 +1410,9 @@ class Window_data_base:
         self.frame_table_materials.grid(row=2, column=0, stick='ns')
 
         self.table_material.bind('<<TreeviewSelect>>', self.select_material_via_tabel)
+        self.table_material.bind('<ButtonPress-3>', self.menu_table_material)
         self.combobox_id.bind('<<ComboboxSelected>>', self.select_material_via_combobox_id)
-        self.entry_file.bind('<ButtonPress-3>', self.get_file_path_file_material)
+        self.entry_file.bind('<Double-ButtonPress-3>', self.get_file_path_file_material)
         self.entry_search.bind('<Return>', self.search_materials)
 
         self.update_table_material()
@@ -1386,6 +1433,17 @@ class Window_data_base:
                                                        title='Загрузка базы данных')
         self.__object_data_base = data_akt.connection_base_data(path_file)
         self.update_table_material()
+
+    def menu_table_material(self, event):
+        if self.table_material.selection() != ():
+            menu = tkinter.Menu(tearoff=0)
+
+            menu.add_separator()
+            menu.add_command(label='Просмотр документа', command=self.view_file)
+            menu.add_command(label='Удалить документ', command=self.delete_file)
+            menu.add_separator()
+            menu.add_command(label='Удалить запись из БД', command=self.delete_material)
+            menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
         # функции для контекстного меню столбца "ID"
     def menu_sorting_by_id_materials(self):
@@ -1614,7 +1672,10 @@ class Window_data_base:
         document_number = self.entry_document_number.get() if self.entry_document_number.get() != '' else None
         start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
         finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
-        path_file_material = self.entry_file.get() if self.entry_file.get() != '' else None
+        if self.entry_file.get() == '' or self.entry_file.get() == '<Файл не загружен>' or self.entry_file.get() == '<Есть загруженный файл>':
+            path_file_material = None
+        else:
+            path_file_material = self.entry_file.get() if self.entry_file.get() != '' else None
         material_id = self.combobox_id.get()
 
         if type_material is None:
@@ -1644,28 +1705,25 @@ class Window_data_base:
 
     # функция для получения пути до файла документа
     def get_file_path_file_material(self, event):
+        self.entry_file.delete(0, 'end')
         path_file_material = tkinter.filedialog.askopenfilename(defaultextension='db',
                                                        initialfile='new_date_base_material.db',
                                                        title='Загрузка файл документа в базу данных')
         self.entry_file.insert('end', path_file_material)
 
+    # функция для удаления файла
     def view_file(self):
         row = self.table_material.selection()[0]
         id = self.table_material.item(row)['values'][0]
         images = self.__object_data_base.get_file_material(id)
-        window_PDF = PDF_Material(self.window, images)
-        #window_pdf = Toplevel(self.window)
-        #window_pdf.geometry('700x500')
-        #label = tkinter.Label(window_pdf)
-        #label.config(image=xyd)
-        #label.pack()
-        #canvas = tkinter.Canvas(window_pdf)
-        #canvas.pack()
-        #canvas.create_image(0, 0, anchor="nw", image=xyd)
-        #window_pdf.mainloop()
+        window_PDF = Window_veiw_doc(self.window, images)
 
-
-
+    def delete_file(self):
+        row = self.table_material.selection()[0]
+        id = self.table_material.item(row)['values'][0]
+        self.__object_data_base.del_file_material(id)
+        self.update_table_material()
+        self.clear_input()
 
     # функция для обновления таблицы материалов
     def update_table_material(self):
@@ -1721,6 +1779,10 @@ class Window_data_base:
         self.entry_document_number.insert('end', material[5] if material[5] is not None else '')
         self.entry_start_date.insert('end', material[6] if material[6] is not None else '')
         self.entry_finish_date.insert('end', material[7] if material[7] is not None else '')
+        if material[8] is None:
+            self.entry_file.insert('end', '<Файл не загружен>')
+        elif material[8] is not None:
+            self.entry_file.insert('end', '<Есть загруженный файл>')
 
     # удаление материала
     def delete_material(self):
@@ -1758,6 +1820,7 @@ class Window_data_base:
         self.entry_document_number.delete(0, 'end')
         self.entry_start_date.delete(0, 'end')
         self.entry_finish_date.delete(0, 'end')
+        self.entry_file.delete(0, 'end')
 
     # вызов окна с предложением сохранить БЗ бри закрытии окна
     def close_window(self):
@@ -1780,10 +1843,10 @@ class Window_data_base:
         self.__object_data_base.close_date_base()
         self.window.destroy()
 
-class PDF_Material:
+class Window_veiw_doc:
     def __init__(self, window, images):
         self.__window = Toplevel(window)
-        self.__window.geometry('700x500')
+        self.__window.geometry('700x900')
         self.images = images
         self.num_page = 1
         self.frame_page = tkinter.Frame(self.__window)
@@ -1800,8 +1863,8 @@ class PDF_Material:
 
         self.next_page(0)
 
-        self.fuck = tkinter.Label(self.__window)
-        self.fuck.pack()
+        self.__window.bind('<Left>', lambda a: self.next_page(-1))
+        self.__window.bind('<Right>', lambda a: self.next_page(1))
 
         self.__window.mainloop()
 
@@ -1814,6 +1877,7 @@ class PDF_Material:
             self.num_page += page
         self.label_page.config(text=f'{self.num_page}/{len(self.images)}')
         image_tk = tkinter.PhotoImage(data=self.images[self.num_page-1])
+        #self.__window.geometry(f'{image_tk.width()}x{image_tk.height()}')
         self.label.config(image=image_tk)
         self.label.photo = image_tk
 

@@ -757,7 +757,7 @@ class Date:
 
 class Material:
     def __init__(self, type=None, material=None, document_name=None, documents_name=None,
-                 document_number=None, start_date=None, finish_date=None):
+                 document_number=None, start_date=None, finish_date=None, path_file=None):
         self.__id = None
         self.__type = type
         self.__material = material
@@ -766,6 +766,7 @@ class Material:
         self.__document_number = document_number
         self.__start_date = start_date
         self.__finish_date = finish_date
+        self.__bin_images = None
 
     def set_id(self, id):
         self.__id = id
@@ -796,6 +797,16 @@ class Material:
 
     def set_object_finish_date(self, object_finish_date):
         self.__finish_date = object_finish_date
+
+    def set_bin_images(self, path_file):
+        if path_file is None:
+            return
+        print(path_file)
+        file = fitz.open(path_file)
+        list_image = []
+        for page in file:
+            list_image.append(page.get_pixmap().tobytes("ppm"))
+        self.__bin_images = pickle.dumps(tuple(list_image))
 
     def add_deadline(self, str_start_date, str_finish_date):
         try:
@@ -891,6 +902,14 @@ class Material:
             date1 = str_date.split('.')
             return f'{date1[0]}.{date1[1]}.{date1[2]}'
 
+        # возвращение изобажений
+    def get_bin_images(self):
+        return pickle.loads(self.__bin_images)
+
+        # удаление изобажений
+    def del_bin_images(self):
+        self.__bin_images = None
+
 
 class Data_base_materials:
     def __init__(self, connection):
@@ -905,14 +924,8 @@ class Data_base_materials:
                                 start_date TEXT,
                                 finish_date TEXT,
                                 file BLOB)''')
-        # self.__type = None
-        # self.__material = None
-        # self.__document_name = None
-        # self.__documents_name = None
-        # self.__document_number = None
-        # self.__start_date = None
-        # self.__finish_date = None
 
+        # Выдать всю базу данных
     def extract_all_data_from_database(self):
         self.__cur.execute('''SELECT * FROM materials''')
         return self.__cur.fetchall()
@@ -920,36 +933,61 @@ class Data_base_materials:
         # Добавить новый материал в базу данных
     def insert_data(self, type, material, document_name, documents_name, document_number, start_date, finish_date,
                     path_file):
-        file = fitz.open(path_file)
-        list_image = []
-        for page in file:
-            list_image.append(page.get_pixmap().tobytes("ppm"))
-        file_bin = pickle.dumps(tuple(list_image))
-        self.__cur.execute('''INSERT INTO materials(type, material, document_name, documents_name, document_number,
-                            start_date, finish_date, file) VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
-                           (type, material, document_name, documents_name, document_number, start_date, finish_date,
-                            file_bin))
+        if path_file is None:
+            self.__cur.execute('''INSERT INTO materials(type, material, document_name, documents_name, document_number,
+                                            start_date, finish_date) VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                               (type, material, document_name, documents_name, document_number, start_date,
+                                finish_date))
+        else:
+            file = fitz.open(path_file)
+            list_image = []
+            for page in file:
+                list_image.append(page.get_pixmap().tobytes("ppm"))
+            file_bin = pickle.dumps(tuple(list_image))
+            self.__cur.execute('''INSERT INTO materials(type, material, document_name, documents_name, document_number,
+                                start_date, finish_date, file) VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                               (type, material, document_name, documents_name, document_number, start_date, finish_date,
+                                file_bin))
 
         # Изменить материал в базе данных
     def change_data(self, material_id, type, material, document_name, documents_name, document_number, start_date,
-                    finish_date, file):
-        self.__cur.execute('''UPDATE materials
-                            SET type = ?,
-                                material = ?,
-                                document_name = ?,
-                                documents_name = ?,
-                                document_number = ?,
-                                start_date = ?,
-                                finish_date = ?
-                                file = ?
-                            WHERE ItemID == ?''',
-                           (type, material, document_name, documents_name, document_number, start_date, finish_date,
-                            file, material_id))
+                    finish_date, path_file):
+        if path_file is None:
+            self.__cur.execute('''UPDATE materials
+                                        SET type = ?,
+                                            material = ?,
+                                            document_name = ?,
+                                            documents_name = ?,
+                                            document_number = ?,
+                                            start_date = ?,
+                                            finish_date = ?
+                                        WHERE ItemID == ?''',
+                               (type, material, document_name, documents_name, document_number, start_date, finish_date,
+                                material_id))
+        else:
+            file = fitz.open(path_file)
+            list_image = []
+            for page in file:
+                list_image.append(page.get_pixmap().tobytes("ppm"))
+            file_bin = pickle.dumps(tuple(list_image))
+            self.__cur.execute('''UPDATE materials
+                                SET type = ?,
+                                    material = ?,
+                                    document_name = ?,
+                                    documents_name = ?,
+                                    document_number = ?,
+                                    start_date = ?,
+                                    finish_date = ?,
+                                    file = ?
+                                WHERE ItemID == ?''',
+                               (type, material, document_name, documents_name, document_number, start_date, finish_date,
+                                file_bin, material_id))
 
         # Удаление материала по ID
     def delete_data(self, material_id):
         self.__cur.execute('''DELETE FROM materials WHERE ItemID = ?''', (material_id,))
 
+        # Выборка материалов для поиска
     def selection_materials_for_search(self, search):
         self.__cur.execute(f'''SELECT * FROM materials
                             WHERE type LIKE "%{search}%" OR
@@ -961,6 +999,7 @@ class Data_base_materials:
                             finish_date LIKE "%{search}%"''')# (search, search, search, search, search, search, search))
         return self.__cur.fetchall()
 
+        # Выборка материалов для сортироваки в таблицы
     def selection_materials_for_table(self, material_names, document_number, column_for_order):
         str_request_material = ''
         str_request_document_number = ''
@@ -1095,6 +1134,10 @@ class Data_base_materials:
         file_bit = self.__cur.fetchone()
         file = pickle.loads(file_bit[0])
         return file
+
+        # Удалить файл материала с записи
+    def del_file_material(self, material_id):
+        self.__cur.execute('''UPDATE materials SET file = NULL WHERE ItemID == ?''', (material_id,))
 
         # Сохранить базу данных
     def commit_data_base(self):
