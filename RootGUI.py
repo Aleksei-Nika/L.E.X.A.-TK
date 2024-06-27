@@ -535,29 +535,33 @@ class RootGUI:
 
     # Функции меню для таблицы материалов
     def menu_table_material(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Cоздать новый', command=self.create_material)
+        menu.add_command(label='Добавить материал из БД', command=self.add_from_database)
         if self.table_material.selection() != ():
-            menu = tkinter.Menu(tearoff=0)
-            menu.add_command(label='Просмотр документа', command=self.view_file)
-            menu.add_command(label='Удаление документа', command=self.del_file)
-            menu.add_separator()
-            menu.add_command(label='Cоздать новый', command=self.create_material)
-            menu.add_command(label='Добавить материал из БД', command=self.add_from_database)
             menu.add_command(label='Изменить', command=self.change_material)
             menu.add_command(label='Удалить', command=self.delete_material)
-            menu.post(event.x_root, event.y_root)
+            menu.add_separator()
+            menu.add_command(label='Просмотр документа', command=self.view_file)
+            menu.add_command(label='Удаление документа', command=self.del_file)
+        menu.post(event.x_root, event.y_root)
 
     def view_file(self):
         line = self.table_material.selection()[0]
         id = self.table_material.item(line)['values'][0]
         index_material = x_data_akt.get_all_id_materials().index(id)
         images = x_data_akt.get_material(index_material).get_bin_images()
-        window = Window_veiw_doc(self.root, images)
+        if images is not None:
+            window = Window_veiw_doc(self.root, images)
+        else:
+            return None
 
     def del_file(self):
         for line in self.table_material.selection():
             id = self.table_material.item(line)['values'][0]
             index_material = x_data_akt.get_all_id_materials().index(id)
             x_data_akt.get_material(index_material).del_bin_images()
+            self.table_material.set(line, 5, '<Файл не загружен>')
 
     def create_material(self):
         window = Window_material(self.root, self.table_material)
@@ -580,7 +584,7 @@ class RootGUI:
     # Функции для БД материалов
     def connect_database(self):
         object_base_materials = data_akt.connection_base_data(self.entry_base_data.get())
-        Window = Window_data_base(self.root, object_base_materials)
+        Window = Window_data_base(self.root, object_base_materials, self.table_material)
 
     def menu_base_data(self, event):
         menu = tkinter.Menu(tearoff=0)
@@ -1263,7 +1267,7 @@ class Window_material:
                 material.set_document_number(self.__document_number)
                 material.set_object_start_date(self.__start_date)
                 material.set_object_finish_date(self.__finish_date)
-                material.set_bin_images(self.__file)
+                material.load_bin_images(self.__file)
 
                 x_data_akt.set_material(material)
                 self.__table.insert('', 'end', values=material.get_in_tabel())
@@ -1277,15 +1281,16 @@ class Window_material:
                 x_data_akt.get_material(self.__index).set_document_number(self.__document_number)
                 x_data_akt.get_material(self.__index).set_object_start_date(self.__start_date)
                 x_data_akt.get_material(self.__index).set_object_finish_date(self.__finish_date)
-                x_data_akt.get_material(self.__index).set_bin_images(self.__file)
+                x_data_akt.get_material(self.__index).load_bin_images(self.__file)
 
                 self.__table.item(self.__item, values=x_data_akt.get_material(self.__index).get_in_tabel())
                 self.window.destroy()
 
 class Window_data_base:
-    def __init__(self, root, object_data_base):
+    def __init__(self, root, object_data_base, material_executive_documentation):
         self.__root = root
         self.__object_data_base = object_data_base
+        self.__root_table = material_executive_documentation
         self.__indicator = ''
 
         self.window = Toplevel(self.__root)
@@ -1304,35 +1309,35 @@ class Window_data_base:
         self.file_menu.add_command(label='Сохранить', command=self.data_base_commit)
 
         self.frame_table_materials = tkinter.Frame(self.window)
-        self.table_material = ttk.Treeview(self.frame_table_materials,
-                                           columns=('id', 'type', 'material', 'document', 'date'),
-                                           show='headings',
-                                           height=25)
+        self.table_material_db = ttk.Treeview(self.frame_table_materials,
+                                              columns=('id', 'type', 'material', 'document', 'date'),
+                                              show='headings',
+                                              height=25)
         self.table_material_scrollbar_y = ttk.Scrollbar(self.frame_table_materials, orient='vertical',
-                                                      command=self.table_material.yview)
+                                                        command=self.table_material_db.yview)
         self.table_material_scrollbar_x = ttk.Scrollbar(self.frame_table_materials, orient='horizontal',
-                                                        command=self.table_material.xview)
-        self.table_material.config(yscrollcommand=self.table_material_scrollbar_y.set)
-        self.table_material.config(xscrollcommand=self.table_material_scrollbar_x.set)
+                                                        command=self.table_material_db.xview)
+        self.table_material_db.config(yscrollcommand=self.table_material_scrollbar_y.set)
+        self.table_material_db.config(xscrollcommand=self.table_material_scrollbar_x.set)
 
-        self.table_material.heading('id', text='id', command=self.menu_sorting_by_id_materials)
-        self.table_material.heading('type', text='Вид',
-                                    command=self.menu_sorting_by_type)
+        self.table_material_db.heading('id', text='id', command=self.menu_sorting_by_id_materials)
+        self.table_material_db.heading('type', text='Вид',
+                                       command=self.menu_sorting_by_type)
         self.type_sort = {}
-        self.table_material.heading('material', text='Материал', command=self.menu_sorting_by_name_materials)
+        self.table_material_db.heading('material', text='Материал', command=self.menu_sorting_by_name_materials)
         self.material_sort = {}
-        self.table_material.heading('document', text='Документ', command=self.menu_sorting_by_document_name)
+        self.table_material_db.heading('document', text='Документ', command=self.menu_sorting_by_document_name)
         self.document_name_sort = {}
         self.document_number_sort = {}
-        self.table_material.heading('date', text='Дата', command=self.menu_sorting_by_date)
+        self.table_material_db.heading('date', text='Дата', command=self.menu_sorting_by_date)
         self.start_date_sort = {}
         self.finish_date_sort = {}
-        self.table_material.column('#1', width=30)
-        self.table_material.column('#2', width=100)
-        self.table_material.column('#3', width=300)
-        self.table_material.column('#4', width=300)
-        self.table_material.column('#5', width=200)
-        self.table_material.grid(row=0, column=0)
+        self.table_material_db.column('#1', width=30)
+        self.table_material_db.column('#2', width=100)
+        self.table_material_db.column('#3', width=300)
+        self.table_material_db.column('#4', width=300)
+        self.table_material_db.column('#5', width=200)
+        self.table_material_db.grid(row=0, column=0)
         self.table_material_scrollbar_y.grid(row=0, column=1, sticky='ns')
         self.table_material_scrollbar_x.grid(row=1, column=0, rowspan=2, sticky='we')
 
@@ -1409,8 +1414,8 @@ class Window_data_base:
         self.frame_search_materials.grid(row=1, column=0, stick='we')
         self.frame_table_materials.grid(row=2, column=0, stick='ns')
 
-        self.table_material.bind('<<TreeviewSelect>>', self.select_material_via_tabel)
-        self.table_material.bind('<ButtonPress-3>', self.menu_table_material)
+        self.table_material_db.bind('<<TreeviewSelect>>', self.select_material_via_tabel)
+        self.table_material_db.bind('<ButtonPress-3>', self.menu_table_material)
         self.combobox_id.bind('<<ComboboxSelected>>', self.select_material_via_combobox_id)
         self.entry_file.bind('<Double-ButtonPress-3>', self.get_file_path_file_material)
         self.entry_search.bind('<Return>', self.search_materials)
@@ -1435,9 +1440,9 @@ class Window_data_base:
         self.update_table_material()
 
     def menu_table_material(self, event):
-        if self.table_material.selection() != ():
+        if self.table_material_db.selection() != ():
             menu = tkinter.Menu(tearoff=0)
-
+            menu.add_command(label='Добавить в исполнительную документацию', command=self.export_data_akt)
             menu.add_separator()
             menu.add_command(label='Просмотр документа', command=self.view_file)
             menu.add_command(label='Удалить документ', command=self.delete_file)
@@ -1564,8 +1569,8 @@ class Window_data_base:
         elif column_for_order == 'finish_date DESC':
             result = sort_finish_date(result, True)
 
-        for row in self.table_material.get_children():
-            self.table_material.delete(row)
+        for row in self.table_material_db.get_children():
+            self.table_material_db.delete(row)
         self.show_in_table(result)
 
         # Переключатель типа по материалу:
@@ -1636,8 +1641,8 @@ class Window_data_base:
     def search_materials(self, event):
         search = self.entry_search.get()
         result = self.__object_data_base.selection_materials_for_search(search)
-        for row in self.table_material.get_children():
-            self.table_material.delete(row)
+        for row in self.table_material_db.get_children():
+            self.table_material_db.delete(row)
         self.show_in_table(result)
 
         # функция для добавления и изменения материала
@@ -1711,24 +1716,25 @@ class Window_data_base:
                                                        title='Загрузка файл документа в базу данных')
         self.entry_file.insert('end', path_file_material)
 
-    # функция для удаления файла
+    # функция для просмотра файла
     def view_file(self):
-        row = self.table_material.selection()[0]
-        id = self.table_material.item(row)['values'][0]
+        row = self.table_material_db.selection()[0]
+        id = self.table_material_db.item(row)['values'][0]
         images = self.__object_data_base.get_file_material(id)
         window_PDF = Window_veiw_doc(self.window, images)
 
+    # функция для удаления файла
     def delete_file(self):
-        row = self.table_material.selection()[0]
-        id = self.table_material.item(row)['values'][0]
+        row = self.table_material_db.selection()[0]
+        id = self.table_material_db.item(row)['values'][0]
         self.__object_data_base.del_file_material(id)
         self.update_table_material()
         self.clear_input()
 
     # функция для обновления таблицы материалов
     def update_table_material(self):
-        for row in self.table_material.get_children():
-            self.table_material.delete(row)
+        for row in self.table_material_db.get_children():
+            self.table_material_db.delete(row)
         self.show_in_table(self.__object_data_base.extract_all_data_from_database())
         self.combobox_id.config(values=('<Добавить материал>',) + self.__object_data_base.all_id_material())
         self.combobox_id.current(0)
@@ -1764,7 +1770,7 @@ class Window_data_base:
                 material.append(f'с {row_db[6]} до {row_db[7]}')
             else:
                 material.append(f'от {row_db[6]}')
-            self.table_material.insert('', 'end', values=material)
+            self.table_material_db.insert('', 'end', values=material)
 
     # выбор материала
     def select_material(self, material_id):
@@ -1786,10 +1792,10 @@ class Window_data_base:
 
     # удаление материала
     def delete_material(self):
-        for row in self.table_material.selection():
-            material_id = self.table_material.item(row)['values'][0]
+        for row in self.table_material_db.selection():
+            material_id = self.table_material_db.item(row)['values'][0]
             self.__object_data_base.delete_data(material_id)
-            self.table_material.delete(row)
+            self.table_material_db.delete(row)
             self.clear_input()
 
     # выбор материала через combobox id
@@ -1799,15 +1805,15 @@ class Window_data_base:
             self.but_add.config(text='добавить')
             return
         self.select_material(material_id)
-        for row in self.table_material.get_children(''):
-            if self.table_material.item(row)['values'][0] == int(material_id):
-                self.table_material.selection_set(row)
+        for row in self.table_material_db.get_children(''):
+            if self.table_material_db.item(row)['values'][0] == int(material_id):
+                self.table_material_db.selection_set(row)
                 break
 
     # выбор материала через таблицу материалов
     def select_material_via_tabel(self, event):
-        row = self.table_material.selection()[0]
-        id = self.table_material.item(row)['values'][0]
+        row = self.table_material_db.selection()[0]
+        id = self.table_material_db.item(row)['values'][0]
         self.select_material(id)
 
     # отчистка полей ввода материалов
@@ -1821,6 +1827,23 @@ class Window_data_base:
         self.entry_start_date.delete(0, 'end')
         self.entry_finish_date.delete(0, 'end')
         self.entry_file.delete(0, 'end')
+
+    # Добавление материал в исполнительную документацию
+    def export_data_akt(self):
+        row = self.table_material_db.selection()[0]
+        id = self.table_material_db.item(row)['values'][0]
+        data_material = self.__object_data_base.material_export(id)
+        material = data_akt.Material()
+        material.set_type(data_material[1])
+        material.set_material(data_material[2])
+        material.set_document_name(data_material[3])
+        material.set_documents_name(data_material[4])
+        material.set_document_number(data_material[5])
+        material.set_object_start_date(data_material[6])
+        material.set_object_finish_date(data_material[7])
+        material.set_bin_images(data_material[8])
+        x_data_akt.set_material(material)
+        self.__root_table.insert('', 'end', values=material.get_in_tabel())
 
     # вызов окна с предложением сохранить БЗ бри закрытии окна
     def close_window(self):

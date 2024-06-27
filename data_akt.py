@@ -798,15 +798,17 @@ class Material:
     def set_object_finish_date(self, object_finish_date):
         self.__finish_date = object_finish_date
 
-    def set_bin_images(self, path_file):
+    def load_bin_images(self, path_file):
         if path_file is None:
             return
-        print(path_file)
         file = fitz.open(path_file)
         list_image = []
         for page in file:
             list_image.append(page.get_pixmap().tobytes("ppm"))
         self.__bin_images = pickle.dumps(tuple(list_image))
+
+    def set_bin_images(self, bin_file):
+        self.__bin_images = bin_file
 
     def add_deadline(self, str_start_date, str_finish_date):
         try:
@@ -876,12 +878,21 @@ class Material:
             else:
                 return 'с ' + self.get_str_start_date() + ' до ' + self.get_str_finish_date()
 
+        # Проверка изображения
+
+        def check_images(images):
+            if images is not None:
+                return '<Есть загруженный файл>'
+            else:
+                return '<Файл не загружен>'
+
         elements_material = []
         elements_material.append(self.__id)
         elements_material.append(check_type(self.__type))
         elements_material.append(self.__material)
         elements_material.append(check_data_document(self.__document_name, self.__document_number))
         elements_material.append(check_dates(self.__start_date, self.__finish_date))
+        elements_material.append(check_images(self.__bin_images))
         return tuple(elements_material)
 
         # возвращение строки даты начала для акта
@@ -904,7 +915,10 @@ class Material:
 
         # возвращение изобажений
     def get_bin_images(self):
-        return pickle.loads(self.__bin_images)
+        if self.__bin_images is not None:
+            return pickle.loads(self.__bin_images)
+        else:
+            return None
 
         # удаление изобажений
     def del_bin_images(self):
@@ -1134,6 +1148,16 @@ class Data_base_materials:
         file_bit = self.__cur.fetchone()
         file = pickle.loads(file_bit[0])
         return file
+
+        # Выдать материал для экспорта в исполнительную документацию
+    def material_export(self, material_id):
+        self.__cur.execute('''SELECT * FROM materials WHERE ItemID == ?''', (material_id,))
+        data_material = list(self.__cur.fetchone())
+        if data_material[6] is not None:
+            data_material[6] = Date(data_material[6])
+        if data_material[7] is not None:
+            data_material[7] = Date(data_material[6])
+        return tuple(data_material)
 
         # Удалить файл материала с записи
     def del_file_material(self, material_id):
