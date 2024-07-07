@@ -2,7 +2,6 @@ import data_akt
 import tkinter
 from tkinter import ttk, Toplevel, filedialog, messagebox
 
-
 x_data_akt = data_akt.Data_Akt()
 
 
@@ -11,11 +10,11 @@ class RootGUI:
         # Создание и настройка основного окна
         self.root = tkinter.Tk()
         self.root.title('L.E.X.A.')
-        #self.root.attributes('-fullscreen', True)
-        #self.root.attributes("-alpha", 0.5)
-        #self.root.attributes("-toolwindow", True)
+        # self.root.attributes('-fullscreen', True)
+        # self.root.attributes("-alpha", 0.5)
+        # self.root.attributes("-toolwindow", True)
         self.root.geometry('700x700')
-        #self.root.geometry(f'{self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}')
+        # self.root.geometry(f'{self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}')
 
         # Создание МЕНЮ
         self.main_menu = tkinter.Menu(self.root)
@@ -141,7 +140,7 @@ class RootGUI:
                                              font=("Times new roman", 12, 'bold'),
                                              justify='left',
                                              text='Застройщик, технический заказчик, лицо, ответственное за ' +
-                                             'эксплотацию здания, сооружения,\nили региональный оператор:')
+                                                  'эксплотацию здания, сооружения,\nили региональный оператор:')
         self.text_developer = tkinter.Text(self.frame_in_canvas,
                                            height=5,
                                            width=90,
@@ -180,15 +179,15 @@ class RootGUI:
                                               font=("Times new roman", 12),
                                               width=5)
         self.entry_act_date = tkinter.Entry(self.frame_number_and_date,
-                                              background='white',
-                                              font=("Times new roman", 12))
+                                            background='white',
+                                            font=("Times new roman", 12))
         self.label_developer_name = tkinter.Label(self.frame_in_canvas,
-                                              background='white',
-                                              font=("Times new roman", 12, 'bold'),
-                                              justify='left',
-                                              text='\nПредставитель застройщика, технического заказчика, ' +
-                                                  'лица ответственного за эксплуатацию здания,\nсооружения,' +
-                                                  'или регионального оператора по вопросам строительного контроля:')
+                                                  background='white',
+                                                  font=("Times new roman", 12, 'bold'),
+                                                  justify='left',
+                                                  text='\nПредставитель застройщика, технического заказчика, ' +
+                                                       'лица ответственного за эксплуатацию здания,\nсооружения,' +
+                                                       'или регионального оператора по вопросам строительного контроля:')
         self.text_developer_name = tkinter.Text(self.frame_in_canvas,
                                                 height=5,
                                                 width=90,
@@ -201,56 +200,56 @@ class RootGUI:
                                                 text='Представитель лица, осуществляющего строительство, ' +
                                                      'реконструкцию, капитальный ремонт:')
         self.text_builder_name = tkinter.Text(self.frame_in_canvas,
-                                                height=5,
-                                                width=90,
-                                                font=("Times new roman", 12),
-                                                wrap='word')
+                                              height=5,
+                                              width=90,
+                                              font=("Times new roman", 12),
+                                              wrap='word')
         self.label_builder_control_name = tkinter.Label(self.frame_in_canvas,
-                                                background='white',
-                                                font=("Times new roman", 12, 'bold'),
-                                                justify='left',
-                                                text='Представитель лица, осуществляющего строительство, ' +
-                                                     'реконструкцию, капитальный ремонт,\nпо вопросам ' +
-                                                     'строительного контроля')
+                                                        background='white',
+                                                        font=("Times new roman", 12, 'bold'),
+                                                        justify='left',
+                                                        text='Представитель лица, осуществляющего строительство, ' +
+                                                             'реконструкцию, капитальный ремонт,\nпо вопросам ' +
+                                                             'строительного контроля')
         self.text_builder_control_name = tkinter.Text(self.frame_in_canvas,
-                                                height=5,
-                                                width=90,
-                                                font=("Times new roman", 12),
-                                                wrap='word')
+                                                      height=5,
+                                                      width=90,
+                                                      font=("Times new roman", 12),
+                                                      wrap='word')
         self.label_designer_name = tkinter.Label(self.frame_in_canvas,
                                                  background='white',
                                                  font=("Times new roman", 12, 'bold'),
                                                  justify='left',
                                                  text='Представитель лица, осуществляющего подготовку проектной' +
-                                                 'документации (в случае\nпривлечения застройщиком лица,' +
-                                                 'осуществляющего подготовку строительной документации, для\nпроверки' +
-                                                 'соответсвия выполняемых работ проектной документации согласно' +
-                                                 'части 2 статьи 53\n'
-                                                 'Градостроительного кодекса Российской Федирации:')
+                                                      'документации (в случае\nпривлечения застройщиком лица,' +
+                                                      'осуществляющего подготовку строительной документации, для\nпроверки' +
+                                                      'соответсвия выполняемых работ проектной документации согласно' +
+                                                      'части 2 статьи 53\n'
+                                                      'Градостроительного кодекса Российской Федирации:')
         self.text_designer_name = tkinter.Text(self.frame_in_canvas,
                                                height=5,
                                                width=90,
                                                font=("Times new roman", 12),
                                                wrap='word')
         self.label_contractor_name = tkinter.Label(self.frame_in_canvas,
-                                                 background='white',
-                                                 font=("Times new roman", 12, 'bold'),
-                                                 justify='left',
-                                                 text='Представитель лица, выполнявщего работы, подлежащие ' +
-                                                      'освидетельствованию (в случае\nвыполнения работы по договорам о' +
-                                                      'строительстве, реконструкции, капитальном ремонте\nобъектов' +
-                                                      'капитального строительства, заключенным с иными лицами):')
+                                                   background='white',
+                                                   font=("Times new roman", 12, 'bold'),
+                                                   justify='left',
+                                                   text='Представитель лица, выполнявщего работы, подлежащие ' +
+                                                        'освидетельствованию (в случае\nвыполнения работы по договорам о' +
+                                                        'строительстве, реконструкции, капитальном ремонте\nобъектов' +
+                                                        'капитального строительства, заключенным с иными лицами):')
         self.text_contractor_name = tkinter.Text(self.frame_in_canvas,
-                                               height=5,
-                                               width=90,
-                                               font=("Times new roman", 12),
-                                               wrap='word')
+                                                 height=5,
+                                                 width=90,
+                                                 font=("Times new roman", 12),
+                                                 wrap='word')
         self.label_another_person = tkinter.Label(self.frame_in_canvas,
-                                                 background='white',
-                                                 font=("Times new roman", 12, 'bold'),
-                                                 justify='left',
-                                                 text='а также иные представители лиц, учавствующих в ' +
-                                                      'освидетельствовании:')
+                                                  background='white',
+                                                  font=("Times new roman", 12, 'bold'),
+                                                  justify='left',
+                                                  text='а также иные представители лиц, учавствующих в ' +
+                                                       'освидетельствовании:')
         self.text_another_person = tkinter.Text(self.frame_in_canvas,
                                                 height=5,
                                                 width=90,
@@ -258,10 +257,10 @@ class RootGUI:
                                                 wrap='word')
         self.frame_contractor = tkinter.Frame(self.frame_in_canvas, background='white')
         self.label_contractor = tkinter.Label(self.frame_contractor,
-                                                 background='white',
-                                                 font=("Times new roman", 12, 'bold'),
-                                                 justify='left',
-                                                 text='приозвели осмотр работ, выполненных: ')
+                                              background='white',
+                                              font=("Times new roman", 12, 'bold'),
+                                              justify='left',
+                                              text='приозвели осмотр работ, выполненных: ')
         self.text_contractor = tkinter.Text(self.frame_contractor,
                                             height=1,
                                             width=52,
@@ -276,14 +275,14 @@ class RootGUI:
                                         font=("Times new roman", 12, 'bold'),
                                         text='1. К освидетельствованию предъявлены следующие работы:')
         self.text_work = tkinter.Text(self.frame_in_canvas,
-                                    height=3,
-                                    width=90,
-                                    font=("Times new roman", 12),
-                                    wrap='word')
+                                      height=3,
+                                      width=90,
+                                      font=("Times new roman", 12),
+                                      wrap='word')
         self.label_documentation = tkinter.Label(self.frame_in_canvas,
-                                        background='white',
-                                        font=("Times new roman", 12, 'bold'),
-                                        text='2. Работы выполнены по проектно-сметной документации:')
+                                                 background='white',
+                                                 font=("Times new roman", 12, 'bold'),
+                                                 text='2. Работы выполнены по проектно-сметной документации:')
         self.text_documentation = tkinter.Text(self.frame_in_canvas,
                                                height=3,
                                                width=90,
@@ -332,7 +331,7 @@ class RootGUI:
         self.canvas.pack(side='left')
         # Прокрутка canvas просмотр акта
         self.canvas.bind_all('<MouseWheel>',
-                             lambda event: self.canvas.yview_scroll(int(-1 * event.delta/120), 'units'))
+                             lambda event: self.canvas.yview_scroll(int(-1 * event.delta / 120), 'units'))
         self.canvas_scrollbar.pack(side='right', fill='y')
         self.frame_for_canvas.pack()
         self.frame_view_akt.grid(row=0, column=1)
@@ -349,7 +348,8 @@ class RootGUI:
                                            columns=('id', 'type', 'material', 'document', 'date', 'file'),
                                            show='headings',
                                            height=5)
-        self.table_material_scrollbar = ttk.Scrollbar(self.frame_table_materials, orient='vertical', command=self.table_material.yview)
+        self.table_material_scrollbar = ttk.Scrollbar(self.frame_table_materials, orient='vertical',
+                                                      command=self.table_material.yview)
         self.table_material.config(yscrollcommand=self.table_material_scrollbar.set)
         self.table_material.heading('id', text='id')
         self.table_material.heading('type', text='Вид')
@@ -401,7 +401,7 @@ class RootGUI:
         self.updater_table_materials()
 
     def save_file(self):
-        self.file = tkinter.filedialog.asksaveasfilename(confirmoverwrite = True, defaultextension='dat')
+        self.file = tkinter.filedialog.asksaveasfilename(confirmoverwrite=True, defaultextension='dat')
         data_akt.save(self.file, x_data_akt)
 
     def updater_list(self, list_object, var):
@@ -411,7 +411,7 @@ class RootGUI:
     def updater_table_materials(self):
         for item in self.table_material.get_children():
             self.table_material.delete(item)
-        for material in x_data_akt.get_all_text_materials():
+        for material in x_data_akt.get_all_text_materials_table():
             self.table_material.insert('', 'end', values=material)
 
     # Контекстное меню для НАИМЕНОВАНИЯ ОБЪЕКТА во вкладке ОБЪЕКТ
@@ -531,13 +531,14 @@ class RootGUI:
         self.text_contractor.insert('end', x_data_akt.get_akt(index[0]).get_contractor().get_text())
 
         self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work())
-        self.text_documentation.insert('end',x_data_akt.get_akt(index[0]).get_text_of_documentation())
+        self.text_documentation.insert('end', x_data_akt.get_akt(index[0]).get_text_of_documentation())
 
     # Функции меню для таблицы материалов
     def menu_table_material(self, event):
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Cоздать новый', command=self.create_material)
         menu.add_command(label='Добавить материал из БД', command=self.add_from_database)
+        menu.add_command(label='Установить порядок материалов', command=self.order_material)
         if self.table_material.selection() != ():
             menu.add_command(label='Изменить', command=self.change_material)
             menu.add_command(label='Удалить', command=self.delete_material)
@@ -569,6 +570,9 @@ class RootGUI:
     def add_from_database(self):
         print(self.table_material.selection())
 
+    def order_material(self):
+        window = Window_order_material(self.root)
+
     def change_material(self):
         line = self.table_material.selection()[0]
         id = self.table_material.item(line)['values'][0]
@@ -590,12 +594,12 @@ class RootGUI:
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Cоздать новую БД', command=self.create_base_data)
         menu.add_command(label='Загрузить БД', command=self.load_base_data)
-        menu.post(self.entry_base_data.winfo_rootx(), self.entry_base_data.winfo_rooty()+20)
-        #menu.post(event.x_root, event.y_root)
+        menu.post(self.entry_base_data.winfo_rootx(), self.entry_base_data.winfo_rooty() + 20)
+        # menu.post(event.x_root, event.y_root)
 
     def create_base_data(self):
         self.entry_base_data.delete(0, 'end')
-        self.file_db = tkinter.filedialog.asksaveasfilename(confirmoverwrite = True, defaultextension='db',
+        self.file_db = tkinter.filedialog.asksaveasfilename(confirmoverwrite=True, defaultextension='db',
                                                             initialfile='new_date_base_material.db')
         self.entry_base_data.insert('end', self.file_db)
 
@@ -898,7 +902,8 @@ class Window_akt:
                                                     width=30,
                                                     values=x_data_akt.get_all_organizations_names()))
         self.list_documentation.append(ttk.Combobox(self.frame_documentation,
-                                                    width=30))
+                                                    width=30,
+                                                    values=x_data_akt.get_all_texts_name_doc()))
         self.list_documentation.append(tkinter.Entry(self.frame_documentation, width=30))
         self.list_documentation[0].grid(row=1, column=1, stick='we')
         self.list_documentation[1].grid(row=1, column=2, stick='we')
@@ -947,12 +952,13 @@ class Window_akt:
                                                         width=30,
                                                         values=x_data_akt.get_all_organizations_names()))
             self.list_documentation.append(ttk.Combobox(self.frame_documentation,
-                                                        width=30))
+                                                        width=30,
+                                                        values=x_data_akt.get_all_texts_name_doc()))
             self.list_documentation.append(tkinter.Entry(self.frame_documentation, width=30))
-            self.list_documentation[-3].grid(row=int(len(self.list_documentation)/3), column=1, stick='we')
-            self.list_documentation[-2].grid(row=int(len(self.list_documentation)/3), column=2, stick='we')
-            self.list_documentation[-1].grid(row=int(len(self.list_documentation)/3), column=3, stick='we')
-            self.button_add_org.grid(row=1, column=0, rowspan=int(len(self.list_documentation)/3)+1, stick='ns')
+            self.list_documentation[-3].grid(row=int(len(self.list_documentation) / 3), column=1, stick='we')
+            self.list_documentation[-2].grid(row=int(len(self.list_documentation) / 3), column=2, stick='we')
+            self.list_documentation[-1].grid(row=int(len(self.list_documentation) / 3), column=3, stick='we')
+            self.button_add_org.grid(row=1, column=0, rowspan=int(len(self.list_documentation) / 3) + 1, stick='ns')
 
     def old_doc(self, documentation):
         for component in documentation:
@@ -995,7 +1001,7 @@ class Window_akt:
             documents_list = []
             for iteration in range(int(len(self.list_documentation) / 3)):
                 org = insert_data(self.list_documentation[iteration * 3 + 0], x_data_akt.get_all_organizations())
-                doc_name = insert_data(self.list_documentation[iteration * 3 + 1], None)
+                doc_name = x_data_akt.set_unique_or_get_name_doc(self.list_documentation[iteration * 3 + 1].get())
                 page = self.list_documentation[iteration * 3 + 2].get()
                 if org.get_text() == '' and doc_name.get_text() == '' and page == '':
                     pass
@@ -1024,7 +1030,8 @@ class Window_akt:
         self.__designer = insert_data(self.combobox_designer, x_data_akt.get_all_organizations())
         self.__developer_name = insert_data(self.combobox_developer_name, x_data_akt.get_all_representatives())
         self.__builder_name = insert_data(self.combobox_builder_name, x_data_akt.get_all_representatives())
-        self.__builder_control_name = insert_data(self.combobox_builder_control_name, x_data_akt.get_all_representatives())
+        self.__builder_control_name = insert_data(self.combobox_builder_control_name,
+                                                  x_data_akt.get_all_representatives())
         self.__designer_name = insert_data(self.combobox_designer_name, x_data_akt.get_all_representatives())
         self.__contractor_name = insert_data(self.combobox_contractor_name, x_data_akt.get_all_representatives())
         self.__another_person = insert_data(self.combobox_another_person, x_data_akt.get_all_representatives())
@@ -1098,6 +1105,7 @@ class Window_material:
             self.__start_date = None
             self.__finish_date = None
             self.__file = None
+            self.__order_material = 'поставить в конец списка'
             self.__heading = 'Добавление материала'
             self.__text_button = 'Добавить материал'
         else:
@@ -1114,6 +1122,7 @@ class Window_material:
                 self.__file = '<Файл не загружен>'
             else:
                 self.__file = '<Есть загруженный файл>'
+            self.__order_material = index + 1
             self.__heading = 'Изменение материала'
             self.__text_button = 'Изменить материал'
 
@@ -1122,7 +1131,8 @@ class Window_material:
         self.window.geometry('500x500')
         self.window.grab_set()
 
-        self.frame_material = ttk.LabelFrame(self.window, text='Данные о материале')
+        self.frame_root = tkinter.Frame(self.window)
+        self.frame_material = ttk.LabelFrame(self.frame_root, text='Данные о материале')
         self.label_type = tkinter.Label(self.frame_material, text='Вид')
         self.combobox_type = ttk.Combobox(self.frame_material,
                                           width=35,
@@ -1148,8 +1158,6 @@ class Window_material:
         self.label_file = tkinter.Label(self.frame_material, text='Файл документа')
         self.entry_file = tkinter.Entry(self.frame_material, width=35)
 
-        self.frame_material.pack()
-
         self.label_type.grid(row=0, column=0, stick='we', sticky='e')
         self.label_material.grid(row=1, column=0, stick='we', sticky='e')
         self.label_document_name.grid(row=2, column=0, stick='we', sticky='e')
@@ -1168,30 +1176,69 @@ class Window_material:
         self.entry_finish_date.grid(row=6, column=1, stick='we')
         self.entry_file.grid(row=7, column=1, stick='we')
 
+        self.frame_order_material = ttk.LabelFrame(self.frame_root, text='Порядок материала')
+
+        numbers_order = len(x_data_akt.get_all_text_materials_list())
+        if numbers_order == 0:
+            combobox_var = tuple(['поставить в конец списка'])
+        else:
+            combobox_var = ['поставить последним материалом этого типа']
+            combobox_var += list(range(1, numbers_order + 2))
+            # combobox_var = combobox_var + [numbers_order] + [numbers_order+1]
+        self.combobox_order_material = ttk.Combobox(self.frame_order_material, width=61,
+                                                    values=combobox_var)
+        self.combobox_order_material.set(self.__order_material)
+        languages_var = []
+        for iteration in range(len(x_data_akt.get_all_text_materials_list())):
+            languages_var.append(f'{iteration + 1}. {x_data_akt.get_all_text_materials_list()[iteration]}')
+        languages_var.append(f'{len(x_data_akt.get_all_text_materials_list()) + 1}. в конце списка')
+        languages_var = tkinter.Variable(value=languages_var)
+        self.frame_listbox = tkinter.Frame(self.frame_order_material)
+        self.listbox_order_material = tkinter.Listbox(self.frame_listbox, width=61,
+                                                      listvariable=languages_var)
+        self.listbox_order_material_scrollbar = tkinter.Scrollbar(self.frame_listbox,
+                                                                  command=self.listbox_order_material.yview)
+        self.listbox_order_material.config(yscrollcommand=self.listbox_order_material_scrollbar.set)
+
+        self.combobox_order_material.grid(row=0, column=0)
+        self.frame_listbox.grid(row=1, column=0)
+        self.listbox_order_material.pack(side='left')
+        self.listbox_order_material_scrollbar.pack(side='right', fill='y')
+
         # self.combobox_documents_name.config(state='disabled')
         # self.entry_finish_date.config(state='disabled')FocusOut
 
         self.combobox_document_name.bind('<FocusOut>', self.corresponding_documents_name)
         self.entry_file.bind('<Double-ButtonPress-3>', self.get_file_path_file_material)
+        self.listbox_order_material.bind('<<ListboxSelect>>', self.setting_combobox_order_material)
+        self.combobox_order_material.bind('<<ComboboxSelected>>', self.setting_listbox_order_material)
 
         if self.__index is not None:
             self.combobox_type.set(self.__type if self.__type is not None else '')
             self.combobox_material.set(self.__material if self.__material is not None else '')
             self.combobox_document_name.set(self.__document_name if self.__document_name is not None else '')
             self.combobox_documents_name.set(self.__documents_name if self.__documents_name is not None else '')
-            self.entry_document_number.insert('end', self.__document_number if self.__document_number is not None else '')
+            self.entry_document_number.insert('end',
+                                              self.__document_number if self.__document_number is not None else '')
             self.entry_start_date.insert('end', self.__start_date if self.__start_date is not None else '')
             self.entry_finish_date.insert('end', self.__finish_date if self.__finish_date is not None else '')
             self.entry_file.insert('end', self.__file)
 
-        self.button_material = tkinter.Button(self.window, text=self.__text_button,
+        self.frame_indicator_and_button = tkinter.Frame(self.frame_root)
+        self.button_material = tkinter.Button(self.frame_indicator_and_button, text=self.__text_button,
                                               command=self.material)
-        self.label_indicator = tkinter.Label(self.window, foreground='red')
+        self.label_indicator = tkinter.Label(self.frame_indicator_and_button, foreground='red')
 
         self.button_material.pack()
         self.label_indicator.pack()
 
-    # Автозаполнение combobox_documents_name
+        self.frame_material.grid(row=0, column=0, sticky='n')
+        self.frame_order_material.grid(row=1, column=0)
+        self.frame_indicator_and_button.grid(row=2, column=0)
+
+        self.frame_root.pack()
+
+        # Автозаполнение combobox_documents_name
     def corresponding_documents_name(self, event):
         documents_name = x_data_akt.get_corresponding_documents_name_materials(self.combobox_document_name.get())
         if documents_name is not None:
@@ -1202,6 +1249,19 @@ class Window_material:
         self.entry_file.delete(0, 'end')
         path_file_material = tkinter.filedialog.askopenfilename(title='Загрузка файл документа')
         self.entry_file.insert('end', path_file_material)
+
+        # Функции для установки значения в combobox порядка материалов
+
+    def setting_combobox_order_material(self, event):
+        index_order = self.listbox_order_material.curselection()[0]
+        self.combobox_order_material.set(index_order + 1)
+
+        # Функция для выделения материала в listbox порядка материалов
+
+    def setting_listbox_order_material(self, event):
+        index_order = self.combobox_order_material.get()
+        if index_order != 'поставить в конец списка' and index_order != 'поставить последним материалом этого типа':
+            self.listbox_order_material.select_set(int(index_order) - 1)
 
     def material(self):
 
@@ -1227,7 +1287,6 @@ class Window_material:
                 if data_akt.date_comparison(self.__start_date, self.__finish_date):
                     self.__indicator += '"Дата начала" не может быть позднее "Даты окончания"\n'
 
-
         # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
         self.__indicator = ''
 
@@ -1239,16 +1298,20 @@ class Window_material:
         self.__document_number = self.entry_document_number.get() if self.entry_document_number.get() != '' else None
         self.__start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
         self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
-        if self.entry_file.get() == '<Файл не загружен>' or self.entry_file.get() == '<Есть загруженный файл>' or self.entry_file.get() =='':
+        if self.entry_file.get() == '<Файл не загружен>' or self.entry_file.get() == '<Есть загруженный файл>' or self.entry_file.get() == '':
             self.__file = None
         else:
             self.__file = self.entry_file.get()
+        if self.combobox_order_material.get() == 'поставить в конец списка' or self.combobox_order_material.get() == 'поставить последним материалом этого типа' or self.combobox_order_material.get() == '':
+            self.__order_material = None
+        else:
+            self.__order_material = int(self.combobox_order_material.get()) - 1
 
         # проверка корректности введенных данный
         if self.__material == '':
             self.__indicator += 'Поле "Наименование" не может быть пустым\n'
         if self.__document_name is None and self.__documents_name is not None:
-            self.__indicator += ('Поле "Наименование документа" не может быть пустым, '+
+            self.__indicator += ('Поле "Наименование документа" не может быть пустым, ' +
                                  'если поле "Наименование документов" заполнено\n')
         checking_deadline()
 
@@ -1269,8 +1332,13 @@ class Window_material:
                 material.set_object_finish_date(self.__finish_date)
                 material.load_bin_images(self.__file)
 
-                x_data_akt.set_material(material)
-                self.__table.insert('', 'end', values=material.get_in_tabel())
+                x_data_akt.set_material(material, self.__order_material)
+
+                for item in self.__table.get_children():
+                    self.__table.delete(item)
+                for material in x_data_akt.get_all_text_materials_table():
+                    self.__table.insert('', 'end', values=material)
+
                 self.window.destroy()
             # Изменение атрибутов ранее созданного объекта класса "Материалы"
             else:
@@ -1283,8 +1351,148 @@ class Window_material:
                 x_data_akt.get_material(self.__index).set_object_finish_date(self.__finish_date)
                 x_data_akt.get_material(self.__index).load_bin_images(self.__file)
 
-                self.__table.item(self.__item, values=x_data_akt.get_material(self.__index).get_in_tabel())
+                x_data_akt.change_order_of_material(x_data_akt.get_material(self.__index), self.__order_material)
+
+                for item in self.__table.get_children():
+                    self.__table.delete(item)
+                for material in x_data_akt.get_all_text_materials_table():
+                    self.__table.insert('', 'end', values=material)
+
                 self.window.destroy()
+
+
+class Window_order_material:
+    def __init__(self, root):
+        self.__root = root
+
+        self.list_old_order_materials = x_data_akt.get_all_text_materials_list()
+        self.static_list_old_order_materials = self.numbering_list(x_data_akt.get_all_text_materials_list())
+        self.list_new_order_materials = tuple()
+        self.__indicator = ''
+
+        self.window = Toplevel(self.__root)
+        self.window.title('Порядок отображения материалов')
+        self.window.geometry('1000x500')
+        self.frame_root = tkinter.Frame(self.window)
+        self.frame_listbox_old_order = tkinter.Frame(self.frame_root)
+        self.label_old_order = tkinter.Label(self.frame_root, text='Старый порядок материалов')
+        self.listbox_old_order = tkinter.Listbox(self.frame_listbox_old_order, width=75, height=25,
+                                                 selectmode='extended',
+                                                 listvariable=tkinter.Variable(value=self.static_list_old_order_materials))
+        self.listbox_old_order_scrollbar = tkinter.Scrollbar(self.frame_listbox_old_order,
+                                                             command=self.listbox_old_order.yview)
+        self.listbox_old_order.config(yscrollcommand=self.listbox_old_order_scrollbar.set)
+        self.listbox_old_order_scrollbar.pack(side='left', fill='y')
+        self.listbox_old_order.pack(side='right')
+
+        self.label_symbol = tkinter.Label(self.frame_root, text='->')
+
+        self.label_new_order = tkinter.Label(self.frame_root, text='Новый порядок материалов')
+        self.frame_listbox_new_order = tkinter.Frame(self.frame_root)
+        self.listbox_new_order = tkinter.Listbox(self.frame_listbox_new_order, width=75, height=25,
+                                                 selectmode='extended')
+        self.listbox_new_order_scrollbar = tkinter.Scrollbar(self.frame_listbox_new_order,
+                                                             command=self.listbox_new_order.yview)
+        self.listbox_new_order.config(yscrollcommand=self.listbox_new_order_scrollbar.set)
+        self.listbox_new_order.pack(side='left')
+        self.listbox_new_order_scrollbar.pack(side='right', fill='y')
+
+        self.button_setting_order = tkinter.Button(self.window, text='Установить новый порядок материалов',
+                                                   command=self.setting_new_material_order)
+        self.label_indicator = tkinter.Label(self.window, foreground='red')
+
+        self.label_old_order.grid(row=0, column=0)
+        self.frame_listbox_old_order.grid(row=1, column=0)
+        self.label_symbol.grid(row=0, column=1, rowspan=2, padx=5)
+        self.label_new_order.grid(row=0, column=2)
+        self.frame_listbox_new_order.grid(row=1, column=2)
+
+        self.frame_root.pack()
+        self.button_setting_order.pack(pady=5)
+        self.label_indicator.pack()
+
+        self.listbox_old_order.bind('<Double-ButtonPress-1>', self.transfer_to_listbox_new_order)
+        self.listbox_new_order.bind('<Double-ButtonPress-1>', self.cancellation_transfer)
+        self.listbox_old_order.bind('<ButtonPress-3>', self.menu_listbox_old_order)
+        self.listbox_new_order.bind('<ButtonPress-3>', self.menu_listbox_new_order)
+
+    def menu_listbox_old_order(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Добавить', command=self.transfer_to_listbox_new_order)
+        menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
+
+    def menu_listbox_new_order(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Убрать', command=self.cancellation_transfer)
+        menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
+
+        # Перемещение Материалов из сторого списка в новый
+    def transfer_to_listbox_new_order(self, event=None):
+        self.list_old_order_materials = list(self.list_old_order_materials)
+        separator_list = []
+        for index_row in self.listbox_old_order.curselection():
+            row = self.listbox_old_order.get(index_row)
+            separator_index = row.find('.')
+            separator_list.append(row[separator_index+2:])
+            self.list_old_order_materials.remove(row[separator_index+2:])
+
+        old_list = []
+        for row in self.static_list_old_order_materials:
+            separator_index = row.find('.')
+            if row[separator_index + 2:] in self.list_old_order_materials:
+                old_list.append(row)
+        self.listbox_old_order.config(listvariable=tkinter.Variable(value=old_list))
+
+        self.list_new_order_materials += tuple(separator_list)
+        list_material = self.numbering_list(self.list_new_order_materials)
+        self.listbox_new_order.config(listvariable=tkinter.Variable(value=list_material))
+        self.list_old_order_materials = tuple(self.list_old_order_materials)
+
+        # Отмена перемещения материала в новый список
+    def cancellation_transfer(self, event=None):
+        self.list_new_order_materials = list(self.list_new_order_materials)
+        self.list_old_order_materials = list(self.list_old_order_materials)
+
+        separator_list = []
+        for index_row in self.listbox_new_order.curselection():
+            row = self.listbox_new_order.get(index_row)
+            separator_index = row.find('.')
+            separator_list.append(row[separator_index + 2:])
+            self.list_new_order_materials.remove(row[separator_index + 2:])
+
+        self.list_old_order_materials += separator_list
+
+        old_list = []
+        for row in self.static_list_old_order_materials:
+            separator_index = row.find('.')
+            if row[separator_index + 2:] in self.list_old_order_materials:
+                old_list.append(row)
+        self.listbox_old_order.config(listvariable=tkinter.Variable(value=old_list))
+
+        new_list = self.numbering_list(self.list_new_order_materials)
+        self.listbox_new_order.config(listvariable=tkinter.Variable(value=new_list))
+        self.list_old_order_materials.sort(key=lambda x: x_data_akt.get_all_text_materials_list().index(x))
+        self.list_new_order_materials = tuple(self.list_new_order_materials)
+        self.list_old_order_materials = tuple(self.list_old_order_materials)
+
+        # Установка полного списка материалов в новом порядке
+    def setting_new_material_order(self):
+        self.__indicator = ''
+        self.label_indicator.config(text='')
+        if len(self.list_old_order_materials) != 0:
+            self.__indicator += 'Не все материалы добавленый в новый список'
+            self.label_indicator.config(text=self.__indicator)
+        else:
+            x_data_akt.setting_complete_material_order(self.list_new_order_materials)
+            self.window.destroy()
+
+        # Нуменрация списка
+    def numbering_list(self, list_material):
+        list_selected_material = []
+        for iter in range(len(list_material)):
+            list_selected_material.append(f'{iter+1}. {list_material[iter]}')
+        return tuple(list_selected_material)
+
 
 class Window_data_base:
     def __init__(self, root, object_data_base, material_executive_documentation):
@@ -1423,15 +1631,17 @@ class Window_data_base:
         self.update_table_material()
 
         # функция для новой база данных
+
     def new_db(self):
-        path_file = tkinter.filedialog.asksaveasfilename(confirmoverwrite = True,
-                                                         defaultextension= 'db',
+        path_file = tkinter.filedialog.asksaveasfilename(confirmoverwrite=True,
+                                                         defaultextension='db',
                                                          initialfile='new_date_base_material.db',
                                                          title='Создание базы данных')
         self.__object_data_base = data_akt.connection_new_base_data(path_file, self.__object_data_base)
         self.update_table_material()
 
         # функция для загрузки база данных
+
     def load_db(self):
         path_file = tkinter.filedialog.askopenfilename(defaultextension='db',
                                                        initialfile='new_date_base_material.db',
@@ -1451,6 +1661,7 @@ class Window_data_base:
             menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
         # функции для контекстного меню столбца "ID"
+
     def menu_sorting_by_id_materials(self):
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
@@ -1475,6 +1686,7 @@ class Window_data_base:
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
         # функции для контекстного меню столбца "МАТЕРИАЛ"
+
     def menu_sorting_by_name_materials(self):
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
@@ -1490,11 +1702,12 @@ class Window_data_base:
             for el_material in self.__object_data_base.all_name_material(el_type):
                 var_material = self.material_sort[el_material]
                 list_menu_materials[-1].add_checkbutton(label=el_material, onvalue=True, offvalue=False,
-                                                    variable=var_material, command=self.switching_by_materials)
+                                                        variable=var_material, command=self.switching_by_materials)
             menu.add_cascade(label=el_type, menu=list_menu_materials[-1])
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
         # функции для контекстного меню столбца "ДОКУМЕНТЫ"
+
     def menu_sorting_by_document_name(self):
         menu = tkinter.Menu(tearoff=0)
         menu.add_command(label='Сбросить сортировку', command=self.update_table_material)
@@ -1520,6 +1733,7 @@ class Window_data_base:
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
         # функции для контекстного меню столбца "ДАТА"
+
     def menu_sorting_by_date(self):
         menu = tkinter.Menu(tearoff=0)
         menu_start_date = tkinter.Menu(tearoff=0)
@@ -1535,6 +1749,7 @@ class Window_data_base:
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
         # Сортировка материалов
+
     def sort_material(self, column_for_order=None):
         def sort_finish_date(list_data, revers):
             list_none_date = []
@@ -1574,6 +1789,7 @@ class Window_data_base:
         self.show_in_table(result)
 
         # Переключатель типа по материалу:
+
     def switching_by_materials(self):
         for key in self.type_sort:
             self.type_sort[key].set(True)
@@ -1588,6 +1804,7 @@ class Window_data_base:
         self.sort_material()
 
         # Переключение материалов по типу:
+
     def switching_by_type(self):
         for key in self.document_name_sort:
             self.document_name_sort[key].set(True)
@@ -1606,6 +1823,7 @@ class Window_data_base:
         self.sort_material()
 
         # Переключатель типа по номеру документов:
+
     def switching_by_document_number(self):
         for key in self.document_name_sort:
             self.document_name_sort[key].set(True)
@@ -1620,6 +1838,7 @@ class Window_data_base:
         self.sort_material()
 
         # Переключатель типа по наименованию документов:
+
     def switching_by_document_name(self):
         for key in self.type_sort:
             self.type_sort[key].set(True)
@@ -1638,6 +1857,7 @@ class Window_data_base:
         self.sort_material()
 
         # функция для поиска материалов в базе данных
+
     def search_materials(self, event):
         search = self.entry_search.get()
         result = self.__object_data_base.selection_materials_for_search(search)
@@ -1646,9 +1866,11 @@ class Window_data_base:
         self.show_in_table(result)
 
         # функция для добавления и изменения материала
+
     def add_material(self):
         self.__indicator = ''
         self.label_indicator.config(text=self.__indicator)
+
         def checking_deadline(start_date, finish_date):
             if start_date is None and finish_date is not None:
                 self.__indicator += 'Поле "Дата начала" не может быть пустым, если поле "Дата окончания" заполнено\n'
@@ -1695,7 +1917,7 @@ class Window_data_base:
             self.__indicator += 'Поле "Номер документа" не должно быть пустым\n'
         checking_deadline(start_date, finish_date)
 
-        if self.__indicator !='':
+        if self.__indicator != '':
             self.label_indicator.config(text=self.__indicator[:-1])
             return
 
@@ -1712,8 +1934,8 @@ class Window_data_base:
     def get_file_path_file_material(self, event):
         self.entry_file.delete(0, 'end')
         path_file_material = tkinter.filedialog.askopenfilename(defaultextension='db',
-                                                       initialfile='new_date_base_material.db',
-                                                       title='Загрузка файл документа в базу данных')
+                                                                initialfile='new_date_base_material.db',
+                                                                title='Загрузка файл документа в базу данных')
         self.entry_file.insert('end', path_file_material)
 
     # функция для просмотра файла
@@ -1848,7 +2070,7 @@ class Window_data_base:
     # вызов окна с предложением сохранить БЗ бри закрытии окна
     def close_window(self):
         result = tkinter.messagebox.askyesnocancel(title='Закрыть базу данных материалов',
-                                             message='Сохранить базу данных перед закрытием?')
+                                                   message='Сохранить базу данных перед закрытием?')
         if result:
             self.data_base_commit()
             self.data_base_close()
@@ -1865,6 +2087,7 @@ class Window_data_base:
     def data_base_close(self):
         self.__object_data_base.close_date_base()
         self.window.destroy()
+
 
 class Window_veiw_doc:
     def __init__(self, window, images):
@@ -1899,10 +2122,11 @@ class Window_veiw_doc:
         else:
             self.num_page += page
         self.label_page.config(text=f'{self.num_page}/{len(self.images)}')
-        image_tk = tkinter.PhotoImage(data=self.images[self.num_page-1])
-        #self.__window.geometry(f'{image_tk.width()}x{image_tk.height()}')
+        image_tk = tkinter.PhotoImage(data=self.images[self.num_page - 1])
+        # self.__window.geometry(f'{image_tk.width()}x{image_tk.height()}')
         self.label.config(image=image_tk)
         self.label.photo = image_tk
+
 
 if __name__ == '__main__':
     window = RootGUI()

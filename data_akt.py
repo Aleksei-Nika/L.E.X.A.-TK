@@ -45,6 +45,7 @@ class Data_Akt:
         self.__names_object = ()
         self.__organization = ()
         self.__representative = ()
+        self.__names_design_estimate_documentation = ()
         self.__materials = ()
 
     # функции для АКТОВ
@@ -195,21 +196,63 @@ class Data_Akt:
     def get_all_representatives(self):
         return self.__representative
 
+        # Добавление уникального имени ПСД (объектов) (документации) или выдача уже существующего
+    def set_unique_or_get_name_doc(self, name_doc):
+        for iter in range(len(self.__names_design_estimate_documentation)):
+            if self.__names_design_estimate_documentation[iter].get_text() == name_doc:
+                return self.__names_design_estimate_documentation[iter]
+        self.__names_design_estimate_documentation = list(self.__names_design_estimate_documentation)
+        self.__names_design_estimate_documentation.append(Object_element(name_doc, None))
+        return self.__names_design_estimate_documentation[len(self.__names_design_estimate_documentation)-1]
+
+        # Возвращение всех имён ПСД (объектов) (документации)
+    def get_all_obj_name_doc(self):
+        return self.__names_design_estimate_documentation
+
+        # Возвращение всех имён ПСД (text) (документации)
+    def get_all_texts_name_doc(self):
+        return tuple(element.get_text() for element in self.__names_design_estimate_documentation)
+
     # функции для МАТЕРИАЛОВ
-        # Добавление МАТЕРИАЛа в кортеж
-    def set_material(self, material):
+        # Добавление МАТЕРИАЛА в кортеж
+    def set_material(self, new_material, index_order=None):
         id = 0
         for el in self.get_all_id_materials():
             if el == id:
                 id += 1
-        material.set_id(id)
+        new_material.set_id(id)
         self.__materials = list(self.__materials)
-        self.__materials.append(material)
+        self.setting_order_of_material(new_material, index_order)
         self.__materials = tuple(self.__materials)
 
-        # изменение МАТЕРИАЛА в кортеже
-    def change_material(self, index):
-        pass
+        # Изменение порядкового номера МАТЕРИАЛА
+    def change_order_of_material(self, material, index_order=None):
+        self.__materials = list(self.__materials)
+        self.__materials.remove(material)
+        self.setting_order_of_material(material, index_order)
+        self.__materials = tuple(self.__materials)
+
+        # Установка порядкового номера МАТЕРИАЛА
+    def setting_order_of_material(self, material, index_order=None):
+        if index_order is not None:
+            self.__materials.insert(index_order, material)
+        else:
+            type_material = material.get_type()
+            list_materials = []
+            for old_material in self.__materials:
+                if old_material.get_type() == type_material:
+                    list_materials.append(old_material)
+            if not list_materials:
+                self.__materials.append(material)
+            else:
+                index = self.__materials.index(list_materials[-1])
+                self.__materials.insert(index+1, material)
+
+        # Установка нового порядка всех материалов
+    def setting_complete_material_order(self, order_materials):
+        self.__materials = list(self.__materials)
+        self.__materials.sort(key=lambda x: order_materials.index(x.get_in_list()))
+        self.__materials = tuple(self.__materials)
 
         # Удаление МАТЕРИАЛА в кортеже
     def delete_material(self, index):
@@ -267,12 +310,14 @@ class Data_Akt:
             if material.get_document_name() == document_name:
                 return material.get_documents_name()
 
+        # Возвращение всех материалов для таблицы
+    def get_all_text_materials_table(self):
+        return tuple(element.get_in_tabel() for element in self.__materials)
 
-    def get_all_text_materials(self):
-        list_text_materials = []
-        for text_material in self.__materials:
-            list_text_materials.append(text_material.get_in_tabel())
-        return tuple(list_text_materials)
+        # Возвращение всех материалов для списка
+    def get_all_text_materials_list(self):
+        return tuple(element.get_in_list() for element in self.__materials)
+
 
 
 class Akt:
@@ -289,7 +334,7 @@ class Akt:
         self.__another_person = None
         self.__contractor = None
         self.__work = None
-        self.__materials_of_akt = None
+        self.__materials = None
 
         self.__start_date = None
         self.__finish_date = None
@@ -382,7 +427,7 @@ class Akt:
 
     # функции для МАТЕРИАЛОВ
     def set_material_of_akt(self, material):
-        self.__materials_of_akt = material
+        self.__materials = material
 
     # функции для ДАТ
     def set_object_start_date(self, start_date):
@@ -757,7 +802,7 @@ class Date:
 
 class Material:
     def __init__(self, type=None, material=None, document_name=None, documents_name=None,
-                 document_number=None, start_date=None, finish_date=None, path_file=None):
+                 document_number=None, start_date=None, finish_date=None, path_file=None, order_number=None):
         self.__id = None
         self.__type = type
         self.__material = material
@@ -767,6 +812,7 @@ class Material:
         self.__start_date = start_date
         self.__finish_date = finish_date
         self.__bin_images = None
+        self.__order_number = None
 
     def set_id(self, id):
         self.__id = id
@@ -797,6 +843,9 @@ class Material:
 
     def set_object_finish_date(self, object_finish_date):
         self.__finish_date = object_finish_date
+
+    def set_order_number(self, order_number):
+        self.__order_number = order_number
 
     def load_bin_images(self, path_file):
         if path_file is None:
@@ -851,6 +900,9 @@ class Material:
     def get_finish_date(self):
         return self.__finish_date
 
+    def get_order_number(self):
+        return self.__order_number
+
     def get_in_tabel(self):
 
         # Проверка ВИДА материала
@@ -879,7 +931,6 @@ class Material:
                 return 'с ' + self.get_str_start_date() + ' до ' + self.get_str_finish_date()
 
         # Проверка изображения
-
         def check_images(images):
             if images is not None:
                 return '<Есть загруженный файл>'
@@ -923,6 +974,38 @@ class Material:
         # удаление изобажений
     def del_bin_images(self):
         self.__bin_images = None
+
+    def get_in_list(self):
+        # Проверка ВИДА материала
+        def check_type_and_material(type, material):
+            if type is None or type == material:
+                return material
+            else:
+                return f'{type} {material}'
+
+        # Проверка ДОКУМЕНТА материала
+        def check_data_document(document_name, document_number):
+            if document_name is None and document_number is None:
+                return ''
+            elif document_number is None:
+                return document_name
+            else:
+                return document_name + ' ' + document_number
+
+        # Проверка ДАТ ДОКУМЕНТА материала
+        def check_dates(start_date, finish_date):
+            if start_date is None:
+                return ''
+            elif finish_date is None:
+                return 'от ' + self.get_str_start_date()
+            else:
+                return 'с ' + self.get_str_start_date() + ' до ' + self.get_str_finish_date()
+
+        material = (f'{check_type_and_material(self.__type, self.__material)}' +
+                    f' {check_data_document(self.__document_name, self.__document_number)}' +
+                    f' {check_dates(self.__start_date, self.__finish_date)}')
+
+        return material
 
 
 class Data_base_materials:
