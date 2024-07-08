@@ -140,7 +140,7 @@ class RootGUI:
                                              font=("Times new roman", 12, 'bold'),
                                              justify='left',
                                              text='Застройщик, технический заказчик, лицо, ответственное за ' +
-                                                  'эксплотацию здания, сооружения,\nили региональный оператор:')
+                                                  'эксплуатацию здания, сооружения,\nили региональный оператор:')
         self.text_developer = tkinter.Text(self.frame_in_canvas,
                                            height=5,
                                            width=90,
@@ -715,6 +715,8 @@ class Window_akt:
         self.__root = root
         self.__listbox = listbox
         self.__indicator = ''
+        self.__list_text_all_materials = x_data_akt.get_all_text_materials_list()
+        self.__static_all_materials = x_data_akt.get_all_text_materials_list()
         if index is None:
             self.__index = None
             self.__name_object = None
@@ -732,6 +734,7 @@ class Window_akt:
             self.__finish_date = None
             self.__work = None
             self.__documentation = None
+            self.__list_text_materials_akt = tuple()
         else:
             self.__index = index
             self.__name_object = self.old_elements(x_data_akt.get_akt(index).get_name_object())
@@ -749,6 +752,7 @@ class Window_akt:
             self.__finish_date = x_data_akt.get_akt(index).get_str_finish_date()
             self.__work = x_data_akt.get_akt(index).get_name_work()
             self.__documentation = x_data_akt.get_akt(index).get_documentation()
+            self.__list_text_materials_akt = x_data_akt.get_akt(index).get_text_all_materials_of_akt()
 
         if action == 'новый':
             self.__action = action
@@ -909,6 +913,42 @@ class Window_akt:
         self.list_documentation[1].grid(row=1, column=2, stick='we')
         self.list_documentation[2].grid(row=1, column=3, stick='we')
 
+        self.frame_material = tkinter.LabelFrame(self.frame_window_akt, text='Материалы/Оснастка')
+        self.frame_listbox_materials_akt = tkinter.Frame(self.frame_material)
+        self.label_materials_akt = tkinter.Label(self.frame_material, text='Используемые материалы')
+        self.listbox_materials_akt = tkinter.Listbox(self.frame_listbox_materials_akt, width=75, height=10,
+                                                     selectmode='extended', )
+        # listvariable=tkinter.Variable(
+        # value=self.static_list_old_order_materials))
+        self.listbox_materials_akt_scrollbar = tkinter.Scrollbar(self.frame_listbox_materials_akt,
+                                                                 command=self.listbox_materials_akt.yview)
+        self.listbox_materials_akt.config(yscrollcommand=self.listbox_materials_akt_scrollbar.set)
+        self.listbox_materials_akt_scrollbar.pack(side='left', fill='y')
+        self.listbox_materials_akt.pack(side='right')
+        self.label_symbol = tkinter.Label(self.frame_material, text='<-')
+        self.label_all_materials = tkinter.Label(self.frame_material, text='Все материалы')
+        self.frame_listbox_all_materials = tkinter.Frame(self.frame_material)
+        self.listbox_all_materials = tkinter.Listbox(self.frame_listbox_all_materials, width=75, height=10,
+                                                     selectmode='extended',
+                                                     listvariable=tkinter.Variable(
+                                                         value=x_data_akt.get_all_text_materials_list()))
+        self.listbox_all_materials_scrollbar = tkinter.Scrollbar(self.frame_listbox_all_materials,
+                                                                 command=self.listbox_all_materials.yview)
+        self.listbox_all_materials.config(yscrollcommand=self.listbox_all_materials_scrollbar.set)
+        self.listbox_all_materials.pack(side='left')
+        self.listbox_all_materials_scrollbar.pack(side='right', fill='y')
+
+        self.listbox_all_materials.bind('<Double-ButtonPress-1>', self.transfer_to_listbox_materials_akt)
+        self.listbox_materials_akt.bind('<Double-ButtonPress-1>', self.cancellation_transfer)
+        self.listbox_all_materials.bind('<ButtonPress-3>', self.menu_listbox_all_materials)
+        self.listbox_materials_akt.bind('<ButtonPress-3>', self.menu_listbox_materials_akt)
+
+        self.label_materials_akt.grid(row=0, column=0)
+        self.frame_listbox_materials_akt.grid(row=1, column=0)
+        self.label_symbol.grid(row=0, column=1, rowspan=2, padx=5)
+        self.label_all_materials.grid(row=0, column=2)
+        self.frame_listbox_all_materials.grid(row=1, column=2)
+
         if index is not None:
             self.combobox_object.set(self.__name_object)
             self.combobox_developer.set(self.__developer)
@@ -924,12 +964,14 @@ class Window_akt:
             self.entry_start_date.insert('end', self.__start_date)
             self.entry_finish_date.insert('end', self.__finish_date)
             self.entry_work.insert('end', self.__work)
-            self.old_doc(self.__documentation)
+            self.old_doc()
+            self.old_materials()
 
-        self.frame_object.grid(row=0, column=0)
+        self.frame_object.grid(row=0, column=0, stick='we')
         self.frame_work.grid(row=1, column=0, stick='we')
         self.frame_date.grid(row=2, column=0, stick='we')
         self.frame_documentation.grid(row=3, column=0, stick='we')
+        self.frame_material.grid(row=4, column=0, stick='we')
 
         self.button_akt = tkinter.Button(self.window_create_akt, text=self.__text_button, command=self.akt)
         self.label_indicator = tkinter.Label(self.window_create_akt, foreground='red')
@@ -960,12 +1002,63 @@ class Window_akt:
             self.list_documentation[-1].grid(row=int(len(self.list_documentation) / 3), column=3, stick='we')
             self.button_add_org.grid(row=1, column=0, rowspan=int(len(self.list_documentation) / 3) + 1, stick='ns')
 
-    def old_doc(self, documentation):
-        for component in documentation:
+    def old_doc(self):
+        for component in self.__documentation:
             self.list_documentation[-3].set(self.old_elements(component.get_organization()))
             self.list_documentation[-2].set(component.get_name_doc().get_text())
             self.list_documentation[-1].insert('end', component.get_page())
             self.add_widget_from_doc()
+
+    def old_materials(self):
+        self.listbox_materials_akt.config(listvariable=tkinter.Variable(value=self.__list_text_materials_akt))
+        self.__list_text_all_materials = list(self.__list_text_all_materials)
+        for material_of_akt in self.__list_text_materials_akt:
+            self.__list_text_all_materials.remove(material_of_akt)
+        self.__list_text_all_materials = tuple(self.__list_text_all_materials)
+        self.listbox_all_materials.config(listvariable=tkinter.Variable(value=self.__list_text_all_materials))
+
+    def transfer_to_listbox_materials_akt(self, event=None):
+        self.__list_text_all_materials = list(self.__list_text_all_materials)
+        separator_list = []
+        for index_row in self.listbox_all_materials.curselection():
+            row = self.listbox_all_materials.get(index_row)
+            separator_list.append(row)
+            self.__list_text_all_materials.remove(row)
+
+        self.listbox_all_materials.config(listvariable=tkinter.Variable(value=self.__list_text_all_materials))
+        self.__list_text_materials_akt = list(self.__list_text_materials_akt) + separator_list
+        self.__list_text_materials_akt.sort(key=lambda x: self.__static_all_materials.index(x))
+        self.listbox_materials_akt.config(listvariable=tkinter.Variable(value=self.__list_text_materials_akt))
+        self.__list_text_all_materials = tuple(self.__list_text_all_materials)
+        self.__list_text_materials_akt = tuple(self.__list_text_materials_akt)
+
+    def cancellation_transfer(self, event=None):
+        self.__list_text_materials_akt = list(self.__list_text_materials_akt)
+        self.__list_text_all_materials = list(self.__list_text_all_materials)
+
+        separator_list = []
+        for index_row in self.listbox_materials_akt.curselection():
+            row = self.listbox_materials_akt.get(index_row)
+            separator_list.append(row)
+            self.__list_text_materials_akt.remove(row)
+
+        self.__list_text_all_materials += separator_list
+
+        self.__list_text_all_materials.sort(key=lambda x: x_data_akt.get_all_text_materials_list().index(x))
+        self.listbox_all_materials.config(listvariable=tkinter.Variable(value=self.__list_text_all_materials))
+        self.listbox_materials_akt.config(listvariable=tkinter.Variable(value=self.__list_text_materials_akt))
+        self.__list_text_materials_akt = tuple(self.__list_text_materials_akt)
+        self.__list_text_all_materials = tuple(self.__list_text_all_materials)
+
+    def menu_listbox_all_materials(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Добавить', command=self.transfer_to_listbox_materials_akt)
+        menu.post(self.window_create_akt.winfo_pointerx(), self.window_create_akt.winfo_pointery())
+
+    def menu_listbox_materials_akt(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Убрать', command=self.cancellation_transfer)
+        menu.post(self.window_create_akt.winfo_pointerx(), self.window_create_akt.winfo_pointery())
 
     def akt(self):
 
@@ -1020,6 +1113,16 @@ class Window_akt:
             documents_list = tuple(documents_list)
             return documents_list
 
+        # Получение кортежа выбранных материалов
+        def set_materials_object():
+            index_materials = []
+            for text_material in self.__list_text_materials_akt:
+                index_materials.append(self.__static_all_materials.index(text_material))
+            materials = []
+            for index_material in index_materials:
+                materials.append(x_data_akt.get_material(index_material))
+            return tuple(materials)
+
         # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
         self.__indicator = ''
 
@@ -1040,6 +1143,7 @@ class Window_akt:
         self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
         self.__work = self.entry_work.get()
         self.__documentation = insert_data_documentation()
+
 
         # проверка корректности введенных данный
         if self.__work == '':
@@ -1067,6 +1171,7 @@ class Window_akt:
             akt.set_object_finish_date(self.__finish_date)
             akt.set_name_work(self.__work)
             akt.set_documentation(self.__documentation)
+            akt.set_materials_of_akt(set_materials_object())
             x_data_akt.set_akt(akt)
         elif self.__action == 'изменить':
             x_data_akt.get_akt(self.__index).set_name_object(self.__name_object)
@@ -1084,6 +1189,7 @@ class Window_akt:
             x_data_akt.get_akt(self.__index).set_object_finish_date(self.__finish_date)
             x_data_akt.get_akt(self.__index).set_name_work(self.__work)
             x_data_akt.get_akt(self.__index).set_documentation(self.__documentation)
+            x_data_akt.get_akt(self.__index).set_materials_of_akt(set_materials_object())
 
         elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
         self.__listbox.config(listvariable=elements)
@@ -1239,12 +1345,14 @@ class Window_material:
         self.frame_root.pack()
 
         # Автозаполнение combobox_documents_name
+
     def corresponding_documents_name(self, event):
         documents_name = x_data_akt.get_corresponding_documents_name_materials(self.combobox_document_name.get())
         if documents_name is not None:
             self.combobox_documents_name.set(documents_name)
 
         # Функция для получения пути до файла документа
+
     def get_file_path_file_material(self, event):
         self.entry_file.delete(0, 'end')
         path_file_material = tkinter.filedialog.askopenfilename(title='Загрузка файл документа')
@@ -1373,12 +1481,14 @@ class Window_order_material:
         self.window = Toplevel(self.__root)
         self.window.title('Порядок отображения материалов')
         self.window.geometry('1000x500')
+        self.window.grab_set()
         self.frame_root = tkinter.Frame(self.window)
         self.frame_listbox_old_order = tkinter.Frame(self.frame_root)
         self.label_old_order = tkinter.Label(self.frame_root, text='Старый порядок материалов')
         self.listbox_old_order = tkinter.Listbox(self.frame_listbox_old_order, width=75, height=25,
                                                  selectmode='extended',
-                                                 listvariable=tkinter.Variable(value=self.static_list_old_order_materials))
+                                                 listvariable=tkinter.Variable(
+                                                     value=self.static_list_old_order_materials))
         self.listbox_old_order_scrollbar = tkinter.Scrollbar(self.frame_listbox_old_order,
                                                              command=self.listbox_old_order.yview)
         self.listbox_old_order.config(yscrollcommand=self.listbox_old_order_scrollbar.set)
@@ -1427,14 +1537,15 @@ class Window_order_material:
         menu.post(self.window.winfo_pointerx(), self.window.winfo_pointery())
 
         # Перемещение Материалов из сторого списка в новый
+
     def transfer_to_listbox_new_order(self, event=None):
         self.list_old_order_materials = list(self.list_old_order_materials)
         separator_list = []
         for index_row in self.listbox_old_order.curselection():
             row = self.listbox_old_order.get(index_row)
             separator_index = row.find('.')
-            separator_list.append(row[separator_index+2:])
-            self.list_old_order_materials.remove(row[separator_index+2:])
+            separator_list.append(row[separator_index + 2:])
+            self.list_old_order_materials.remove(row[separator_index + 2:])
 
         old_list = []
         for row in self.static_list_old_order_materials:
@@ -1449,6 +1560,7 @@ class Window_order_material:
         self.list_old_order_materials = tuple(self.list_old_order_materials)
 
         # Отмена перемещения материала в новый список
+
     def cancellation_transfer(self, event=None):
         self.list_new_order_materials = list(self.list_new_order_materials)
         self.list_old_order_materials = list(self.list_old_order_materials)
@@ -1476,6 +1588,7 @@ class Window_order_material:
         self.list_old_order_materials = tuple(self.list_old_order_materials)
 
         # Установка полного списка материалов в новом порядке
+
     def setting_new_material_order(self):
         self.__indicator = ''
         self.label_indicator.config(text='')
@@ -1487,10 +1600,11 @@ class Window_order_material:
             self.window.destroy()
 
         # Нуменрация списка
+
     def numbering_list(self, list_material):
         list_selected_material = []
         for iter in range(len(list_material)):
-            list_selected_material.append(f'{iter+1}. {list_material[iter]}')
+            list_selected_material.append(f'{iter + 1}. {list_material[iter]}')
         return tuple(list_selected_material)
 
 

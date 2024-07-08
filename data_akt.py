@@ -319,7 +319,6 @@ class Data_Akt:
         return tuple(element.get_in_list() for element in self.__materials)
 
 
-
 class Akt:
     def __init__(self):
         self.__name_object = None
@@ -334,7 +333,7 @@ class Akt:
         self.__another_person = None
         self.__contractor = None
         self.__work = None
-        self.__materials = None
+        self.__materials = ()
 
         self.__start_date = None
         self.__finish_date = None
@@ -426,8 +425,22 @@ class Akt:
         return self.__work
 
     # функции для МАТЕРИАЛОВ
+    def set_materials_of_akt(self, materials):
+        self.__materials = materials
+
     def set_material_of_akt(self, material):
-        self.__materials = material
+        self.__materials = list(self.__materials)
+        self.__materials.append(material)
+        self.__materials = tuple(self.__materials)
+
+    def get_all_materials_of_akt(self):
+        return self.__materials
+
+    def get_material_of_akt(self, index_material):
+        return self.__materials[index_material]
+
+    def get_text_all_materials_of_akt(self):
+        return tuple(element.get_in_list() for element in self.__materials)
 
     # функции для ДАТ
     def set_object_start_date(self, start_date):
