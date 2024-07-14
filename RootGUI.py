@@ -16,6 +16,8 @@ class RootGUI:
         self.root.geometry('700x700')
         # self.root.geometry(f'{self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}')
 
+        self.root.bind('<Control-KeyPress>', key_rus)
+
         # Создание МЕНЮ
         self.main_menu = tkinter.Menu(self.root)
         self.root.config(menu=self.main_menu)
@@ -342,7 +344,7 @@ class RootGUI:
         self.notebook.add(self.frame_material, text='Материалы')
 
         # Создание группы виджетов РАБОТА С МАТЕРИАЛАМИ
-        self.frame_materials_of_akt = ttk.LabelFrame(self.frame_material, text='Используемые материалы')
+        self.frame_materials_of_akt = ttk.LabelFrame(self.frame_material, text='Материалы')
         self.frame_table_materials = tkinter.Frame(self.frame_materials_of_akt)
         self.table_material = ttk.Treeview(self.frame_table_materials,
                                            columns=('id', 'type', 'material', 'document', 'date', 'file'),
@@ -377,6 +379,36 @@ class RootGUI:
         self.frame_base_data.pack()
         self.entry_base_data.pack(side='left')
         self.button_base_data.pack(side='right', fill='y')
+
+        # Создание вкладки ДОКУМЕНТЫ
+        self.frame_document = tkinter.Frame(self.root)
+        self.frame_document.pack()
+        self.notebook.add(self.frame_document, text='Документы')
+
+        # Создание группы виджетов РАБОТА С МАТЕРИАЛАМИ
+        self.frame_documents_of_akt = ttk.LabelFrame(self.frame_document, text='Документы соответствия работ')
+        self.frame_table_documents = tkinter.Frame(self.frame_documents_of_akt)
+        self.table_document = ttk.Treeview(self.frame_table_documents,
+                                           columns=('id', 'document', 'date', 'file'),
+                                           show='headings',
+                                           height=5)
+        self.table_document_scrollbar = ttk.Scrollbar(self.frame_table_documents, orient='vertical',
+                                                      command=self.table_document.yview)
+        self.table_document.config(yscrollcommand=self.table_material_scrollbar.set)
+        self.table_document.heading('id', text='id')
+        self.table_document.heading('document', text='Документ')
+        self.table_document.heading('date', text='Дата')
+        self.table_document.heading('file', text='Изображения')
+        self.table_document.column('#1', width=30)
+        self.table_document.column('#2', width=100)
+        self.table_document.column('#3', width=300)
+        self.table_document.column('#4', width=300)
+        self.table_document.bind('<Button-3>', self.menu_table_document)
+
+        self.frame_documents_of_akt.pack()
+        self.frame_table_documents.pack()
+        self.table_document_scrollbar.pack(side='right', fill='y')
+        self.table_document.pack(side='left')
 
         self.root.mainloop()
 
@@ -543,11 +575,11 @@ class RootGUI:
             menu.add_command(label='Изменить', command=self.change_material)
             menu.add_command(label='Удалить', command=self.delete_material)
             menu.add_separator()
-            menu.add_command(label='Просмотр документа', command=self.view_file)
-            menu.add_command(label='Удаление документа', command=self.del_file)
+            menu.add_command(label='Просмотр документа', command=self.view_file_material)
+            menu.add_command(label='Удаление документа', command=self.del_file_material)
         menu.post(event.x_root, event.y_root)
 
-    def view_file(self):
+    def view_file_material(self):
         line = self.table_material.selection()[0]
         id = self.table_material.item(line)['values'][0]
         index_material = x_data_akt.get_all_id_materials().index(id)
@@ -557,7 +589,7 @@ class RootGUI:
         else:
             return None
 
-    def del_file(self):
+    def del_file_material(self):
         for line in self.table_material.selection():
             id = self.table_material.item(line)['values'][0]
             index_material = x_data_akt.get_all_id_materials().index(id)
@@ -571,7 +603,7 @@ class RootGUI:
         print(self.table_material.selection())
 
     def order_material(self):
-        window = Window_order_material(self.root)
+        window = Window_order_material(self.root, x_data_akt.get_all_text_materials_list(), 'material')
 
     def change_material(self):
         line = self.table_material.selection()[0]
@@ -608,6 +640,54 @@ class RootGUI:
         self.file_db = tkinter.filedialog.askopenfilename(defaultextension='db')
         self.entry_base_data.insert('end', self.file_db)
 
+    # функции меню для таблицы документов
+    def menu_table_document(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Cоздать новый', command=self.create_document)
+        menu.add_command(label='Установить порядок материалов', command=self.order_document)
+        if self.table_document.selection() != ():
+            menu.add_command(label='Изменить', command=self.change_document)
+            menu.add_command(label='Удалить', command=self.delete_document)
+            menu.add_separator()
+            menu.add_command(label='Просмотр документа', command=self.view_file_document)
+            menu.add_command(label='Удаление документа', command=self.del_file_document)
+        menu.post(event.x_root, event.y_root)
+
+    def create_document(self):
+        window = Window_document(self.root, self.table_document)
+
+    def order_document(self):
+        window = Window_order_material(self.root, x_data_akt.get_all_text_documents_list(), 'document')
+
+    def change_document(self):
+        line = self.table_document.selection()[0]
+        id = self.table_document.item(line)['values'][0]
+        index_documents = x_data_akt.get_all_id_documents().index(id)
+        window = Window_document(self.root, self.table_document, index_documents, line)
+
+    def delete_document(self):
+        for line in self.table_document.selection():
+            id = self.table_document.item(line)['values'][0]
+            x_data_akt.delete_document(x_data_akt.get_all_id_documents().index(id))
+            self.table_document.delete(line)
+
+    def view_file_document(self):
+        line = self.table_document.selection()[0]
+        id = self.table_document.item(line)['values'][0]
+        index_document = x_data_akt.get_all_id_documents().index(id)
+        images = x_data_akt.get_document(index_document).get_bin_images()
+        if images is not None:
+            window = Window_veiw_doc(self.root, images)
+        else:
+            return None
+
+    def del_file_document(self):
+        for line in self.table_document.selection():
+            id = self.table_document.item(line)['values'][0]
+            index_document = x_data_akt.get_all_id_documents().index(id)
+            x_data_akt.get_document(index_document).del_bin_images()
+            self.table_document.set(line, 3, '<Файл не загружен>')
+
 
 class Window_object_element:
     def __init__(self, root, listbox, type_element, index=None):
@@ -628,6 +708,8 @@ class Window_object_element:
         self.window.title('Данные об объекте')
         self.window.geometry('500x500')
         self.window.grab_set()
+
+        self.__root.bind('<Control-KeyPress>', key_rus)
 
         self.frame = tkinter.Frame(self.window)
         self.label = tkinter.Label(self.frame, text='Введите информацию')
@@ -717,6 +799,8 @@ class Window_akt:
         self.__indicator = ''
         self.__list_text_all_materials = x_data_akt.get_all_text_materials_list()
         self.__static_all_materials = x_data_akt.get_all_text_materials_list()
+        self.__list_text_all_documents = x_data_akt.get_all_text_documents_list()
+        self.__static_all_documents = x_data_akt.get_all_text_documents_list()
         if index is None:
             self.__index = None
             self.__name_object = None
@@ -735,6 +819,7 @@ class Window_akt:
             self.__work = None
             self.__documentation = None
             self.__list_text_materials_akt = tuple()
+            self.__list_text_documents_akt = tuple()
         else:
             self.__index = index
             self.__name_object = self.old_elements(x_data_akt.get_akt(index).get_name_object())
@@ -753,6 +838,7 @@ class Window_akt:
             self.__work = x_data_akt.get_akt(index).get_name_work()
             self.__documentation = x_data_akt.get_akt(index).get_documentation()
             self.__list_text_materials_akt = x_data_akt.get_akt(index).get_text_all_materials_of_akt()
+            self.__list_text_documents_akt = x_data_akt.get_akt(index).get_text_all_documents_of_akt()
 
         if action == 'новый':
             self.__action = action
@@ -772,6 +858,7 @@ class Window_akt:
         self.window_create_akt.geometry('700x900')
         self.window_create_akt.grab_set()
         self.frame_window_akt = tkinter.Frame(self.window_create_akt)
+        self.window_create_akt.bind('<Control-KeyPress>', key_rus)
 
         self.frame_object = tkinter.LabelFrame(self.frame_window_akt, text='Объект, организации, представители')
         self.label_object = tkinter.Label(self.frame_object, text='Выберите наименование объекта')
@@ -891,6 +978,7 @@ class Window_akt:
         self.label_finis_date = tkinter.Label(self.frame_date, text='Окончание работ:')
         self.label_finis_date.pack(side='right')
 
+        # группа виджетов ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
         self.frame_documentation = tkinter.LabelFrame(self.frame_window_akt, text='Проектно-сметная документация')
         self.label_org = tkinter.Label(self.frame_documentation, text='Организация')
         self.label_doc = tkinter.Label(self.frame_documentation, text='Наименование документация')
@@ -913,19 +1001,18 @@ class Window_akt:
         self.list_documentation[1].grid(row=1, column=2, stick='we')
         self.list_documentation[2].grid(row=1, column=3, stick='we')
 
+        # группа виджетов МАТЕРИАЛЫ
         self.frame_material = tkinter.LabelFrame(self.frame_window_akt, text='Материалы/Оснастка')
         self.frame_listbox_materials_akt = tkinter.Frame(self.frame_material)
         self.label_materials_akt = tkinter.Label(self.frame_material, text='Используемые материалы')
         self.listbox_materials_akt = tkinter.Listbox(self.frame_listbox_materials_akt, width=75, height=10,
-                                                     selectmode='extended', )
-        # listvariable=tkinter.Variable(
-        # value=self.static_list_old_order_materials))
+                                                     selectmode='extended')
         self.listbox_materials_akt_scrollbar = tkinter.Scrollbar(self.frame_listbox_materials_akt,
                                                                  command=self.listbox_materials_akt.yview)
         self.listbox_materials_akt.config(yscrollcommand=self.listbox_materials_akt_scrollbar.set)
         self.listbox_materials_akt_scrollbar.pack(side='left', fill='y')
         self.listbox_materials_akt.pack(side='right')
-        self.label_symbol = tkinter.Label(self.frame_material, text='<-')
+        self.label_symbol_document = tkinter.Label(self.frame_material, text='<-')
         self.label_all_materials = tkinter.Label(self.frame_material, text='Все материалы')
         self.frame_listbox_all_materials = tkinter.Frame(self.frame_material)
         self.listbox_all_materials = tkinter.Listbox(self.frame_listbox_all_materials, width=75, height=10,
@@ -939,15 +1026,50 @@ class Window_akt:
         self.listbox_all_materials_scrollbar.pack(side='right', fill='y')
 
         self.listbox_all_materials.bind('<Double-ButtonPress-1>', self.transfer_to_listbox_materials_akt)
-        self.listbox_materials_akt.bind('<Double-ButtonPress-1>', self.cancellation_transfer)
+        self.listbox_materials_akt.bind('<Double-ButtonPress-1>', self.cancellation_transfer_materials)
         self.listbox_all_materials.bind('<ButtonPress-3>', self.menu_listbox_all_materials)
         self.listbox_materials_akt.bind('<ButtonPress-3>', self.menu_listbox_materials_akt)
 
         self.label_materials_akt.grid(row=0, column=0)
         self.frame_listbox_materials_akt.grid(row=1, column=0)
-        self.label_symbol.grid(row=0, column=1, rowspan=2, padx=5)
+        self.label_symbol_document.grid(row=0, column=1, rowspan=2, padx=5)
         self.label_all_materials.grid(row=0, column=2)
         self.frame_listbox_all_materials.grid(row=1, column=2)
+
+        # группа виджетов ДОКУМЕНТЫ СООТВЕТСТВИЯ
+        self.frame_document = tkinter.LabelFrame(self.frame_window_akt, text='Документы соответствия работ')
+        self.frame_listbox_documents_akt = tkinter.Frame(self.frame_document)
+        self.label_documents_akt = tkinter.Label(self.frame_document, text='Документы соответствия работ акта')
+        self.listbox_documents_akt = tkinter.Listbox(self.frame_listbox_documents_akt, width=75, height=10,
+                                                     selectmode='extended')
+        self.listbox_documents_akt_scrollbar = tkinter.Scrollbar(self.frame_listbox_documents_akt,
+                                                                 command=self.listbox_documents_akt.yview)
+        self.listbox_documents_akt.config(yscrollcommand=self.listbox_documents_akt_scrollbar.set)
+        self.listbox_documents_akt_scrollbar.pack(side='left', fill='y')
+        self.listbox_documents_akt.pack(side='right')
+        self.label_symbol_document = tkinter.Label(self.frame_document, text='<-')
+        self.label_all_documents = tkinter.Label(self.frame_document, text='Все документы соответствия работ')
+        self.frame_listbox_all_documents = tkinter.Frame(self.frame_document)
+        self.listbox_all_documents = tkinter.Listbox(self.frame_listbox_all_documents, width=75, height=10,
+                                                     selectmode='extended',
+                                                     listvariable=tkinter.Variable(
+                                                         value=x_data_akt.get_all_text_documents_list()))
+        self.listbox_all_documents_scrollbar = tkinter.Scrollbar(self.frame_listbox_all_documents,
+                                                                 command=self.listbox_all_documents.yview)
+        self.listbox_all_documents.config(yscrollcommand=self.listbox_all_documents_scrollbar.set)
+        self.listbox_all_documents.pack(side='left')
+        self.listbox_all_documents_scrollbar.pack(side='right', fill='y')
+
+        self.listbox_all_documents.bind('<Double-ButtonPress-1>', self.transfer_to_listbox_documents_akt)
+        self.listbox_documents_akt.bind('<Double-ButtonPress-1>', self.cancellation_transfer_documents)
+        self.listbox_all_documents.bind('<ButtonPress-3>', self.menu_listbox_all_documents)
+        self.listbox_documents_akt.bind('<ButtonPress-3>', self.menu_listbox_documents_akt)
+
+        self.label_documents_akt.grid(row=0, column=0)
+        self.frame_listbox_documents_akt.grid(row=1, column=0)
+        self.label_symbol_document.grid(row=0, column=1, rowspan=2, padx=5)
+        self.label_all_documents.grid(row=0, column=2)
+        self.frame_listbox_all_documents.grid(row=1, column=2)
 
         if index is not None:
             self.combobox_object.set(self.__name_object)
@@ -966,12 +1088,14 @@ class Window_akt:
             self.entry_work.insert('end', self.__work)
             self.old_doc()
             self.old_materials()
+            self.old_documents()
 
         self.frame_object.grid(row=0, column=0, stick='we')
         self.frame_work.grid(row=1, column=0, stick='we')
         self.frame_date.grid(row=2, column=0, stick='we')
         self.frame_documentation.grid(row=3, column=0, stick='we')
         self.frame_material.grid(row=4, column=0, stick='we')
+        self.frame_document.grid(row=5, column=0, stick='we')
 
         self.button_akt = tkinter.Button(self.window_create_akt, text=self.__text_button, command=self.akt)
         self.label_indicator = tkinter.Label(self.window_create_akt, foreground='red')
@@ -1017,6 +1141,14 @@ class Window_akt:
         self.__list_text_all_materials = tuple(self.__list_text_all_materials)
         self.listbox_all_materials.config(listvariable=tkinter.Variable(value=self.__list_text_all_materials))
 
+    def old_documents(self):
+        self.listbox_documents_akt.config(listvariable=tkinter.Variable(value=self.__list_text_documents_akt))
+        self.__list_text_all_documents = list(self.__list_text_all_documents)
+        for document_of_akt in self.__list_text_documents_akt:
+            self.__list_text_all_documents.remove(document_of_akt)
+        self.__list_text_all_documents = tuple(self.__list_text_all_documents)
+        self.listbox_all_documents.config(listvariable=tkinter.Variable(value=self.__list_text_all_documents))
+
     def transfer_to_listbox_materials_akt(self, event=None):
         self.__list_text_all_materials = list(self.__list_text_all_materials)
         separator_list = []
@@ -1032,7 +1164,7 @@ class Window_akt:
         self.__list_text_all_materials = tuple(self.__list_text_all_materials)
         self.__list_text_materials_akt = tuple(self.__list_text_materials_akt)
 
-    def cancellation_transfer(self, event=None):
+    def cancellation_transfer_materials(self, event=None):
         self.__list_text_materials_akt = list(self.__list_text_materials_akt)
         self.__list_text_all_materials = list(self.__list_text_all_materials)
 
@@ -1057,7 +1189,50 @@ class Window_akt:
 
     def menu_listbox_materials_akt(self, event):
         menu = tkinter.Menu(tearoff=0)
-        menu.add_command(label='Убрать', command=self.cancellation_transfer)
+        menu.add_command(label='Убрать', command=self.cancellation_transfer_materials)
+        menu.post(self.window_create_akt.winfo_pointerx(), self.window_create_akt.winfo_pointery())
+
+    def transfer_to_listbox_documents_akt(self, event=None):
+        self.__list_text_all_documents = list(self.__list_text_all_documents)
+        separator_list = []
+        for index_row in self.listbox_all_documents.curselection():
+            row = self.listbox_all_documents.get(index_row)
+            separator_list.append(row)
+            self.__list_text_all_documents.remove(row)
+
+        self.listbox_all_documents.config(listvariable=tkinter.Variable(value=self.__list_text_all_documents))
+        self.__list_text_documents_akt = list(self.__list_text_documents_akt) + separator_list
+        self.__list_text_documents_akt.sort(key=lambda x: self.__static_all_documents.index(x))
+        self.listbox_documents_akt.config(listvariable=tkinter.Variable(value=self.__list_text_documents_akt))
+        self.__list_text_all_documents = tuple(self.__list_text_all_documents)
+        self.__list_text_documents_akt = tuple(self.__list_text_documents_akt)
+
+    def cancellation_transfer_documents(self, event=None):
+        self.__list_text_documents_akt = list(self.__list_text_documents_akt)
+        self.__list_text_all_documents = list(self.__list_text_all_documents)
+
+        separator_list = []
+        for index_row in self.listbox_documents_akt.curselection():
+            row = self.listbox_documents_akt.get(index_row)
+            separator_list.append(row)
+            self.__list_text_documents_akt.remove(row)
+
+        self.__list_text_all_documents += separator_list
+
+        self.__list_text_all_documents.sort(key=lambda x: x_data_akt.get_all_text_documents_list().index(x))
+        self.listbox_all_documents.config(listvariable=tkinter.Variable(value=self.__list_text_all_documents))
+        self.listbox_documents_akt.config(listvariable=tkinter.Variable(value=self.__list_text_documents_akt))
+        self.__list_text_documents_akt = tuple(self.__list_text_documents_akt)
+        self.__list_text_all_documents = tuple(self.__list_text_all_documents)
+
+    def menu_listbox_all_documents(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Добавить', command=self.transfer_to_listbox_documents_akt)
+        menu.post(self.window_create_akt.winfo_pointerx(), self.window_create_akt.winfo_pointery())
+
+    def menu_listbox_documents_akt(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Убрать', command=self.cancellation_transfer_documents)
         menu.post(self.window_create_akt.winfo_pointerx(), self.window_create_akt.winfo_pointery())
 
     def akt(self):
@@ -1123,6 +1298,15 @@ class Window_akt:
                 materials.append(x_data_akt.get_material(index_material))
             return tuple(materials)
 
+        def set_documents_object():
+            index_documents = []
+            for text_document in self.__list_text_documents_akt:
+                index_documents.append(self.__static_all_documents.index(text_document))
+            documents = []
+            for index_document in index_documents:
+                documents.append(x_data_akt.get_document(index_document))
+            return tuple(documents)
+
         # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
         self.__indicator = ''
 
@@ -1143,7 +1327,6 @@ class Window_akt:
         self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
         self.__work = self.entry_work.get()
         self.__documentation = insert_data_documentation()
-
 
         # проверка корректности введенных данный
         if self.__work == '':
@@ -1172,6 +1355,7 @@ class Window_akt:
             akt.set_name_work(self.__work)
             akt.set_documentation(self.__documentation)
             akt.set_materials_of_akt(set_materials_object())
+            akt.set_documents_of_akt(set_documents_object())
             x_data_akt.set_akt(akt)
         elif self.__action == 'изменить':
             x_data_akt.get_akt(self.__index).set_name_object(self.__name_object)
@@ -1190,6 +1374,7 @@ class Window_akt:
             x_data_akt.get_akt(self.__index).set_name_work(self.__work)
             x_data_akt.get_akt(self.__index).set_documentation(self.__documentation)
             x_data_akt.get_akt(self.__index).set_materials_of_akt(set_materials_object())
+            x_data_akt.get_akt(self.__index).set_documents_of_akt(set_documents_object())
 
         elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
         self.__listbox.config(listvariable=elements)
@@ -1236,6 +1421,7 @@ class Window_material:
         self.window.title(self.__heading)
         self.window.geometry('500x500')
         self.window.grab_set()
+        self.window.bind('<Control-KeyPress>', key_rus)
 
         self.frame_root = tkinter.Frame(self.window)
         self.frame_material = ttk.LabelFrame(self.frame_root, text='Данные о материале')
@@ -1290,7 +1476,6 @@ class Window_material:
         else:
             combobox_var = ['поставить последним материалом этого типа']
             combobox_var += list(range(1, numbers_order + 2))
-            # combobox_var = combobox_var + [numbers_order] + [numbers_order+1]
         self.combobox_order_material = ttk.Combobox(self.frame_order_material, width=61,
                                                     values=combobox_var)
         self.combobox_order_material.set(self.__order_material)
@@ -1345,27 +1530,23 @@ class Window_material:
         self.frame_root.pack()
 
         # Автозаполнение combobox_documents_name
-
     def corresponding_documents_name(self, event):
         documents_name = x_data_akt.get_corresponding_documents_name_materials(self.combobox_document_name.get())
         if documents_name is not None:
             self.combobox_documents_name.set(documents_name)
 
         # Функция для получения пути до файла документа
-
     def get_file_path_file_material(self, event):
         self.entry_file.delete(0, 'end')
         path_file_material = tkinter.filedialog.askopenfilename(title='Загрузка файл документа')
         self.entry_file.insert('end', path_file_material)
 
         # Функции для установки значения в combobox порядка материалов
-
     def setting_combobox_order_material(self, event):
         index_order = self.listbox_order_material.curselection()[0]
         self.combobox_order_material.set(index_order + 1)
 
         # Функция для выделения материала в listbox порядка материалов
-
     def setting_listbox_order_material(self, event):
         index_order = self.combobox_order_material.get()
         if index_order != 'поставить в конец списка' and index_order != 'поставить последним материалом этого типа':
@@ -1470,21 +1651,23 @@ class Window_material:
 
 
 class Window_order_material:
-    def __init__(self, root):
+    def __init__(self, root, list_old_order, subject_of_order):
         self.__root = root
 
-        self.list_old_order_materials = x_data_akt.get_all_text_materials_list()
-        self.static_list_old_order_materials = self.numbering_list(x_data_akt.get_all_text_materials_list())
+        self.list_old_order_materials = list_old_order
+        self.static_list_old_order_materials = self.numbering_list(list_old_order)
         self.list_new_order_materials = tuple()
+        self.subject_of_order = subject_of_order
         self.__indicator = ''
 
         self.window = Toplevel(self.__root)
-        self.window.title('Порядок отображения материалов')
+        self.window.title('Порядок отображения позиций')
         self.window.geometry('1000x500')
         self.window.grab_set()
+        self.window.bind('<Control-KeyPress>', key_rus)
         self.frame_root = tkinter.Frame(self.window)
         self.frame_listbox_old_order = tkinter.Frame(self.frame_root)
-        self.label_old_order = tkinter.Label(self.frame_root, text='Старый порядок материалов')
+        self.label_old_order = tkinter.Label(self.frame_root, text='Старый порядок позиций')
         self.listbox_old_order = tkinter.Listbox(self.frame_listbox_old_order, width=75, height=25,
                                                  selectmode='extended',
                                                  listvariable=tkinter.Variable(
@@ -1497,7 +1680,7 @@ class Window_order_material:
 
         self.label_symbol = tkinter.Label(self.frame_root, text='->')
 
-        self.label_new_order = tkinter.Label(self.frame_root, text='Новый порядок материалов')
+        self.label_new_order = tkinter.Label(self.frame_root, text='Новый порядок позиций')
         self.frame_listbox_new_order = tkinter.Frame(self.frame_root)
         self.listbox_new_order = tkinter.Listbox(self.frame_listbox_new_order, width=75, height=25,
                                                  selectmode='extended')
@@ -1507,7 +1690,7 @@ class Window_order_material:
         self.listbox_new_order.pack(side='left')
         self.listbox_new_order_scrollbar.pack(side='right', fill='y')
 
-        self.button_setting_order = tkinter.Button(self.window, text='Установить новый порядок материалов',
+        self.button_setting_order = tkinter.Button(self.window, text='Установить новый порядок позиций',
                                                    command=self.setting_new_material_order)
         self.label_indicator = tkinter.Label(self.window, foreground='red')
 
@@ -1593,11 +1776,14 @@ class Window_order_material:
         self.__indicator = ''
         self.label_indicator.config(text='')
         if len(self.list_old_order_materials) != 0:
-            self.__indicator += 'Не все материалы добавленый в новый список'
+            self.__indicator += 'Не все позиции добавленый в новый список'
             self.label_indicator.config(text=self.__indicator)
-        else:
+            return
+        if self.subject_of_order == 'material':
             x_data_akt.setting_complete_material_order(self.list_new_order_materials)
-            self.window.destroy()
+        elif self.subject_of_order == 'document':
+            x_data_akt.setting_complete_document_order(self.list_new_order_materials)
+        self.window.destroy()
 
         # Нуменрация списка
 
@@ -1619,6 +1805,7 @@ class Window_data_base:
         self.window.title('База данный материалов')
         self.window.geometry('500x500')
         self.window.grab_set()
+        self.window.bind('<Control-KeyPress>', key_rus)
         self.window.protocol("WM_DELETE_WINDOW", self.close_window)
 
         # МЕНЮ окна
@@ -2207,6 +2394,7 @@ class Window_veiw_doc:
     def __init__(self, window, images):
         self.__window = Toplevel(window)
         self.__window.geometry('700x900')
+        self.__window.bind('<Control-KeyPress>', key_rus)
         self.images = images
         self.num_page = 1
         self.frame_page = tkinter.Frame(self.__window)
@@ -2241,6 +2429,256 @@ class Window_veiw_doc:
         self.label.config(image=image_tk)
         self.label.photo = image_tk
 
+
+class Window_document:
+    def __init__(self, root, table, index=None, item=None):
+        self.__root = root
+        self.__table = table
+        self.__indicator = ''
+        if index is None:
+            self.__index = None
+            self.__document_name = None
+            self.__documents_name = None
+            self.__document_number = None
+            self.__start_date = None
+            self.__finish_date = None
+            self.__file = None
+            self.__order_document = 'поставить в конец списка'
+            self.__heading = 'Добавление документа'
+            self.__text_button = 'Добавить документ'
+        else:
+            self.__index = index
+            self.__item = item
+            self.__document_name = x_data_akt.get_document(index).get_document_name()
+            self.__documents_name = x_data_akt.get_document(index).get_documents_name()
+            self.__document_number = x_data_akt.get_document(index).get_document_number()
+            self.__start_date = x_data_akt.get_document(index).get_str_start_date()
+            self.__finish_date = x_data_akt.get_document(index).get_str_finish_date()
+            if x_data_akt.get_document(index).get_bin_images() is None:
+                self.__file = '<Файл не загружен>'
+            else:
+                self.__file = '<Есть загруженный файл>'
+            self.__order_document = index + 1
+            self.__heading = 'Изменение документа'
+            self.__text_button = 'Изменить документ'
+
+        self.window = Toplevel(self.__root)
+        self.window.title(self.__heading)
+        self.window.geometry('500x500')
+        self.window.grab_set()
+        self.window.bind('<Control-KeyPress>', key_rus)
+
+        self.frame_root = tkinter.Frame(self.window)
+        self.frame_document = ttk.LabelFrame(self.frame_root, text='Данные о документе')
+        self.label_document_name = tkinter.Label(self.frame_document, text='Наименование документа')
+        self.combobox_document_name = ttk.Combobox(self.frame_document,
+                                                   width=35,
+                                                   values=x_data_akt.get_all_unique_document_names_documents())
+        self.label_documents_name = tkinter.Label(self.frame_document, text='Наименование документов')
+        self.combobox_documents_name = ttk.Combobox(self.frame_document,
+                                                    width=35,
+                                                    values=x_data_akt.get_all_unique_documents_names_documents())
+        self.label_document_number = tkinter.Label(self.frame_document, text='Номер документа')
+        self.entry_document_number = tkinter.Entry(self.frame_document, width=35)
+        self.label_start_date = tkinter.Label(self.frame_document, text='Дата начала')
+        self.entry_start_date = tkinter.Entry(self.frame_document, width=35)
+        self.label_finish_date = tkinter.Label(self.frame_document, text='Дата окончания')
+        self.entry_finish_date = tkinter.Entry(self.frame_document, width=35)
+        self.label_file = tkinter.Label(self.frame_document, text='Файл документа')
+        self.entry_file = tkinter.Entry(self.frame_document, width=35)
+
+        self.label_document_name.grid(row=0, column=0, stick='we', sticky='e')
+        self.label_documents_name.grid(row=1, column=0, stick='we', sticky='e')
+        self.label_document_number.grid(row=2, column=0, stick='we', sticky='e')
+        self.label_start_date.grid(row=3, column=0, stick='we', sticky='e')
+        self.label_finish_date.grid(row=4, column=0, stick='we', sticky='e')
+        self.label_file.grid(row=5, column=0, stick='we', sticky='e')
+
+        self.combobox_document_name.grid(row=0, column=1, stick='we')
+        self.combobox_documents_name.grid(row=1, column=1, stick='we')
+        self.entry_document_number.grid(row=2, column=1, stick='we')
+        self.entry_start_date.grid(row=3, column=1, stick='we')
+        self.entry_finish_date.grid(row=4, column=1, stick='we')
+        self.entry_file.grid(row=5, column=1, stick='we')
+
+        self.frame_order_document = ttk.LabelFrame(self.frame_root, text='Порядок документов')
+
+        numbers_order = len(x_data_akt.get_all_text_materials_list())
+        if numbers_order == 0:
+            combobox_var = tuple(['поставить в конец списка'])
+        else:
+            combobox_var = ['поставить последним документом этого наименования']
+            combobox_var += list(range(1, numbers_order + 2))
+        self.combobox_order_document = ttk.Combobox(self.frame_order_document, width=61,
+                                                    values=combobox_var)
+        self.combobox_order_document.set(self.__order_document)
+        languages_var = []
+        for iteration in range(len(x_data_akt.get_all_text_documents_list())):
+            languages_var.append(f'{iteration + 1}. {x_data_akt.get_all_text_documents_list()[iteration]}')
+        languages_var.append(f'{len(x_data_akt.get_all_text_documents_list()) + 1}. в конце списка')
+        languages_var = tkinter.Variable(value=languages_var)
+        self.frame_listbox = tkinter.Frame(self.frame_order_document)
+        self.listbox_order_document = tkinter.Listbox(self.frame_listbox, width=61,
+                                                      listvariable=languages_var)
+        self.listbox_order_document_scrollbar = tkinter.Scrollbar(self.frame_listbox,
+                                                                  command=self.listbox_order_document.yview)
+        self.listbox_order_document.config(yscrollcommand=self.listbox_order_document_scrollbar.set)
+
+        self.combobox_order_document.grid(row=0, column=0)
+        self.frame_listbox.grid(row=1, column=0)
+        self.listbox_order_document.pack(side='left')
+        self.listbox_order_document_scrollbar.pack(side='right', fill='y')
+
+        self.combobox_document_name.bind('<FocusOut>', self.corresponding_documents_name)
+        self.entry_file.bind('<Double-ButtonPress-3>', self.get_file_path_file_document)
+        self.listbox_order_document.bind('<<ListboxSelect>>', self.setting_combobox_order_document)
+        self.combobox_order_document.bind('<<ComboboxSelected>>', self.setting_listbox_order_document)
+
+        if self.__index is not None:
+            self.combobox_document_name.set(self.__document_name if self.__document_name is not None else '')
+            self.combobox_documents_name.set(self.__documents_name if self.__documents_name is not None else '')
+            self.entry_document_number.insert('end',
+                                              self.__document_number if self.__document_number is not None else '')
+            self.entry_start_date.insert('end', self.__start_date if self.__start_date is not None else '')
+            self.entry_finish_date.insert('end', self.__finish_date if self.__finish_date is not None else '')
+            self.entry_file.insert('end', self.__file)
+
+        self.frame_indicator_and_button = tkinter.Frame(self.frame_root)
+        self.button_material = tkinter.Button(self.frame_indicator_and_button, text=self.__text_button,
+                                              command=self.document)
+        self.label_indicator = tkinter.Label(self.frame_indicator_and_button, foreground='red')
+
+        self.button_material.pack()
+        self.label_indicator.pack()
+
+        self.frame_document.grid(row=0, column=0, sticky='n')
+        self.frame_order_document.grid(row=1, column=0)
+        self.frame_indicator_and_button.grid(row=2, column=0)
+
+        self.frame_root.pack()
+
+        # Автозаполнение combobox_documents_name
+    def corresponding_documents_name(self, event):
+        documents_name = x_data_akt.get_corresponding_documents_name_documents(self.combobox_document_name.get())
+        if documents_name is not None:
+            self.combobox_documents_name.set(documents_name)
+
+        # Функция для получения пути до файла документа
+    def get_file_path_file_document(self, event):
+        self.entry_file.delete(0, 'end')
+        path_file_document = tkinter.filedialog.askopenfilename(title='Загрузка файл документа')
+        self.entry_file.insert('end', path_file_document)
+
+        # Функции для установки значения в combobox порядка материалов
+    def setting_combobox_order_document(self, event):
+        index_order = self.listbox_order_document.curselection()[0]
+        self.combobox_order_document.set(index_order + 1)
+
+        # Функция для выделения материала в listbox порядка материалов
+    def setting_listbox_order_document(self, event):
+        index_order = self.combobox_order_document.get()
+        if index_order != 'поставить в конец списка' and index_order != 'поставить последним материалом этого типа':
+            self.listbox_order_document.select_set(int(index_order) - 1)
+
+    def document(self):
+
+        # Функция для проверки корректности введенных дат и перевод их в объект класса Date
+        def checking_deadline():
+            if self.__start_date is None and self.__finish_date is not None:
+                self.__indicator += 'Поле "Дата начала" не может быть пустым, если поле "Дата окончания" заполнено\n'
+                return
+            good_data_date = True
+            if self.__start_date is not None:
+                try:
+                    self.__start_date = data_akt.Date(self.__start_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата начала" введеные некоректные данные\n'
+                    good_data_date = False
+            if self.__finish_date is not None:
+                try:
+                    self.__finish_date = data_akt.Date(self.__finish_date)
+                except (KeyError, IndexError, ValueError):
+                    self.__indicator += 'В поле "Дата окончания" введеные некоректные данные\n'
+                    good_data_date = False
+            if self.__start_date is not None and self.__finish_date is not None and good_data_date:
+                if data_akt.date_comparison(self.__start_date, self.__finish_date):
+                    self.__indicator += '"Дата начала" не может быть позднее "Даты окончания"\n'
+
+        # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
+        self.__indicator = ''
+
+        # Получение данный с полей ввода
+        self.__document_name = self.combobox_document_name.get() if self.combobox_document_name.get() != '' else None
+        self.__documents_name = self.combobox_documents_name.get() if self.combobox_documents_name.get() != '' else None
+        self.__document_number = self.entry_document_number.get() if self.entry_document_number.get() != '' else None
+        self.__start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
+        self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
+        if self.entry_file.get() == '<Файл не загружен>' or self.entry_file.get() == '<Есть загруженный файл>' or self.entry_file.get() == '':
+            self.__file = None
+        else:
+            self.__file = self.entry_file.get()
+        if self.combobox_order_document.get() == 'поставить в конец списка' or self.combobox_order_document.get() == 'поставить последним материалом этого типа' or self.combobox_order_document.get() == '':
+            self.__order_document = None
+        else:
+            self.__order_document = int(self.combobox_order_document.get()) - 1
+
+        # проверка корректности введенных данный
+        if self.__document_name is None:
+            self.__indicator += 'Поле "Наименование" не может быть пустым\n'
+        if self.__documents_name is None:
+            self.__indicator += 'Поле "Наименование документов" не может быть пустым'
+        checking_deadline()
+
+        # Если данные введены некорректно выводит ошибки в веденных данных
+        if self.__indicator != '':
+            self.label_indicator.config(text=self.__indicator)
+        else:
+            # Создание нового материала, назначение его атрибутов и добавление в таблицу
+            if self.__index is None:
+                document = data_akt.Document()
+
+                document.set_document_name(self.__document_name)
+                document.set_documents_name(self.__documents_name)
+                document.set_document_number(self.__document_number)
+                document.set_object_start_date(self.__start_date)
+                document.set_object_finish_date(self.__finish_date)
+                document.load_bin_images(self.__file)
+
+                x_data_akt.set_document(document, self.__order_document)
+
+                for item in self.__table.get_children():
+                    self.__table.delete(item)
+                for document in x_data_akt.get_all_text_documents_table():
+                    self.__table.insert('', 'end', values=document)
+
+                self.window.destroy()
+            # Изменение атрибутов ранее созданного объекта класса "Материалы"
+            else:
+                x_data_akt.get_document(self.__index).set_document_name(self.__document_name)
+                x_data_akt.get_document(self.__index).set_documents_name(self.__documents_name)
+                x_data_akt.get_document(self.__index).set_document_number(self.__document_number)
+                x_data_akt.get_document(self.__index).set_object_start_date(self.__start_date)
+                x_data_akt.get_document(self.__index).set_object_finish_date(self.__finish_date)
+                x_data_akt.get_document(self.__index).load_bin_images(self.__file)
+
+                x_data_akt.change_order_of_document(x_data_akt.get_document(self.__index), self.__order_document)
+
+                for item in self.__table.get_children():
+                    self.__table.delete(item)
+                for document in x_data_akt.get_all_text_documents_table():
+                    self.__table.insert('', 'end', values=document)
+
+                self.window.destroy()
+
+def key_rus(event):
+    if event.keycode == 86:
+        event.widget.event_generate('<<Paste>>')
+    elif event.keycode == 67:
+        event.widget.event_generate('<<Copy>>')
+    elif event.keycode == 88:
+        event.widget.event_generate('<<Cut>>')
+    elif event.keycode == 65:
+        event.widget.event_generate('<<SelectAll>>')
 
 if __name__ == '__main__':
     window = RootGUI()

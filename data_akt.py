@@ -47,6 +47,7 @@ class Data_Akt:
         self.__representative = ()
         self.__names_design_estimate_documentation = ()
         self.__materials = ()
+        self.__documents = ()
 
     # функции для АКТОВ
     def set_akt(self, akt):
@@ -217,9 +218,8 @@ class Data_Akt:
         # Добавление МАТЕРИАЛА в кортеж
     def set_material(self, new_material, index_order=None):
         id = 0
-        for el in self.get_all_id_materials():
-            if el == id:
-                id += 1
+        while id in self.get_all_id_materials():
+            id += 1
         new_material.set_id(id)
         self.__materials = list(self.__materials)
         self.setting_order_of_material(new_material, index_order)
@@ -318,6 +318,109 @@ class Data_Akt:
     def get_all_text_materials_list(self):
         return tuple(element.get_in_list() for element in self.__materials)
 
+    # Функции для ДОКУМЕНТОВ СООТВЕТСТВИЯ
+        # Добавление ДОКУМЕНТА СООТВЕТСТВИЯ в кортеж
+    def set_document(self, new_document, index_order=None):
+        id = 0
+        while id in self.get_all_id_documents():
+            id += 1
+        new_document.set_id(id)
+        self.__documents = list(self.__documents)
+        self.setting_order_of_document(new_document, index_order)
+        self.__documents = tuple(self.__documents)
+
+        # Изменение порядкового номера ДОКУМЕНТА СООТВЕТСТВИЯ
+    def change_order_of_document(self, document, index_order=None):
+        self.__documents = list(self.__documents)
+        self.__documents.remove(document)
+        self.setting_order_of_document(document, index_order)
+        self.__documents = tuple(self.__documents)
+
+        # Установка порядкового номера ДОКУМЕНТА СООТВЕТСТВИЯ
+    def setting_order_of_document(self, document, index_order=None):
+        if index_order is not None:
+            self.__documents.insert(index_order, document)
+        else:
+            document_name = document.get_document_name()
+            list_documents = []
+            list_documents_date = []
+            for old_document in self.__documents:
+                if old_document.get_document_name() == document_name:
+                    list_documents.append(old_document)
+            if not list_documents:
+                self.__documents.append(document)
+            elif document.get_start_date() is None:
+                index = self.__documents.index(list_documents[-1])
+                self.__documents.insert(index + 1, document)
+            elif document.get_start_date() is not None:
+                for el in list_documents:
+                    if el.get_start_date() is not None:
+                        list_documents_date.append(el)
+                list_documents_date.append(document)
+                list_documents_date.sort(key=lambda x: x.get_start_date().get_date())
+                index_by_date = list_documents_date.index(document)
+                if index_by_date == 0:
+                    index = self.__documents.index(list_documents_date[index_by_date + 1])
+                    self.__documents.insert(index, document)
+                else:
+                    index = self.__documents.index(list_documents_date[index_by_date - 1])
+                    self.__documents.insert(index+1, document)
+
+
+        # Установка нового порядка всех ДОКУМЕНТОВ СООТВЕТСТВИЯ
+    def setting_complete_document_order(self, order_documents):
+        self.__documents = list(self.__documents)
+        self.__documents.sort(key=lambda x: order_documents.index(x.get_in_list()))
+        self.__documents = tuple(self.__documents)
+
+        # Удаление ДОКУМЕНТА СООТВЕТСТВИЯ в кортеже
+    def delete_document(self, index):
+        self.__documents = list(self.__documents)
+        del self.__documents[index]
+        self.__documents = tuple(self.__documents)
+
+        # Возвращение ДОКУМЕНТА СООТВЕТСТВИЯ из кортежа
+    def get_document(self, index):
+        return self.__documents[index]
+
+        # Возвращение кортежа всех ДОКУМЕНТОВ СООТВЕТСТВИЯ
+    def get_all_documents(self):
+        return self.__materials
+
+        # Возвращение всех ID ДОКУМЕНТОВ СООТВЕТСТВИЯ
+    def get_all_id_documents(self):
+        return tuple(document.get_id() for document in self.__documents)
+
+        # Возвращение уникальных ИМЁН ДОКУМЕНТОВ СООТВЕТСТВИЯ
+    def get_all_unique_document_names_documents(self):
+        all_unique_document_name_documents = set()
+        for document in self.__documents:
+            if document.get_document_name() is not None:
+                all_unique_document_name_documents.add(document.get_document_name())
+        return tuple(all_unique_document_name_documents)
+
+        # Возвращение уникальных ИМЁН ДОКУМЕНТОВ (множественное число имени) ДОКУМЕНТОВ СООТВЕТСТВИЯ
+    def get_all_unique_documents_names_documents(self):
+        all_unique_documents_names_documents = set()
+        for document in self.__documents:
+            if document.get_documents_name() is not None:
+                all_unique_documents_names_documents.add(document.get_documents_name())
+        return tuple(all_unique_documents_names_documents)
+
+        # Возвращение соответсвующего ИМЕНИ ДОКУМЕНТОВ (множественное число имени) ДОКУМЕНТА СООТВЕТСТВИЯ
+    def get_corresponding_documents_name_documents(self, document_name):
+        for document in self.__documents:
+            if document.get_document_name() == document_name:
+                return document.get_documents_name()
+
+        # Возвращение всех ДОКУМЕНТОВ СООТВЕТСТВИЯ для таблицы
+    def get_all_text_documents_table(self):
+        return tuple(element.get_in_tabel() for element in self.__documents)
+
+        # Возвращение всех ДОКУМЕНТОВ СООТВЕТСТВИЯ для списка
+    def get_all_text_documents_list(self):
+        return tuple(element.get_in_list() for element in self.__documents)
+
 
 class Akt:
     def __init__(self):
@@ -334,6 +437,7 @@ class Akt:
         self.__contractor = None
         self.__work = None
         self.__materials = ()
+        self.__documents = ()
 
         self.__start_date = None
         self.__finish_date = None
@@ -441,6 +545,24 @@ class Akt:
 
     def get_text_all_materials_of_akt(self):
         return tuple(element.get_in_list() for element in self.__materials)
+
+    # функции для ДОКУМЕНТОВ СООСТВЕТСВИЯ
+    def set_documents_of_akt(self, documents):
+        self.__documents = documents
+
+    def set_document_of_akt(self, document):
+        self.__documents = list(self.__documents)
+        self.__documents.append(document)
+        self.__documents = tuple(self.__documents)
+
+    def get_all_documents_of_akt(self):
+        return self.__documents
+
+    def get_document_of_akt(self, index_document):
+        return self.__documents[index_document]
+
+    def get_text_all_documents_of_akt(self):
+        return tuple(element.get_in_list() for element in self.__documents)
 
     # функции для ДАТ
     def set_object_start_date(self, start_date):
@@ -815,7 +937,7 @@ class Date:
 
 class Material:
     def __init__(self, type=None, material=None, document_name=None, documents_name=None,
-                 document_number=None, start_date=None, finish_date=None, path_file=None, order_number=None):
+                 document_number=None, start_date=None, finish_date=None, path_file=None):
         self.__id = None
         self.__type = type
         self.__material = material
@@ -825,7 +947,6 @@ class Material:
         self.__start_date = start_date
         self.__finish_date = finish_date
         self.__bin_images = None
-        self.__order_number = None
 
     def set_id(self, id):
         self.__id = id
@@ -856,9 +977,6 @@ class Material:
 
     def set_object_finish_date(self, object_finish_date):
         self.__finish_date = object_finish_date
-
-    def set_order_number(self, order_number):
-        self.__order_number = order_number
 
     def load_bin_images(self, path_file):
         if path_file is None:
@@ -912,9 +1030,6 @@ class Material:
 
     def get_finish_date(self):
         return self.__finish_date
-
-    def get_order_number(self):
-        return self.__order_number
 
     def get_in_tabel(self):
 
@@ -1267,6 +1382,174 @@ class Data_base_materials:
     def close_date_base(self):
         self.__conn.close()
 
+
+class Document:
+    def __init__(self, document_name=None, documents_name=None, document_number=None, start_date=None,
+                 finish_date=None):
+        self.__id = None
+        self.__document_name = document_name
+        self.__documents_name = documents_name
+        self.__document_number = document_number
+        self.__start_date = start_date
+        self.__finish_date = finish_date
+        self.__bin_images = None
+
+    def set_id(self, id):
+        self.__id = id
+
+    def set_document_name(self, document_name):
+        self.__document_name = document_name
+
+    def set_documents_name(self, documents_name):
+        self.__documents_name = documents_name
+
+    def set_document_number(self, document_number):
+        self.__document_number = document_number
+
+    def set_str_start_date(self, str_start_date):
+        self.__start_date = Date(str_start_date)
+
+    def set_str_finish_date(self, str_finish_date):
+        self.__finish_date = Date(str_finish_date)
+
+    def set_object_start_date(self, object_start_date):
+        self.__start_date = object_start_date
+
+    def set_object_finish_date(self, object_finish_date):
+        self.__finish_date = object_finish_date
+
+    def load_bin_images(self, path_file):
+        if path_file is None:
+            return
+        file = fitz.open(path_file)
+        list_image = []
+        for page in file:
+            list_image.append(page.get_pixmap().tobytes("ppm"))
+        self.__bin_images = pickle.dumps(tuple(list_image))
+
+    def set_bin_images(self, bin_file):
+        self.__bin_images = bin_file
+
+    def add_deadline(self, str_start_date, str_finish_date):
+        try:
+            if str_start_date is None and str_finish_date is None:
+                self.__start_date = None
+                self.__finish_date = None
+            elif str_start_date is None:
+                self.__finish_date = Date(str_finish_date)
+                self.__start_date = None
+            elif str_finish_date is None:
+                self.__start_date = Date(str_start_date)
+                self.__finish_date = None
+            else:
+                self.__start_date = Date(str_start_date)
+                self.__finish_date = Date(str_finish_date)
+        except (KeyError, IndexError):
+            return
+
+    def get_id(self):
+        return self.__id
+
+    def get_document_name(self):
+        return self.__document_name
+
+    def get_documents_name(self):
+        return self.__documents_name
+
+    def get_document_number(self):
+        return self.__document_number
+
+    def get_start_date(self):
+        return self.__start_date
+
+    def get_finish_date(self):
+        return self.__finish_date
+
+    def get_in_tabel(self):
+
+        # Проверка НАИМЕНОВАНИЯ ДОКУМЕНТА
+        def check_data_document(document_name, document_number):
+            if document_name is None and document_number is None:
+                return ''
+            elif document_number is None:
+                return document_name
+            else:
+                return document_name + ' ' + document_number
+
+        # Проверка ДАТ ДОКУМЕНТА
+        def check_dates(start_date, finish_date):
+            if start_date is None:
+                return ''
+            elif finish_date is None:
+                return 'от ' + self.get_str_start_date()
+            else:
+                return 'с ' + self.get_str_start_date() + ' до ' + self.get_str_finish_date()
+
+        # Проверка изображения
+        def check_images(images):
+            if images is not None:
+                return '<Есть загруженный файл>'
+            else:
+                return '<Файл не загружен>'
+
+        elements_document = []
+        elements_document.append(self.__id)
+        elements_document.append(check_data_document(self.__document_name, self.__document_number))
+        elements_document.append(check_dates(self.__start_date, self.__finish_date))
+        elements_document.append(check_images(self.__bin_images))
+        return tuple(elements_document)
+
+    def get_str_start_date(self):
+        if self.__start_date == '' or self.__start_date is None:
+            return None
+        else:
+            str_date = str(self.__start_date.get_date().strftime('%d.%m.%Y'))
+            date1 = str_date.split('.')
+            return f'{date1[0]}.{date1[1]}.{date1[2]}'
+
+        # возвращение строки даты начала
+    def get_str_finish_date(self):
+        if self.__finish_date == '' or self.__finish_date is None:
+            return None
+        else:
+            str_date = str(self.__finish_date.get_date().strftime('%d.%m.%Y'))
+            date1 = str_date.split('.')
+            return f'{date1[0]}.{date1[1]}.{date1[2]}'
+
+        # возвращение изобажений
+    def get_bin_images(self):
+        if self.__bin_images is not None:
+            return pickle.loads(self.__bin_images)
+        else:
+            return None
+
+        # удаление изобажений
+    def del_bin_images(self):
+        self.__bin_images = None
+
+    def get_in_list(self):
+        # Проверка наименования ДОКУМЕНТА
+        def check_data_document(document_name, document_number):
+            if document_name is None and document_number is None:
+                return ''
+            elif document_number is None:
+                return document_name
+            else:
+                return document_name + ' ' + document_number
+
+        # Проверка ДАТ ДОКУМЕНТА
+        def check_dates(start_date, finish_date):
+            if start_date is None:
+                return ''
+            elif finish_date is None:
+                return 'от ' + self.get_str_start_date()
+            else:
+                return 'с ' + self.get_str_start_date() + ' до ' + self.get_str_finish_date()
+
+        document = (f' {check_data_document(self.__document_name, self.__document_number)}' +
+                    f' {check_dates(self.__start_date, self.__finish_date)}')
+
+        return document
 
 
 # Сравнение дат
