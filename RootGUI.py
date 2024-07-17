@@ -78,9 +78,9 @@ class RootGUI:
 
         # Создание группы виджетов ПРЕДСТВАВИТЕЛИ для вкладки ОБЪЕКТ
         self.frame_representative = tkinter.LabelFrame(self.frame_object,
-                                                       borderwidth=1,
-                                                       relief='solid',
-                                                       text='Представители')
+                                                   borderwidth=1,
+                                                   relief='solid',
+                                                   text='Представители')
         self.frame_listbox_representative = tkinter.Frame(self.frame_representative)
         self.representatives = tkinter.Variable(value=x_data_akt.get_all_representatives_names())
         self.listbox_representative = tkinter.Listbox(self.frame_listbox_representative,
@@ -89,12 +89,32 @@ class RootGUI:
                                                       width=93)
         self.listbox_representative.pack(side='left')
         self.listbox_representative_scrollbar = tkinter.Scrollbar(self.frame_listbox_representative,
-                                                                  command=self.listbox_representative.yview)
+                                                              command=self.listbox_representative.yview)
         self.listbox_representative_scrollbar.pack(side='right', fill='y')
         self.listbox_representative.config(yscrollcommand=self.listbox_representative_scrollbar.set)
         self.listbox_representative.bind('<Button-3>', self.menu_representative)
         self.frame_listbox_representative.pack()
         self.frame_representative.grid(row=3, column=0)
+
+        # Создание группы виджетов ТЕХНИЧЕСКИЕ РЕГЛАМЕНТЫ для вкладки ОБЪЕКТ
+        self.frame_regulation = tkinter.LabelFrame(self.frame_object,
+                                                   borderwidth=1,
+                                                   relief='solid',
+                                                   text='Технические регламенты, нормативные документы')
+        self.frame_listbox_regulation = tkinter.Frame(self.frame_regulation)
+        self.regulations = tkinter.Variable(value=x_data_akt.get_all_regulations_names())
+        self.listbox_regulation = tkinter.Listbox(self.frame_listbox_regulation,
+                                                  listvariable=self.regulations,
+                                                  height=5,
+                                                  width=93)
+        self.listbox_regulation.pack(side='left')
+        self.listbox_regulation_scrollbar = tkinter.Scrollbar(self.frame_listbox_regulation,
+                                                              command=self.listbox_regulation.yview)
+        self.listbox_regulation_scrollbar.pack(side='right', fill='y')
+        self.listbox_regulation.config(yscrollcommand=self.listbox_regulation_scrollbar.set)
+        self.listbox_regulation.bind('<Button-3>', self.menu_regulation)
+        self.frame_listbox_regulation.pack()
+        self.frame_regulation.grid(row=4, column=0)
 
         # Создание вкладки АКТЫ
         self.frame_akt = tkinter.Frame(self.root)
@@ -418,7 +438,7 @@ class RootGUI:
         x_data_akt = data_akt.Data_Akt()
         self.updater_list(self.listbox_names, x_data_akt.get_all_name_object_names())
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
-        self.updater_list(self.listbox_representative, x_data_akt.get_all_representatives_names())
+        self.updater_list(self.listbox_regulation, x_data_akt.get_all_representatives_names())
         self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
         self.updater_table_materials()
 
@@ -428,7 +448,7 @@ class RootGUI:
         x_data_akt = data_akt.load(self.file)
         self.updater_list(self.listbox_names, x_data_akt.get_all_name_object_names())
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
-        self.updater_list(self.listbox_representative, x_data_akt.get_all_representatives_names())
+        self.updater_list(self.listbox_regulation, x_data_akt.get_all_representatives_names())
         self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
         self.updater_table_materials()
 
@@ -505,6 +525,26 @@ class RootGUI:
         index = self.listbox_representative.curselection()
         x_data_akt.delete_representative(index[0])
         self.listbox_representative.delete(index[0])
+
+    # Контекстное меню для ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ вкладке ОБЪЕКТ
+    def menu_regulation(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Добавить', command=self.add_regulation)
+        menu.add_command(label='Изменить', command=self.change_regulation)
+        menu.add_command(label='Удалить', command=self.delete_regulation)
+        menu.post(event.x_root, event.y_root)
+
+    def add_regulation(self):
+        window = Window_object_element(self.root, self.listbox_regulation, 'регламенты')
+
+    def change_regulation(self):
+        index = self.listbox_regulation.curselection()[0]
+        window = Window_object_element(self.root, self.listbox_regulation, 'регламенты', index)
+
+    def delete_regulation(self):
+        index = self.listbox_regulation.curselection()
+        x_data_akt.delete_regulation(index[0])
+        self.listbox_regulation.delete(index[0])
 
     # Контекстное меню для СПИСКА АКТОВ вкладке АКТЫ
     def menu_listbox_akts(self, event):
@@ -709,7 +749,7 @@ class Window_object_element:
         self.window.geometry('500x500')
         self.window.grab_set()
 
-        self.__root.bind('<Control-KeyPress>', key_rus)
+        self.window.bind('<Control-KeyPress>', key_rus)
 
         self.frame = tkinter.Frame(self.window)
         self.label = tkinter.Label(self.frame, text='Введите информацию')
@@ -766,6 +806,8 @@ class Window_object_element:
             return x_data_akt.get_organization_name(self.__index), x_data_akt.get_organization_text(self.__index)
         elif self.__type_element == 'представители':
             return x_data_akt.get_representative_name(self.__index), x_data_akt.get_representative_text(self.__index)
+        elif self.__type_element == 'регламенты':
+            return x_data_akt.get_regulation_name(self.__index), x_data_akt.get_regulation_text(self.__index)
 
     def get_names(self):
         if self.__type_element == 'имена':
@@ -774,6 +816,8 @@ class Window_object_element:
             return x_data_akt.get_all_organizations_names()
         elif self.__type_element == 'представители':
             return x_data_akt.get_all_representatives_names()
+        elif self.__type_element == 'регламенты':
+            return x_data_akt.get_all_regulations_names()
 
     def set_element_data_akt(self, text, name):
         if self.__type_element == 'имена':
@@ -782,6 +826,8 @@ class Window_object_element:
             x_data_akt.set_organization(text, name)
         elif self.__type_element == 'представители':
             x_data_akt.set_representative(text, name)
+        elif self.__type_element == 'регламенты':
+            x_data_akt.set_regulation(text, name)
 
     def change_element_data_akt(self, text, name):
         if self.__type_element == 'имена':
@@ -790,6 +836,8 @@ class Window_object_element:
             x_data_akt.change_organization(text, name, self.__index)
         elif self.__type_element == 'представители':
             x_data_akt.change_representative(text, name, self.__index)
+        elif self.__type_element == 'регламенты':
+            x_data_akt.change_regulation(text, name, self.__index)
 
 
 class Window_akt:
@@ -2669,6 +2717,7 @@ class Window_document:
                     self.__table.insert('', 'end', values=document)
 
                 self.window.destroy()
+
 
 def key_rus(event):
     if event.keycode == 86:

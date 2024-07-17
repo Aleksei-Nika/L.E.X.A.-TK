@@ -48,6 +48,7 @@ class Data_Akt:
         self.__names_design_estimate_documentation = ()
         self.__materials = ()
         self.__documents = ()
+        self.__regulations = ()
 
     # функции для АКТОВ
     def set_akt(self, akt):
@@ -75,7 +76,7 @@ class Data_Akt:
         return tuple(akts.get_name_work() for akts in self.get_all_akts())
 
     # функции для ИМЁН ОБЪЕКТА
-    # Добавление ИМЕНИ ОБЪЕКТА в конец кортежа
+        # Добавление ИМЕНИ ОБЪЕКТА в конец кортежа
     def set_name_object(self, text, name):
         self.__names_object = list(self.__names_object)
         self.__names_object.insert(0, Object_element(text, name))
@@ -117,6 +118,50 @@ class Data_Akt:
         # Возвращение кортежа ПОЛНЫХ ИМЁН
     def get_all_names_object(self):
         return self.__names_object
+
+    # Функции для ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+        # Добавление ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+    def set_regulation(self, text, name):
+        self.__regulations = list(self.__regulations)
+        self.__regulations.insert(0, Object_element(text, name))
+        self.__regulations = tuple(self.__regulations)
+
+        # Изменение ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+    def change_regulation(self, text, name, index):
+        self.__regulations = list(self.__regulations)
+        self.__regulations[index].set_text(text)
+        self.__regulations[index].set_name(name)
+        self.__regulations = tuple(self.__regulations)
+
+        # Удаление ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+    def delete_regulation(self, index):
+        self.__regulations = list(self.__regulations)
+        del self.__regulations[index]
+        self.__regulations = tuple(self.__regulations)
+
+        # Возвращение ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+    def get_regulation(self, index):
+        return self.__regulations[index]
+
+        # Возвращение всех ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+    def get_all_regulations(self):
+        return self.__regulations
+
+        # Возвращение ТЕКСТА ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+    def get_regulation_text(self, index):
+        return self.__regulations[index].get_text()
+
+        # Возвращение всех ТЕКСТОВ ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+    def get_all_regulations_texts(self):
+        return tuple(element.get_text() for element in self.__regulations)
+
+        # Возвращение ИМЕНИ ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+    def get_regulation_name(self, index):
+        return self.__regulations[index].get_name()
+
+        # Возвращение всех ИМЕН ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+    def get_all_regulations_names(self):
+        return tuple(element.get_name() for element in self.__regulations)
 
     # функции для ОРГАНИЗАЦИЙ
     def set_organization(self, text, name):
@@ -438,11 +483,10 @@ class Akt:
         self.__work = None
         self.__materials = ()
         self.__documents = ()
-
         self.__start_date = None
         self.__finish_date = None
-
         self.__documentation = None
+        self.__regulations = ()
 
     # Функции для ИМЕНИ ОБЪЕКТА
     def set_name_object(self, obj):
@@ -711,6 +755,13 @@ class Akt:
             analyzed_doc_list.append(page)
 
         return text_of_doc + '.'
+
+    # Функции для ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+    def set_regulations(self, regulations):
+        self.__regulations = tuple(regulations)
+
+    def get_regulations(self):
+        return self.__regulations
 
 
 # класс ЭЛЕМЕНТЫ для АКТА
