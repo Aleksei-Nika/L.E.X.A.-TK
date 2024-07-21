@@ -78,9 +78,9 @@ class RootGUI:
 
         # Создание группы виджетов ПРЕДСТВАВИТЕЛИ для вкладки ОБЪЕКТ
         self.frame_representative = tkinter.LabelFrame(self.frame_object,
-                                                   borderwidth=1,
-                                                   relief='solid',
-                                                   text='Представители')
+                                                       borderwidth=1,
+                                                       relief='solid',
+                                                       text='Представители')
         self.frame_listbox_representative = tkinter.Frame(self.frame_representative)
         self.representatives = tkinter.Variable(value=x_data_akt.get_all_representatives_names())
         self.listbox_representative = tkinter.Listbox(self.frame_listbox_representative,
@@ -89,7 +89,7 @@ class RootGUI:
                                                       width=93)
         self.listbox_representative.pack(side='left')
         self.listbox_representative_scrollbar = tkinter.Scrollbar(self.frame_listbox_representative,
-                                                              command=self.listbox_representative.yview)
+                                                                  command=self.listbox_representative.yview)
         self.listbox_representative_scrollbar.pack(side='right', fill='y')
         self.listbox_representative.config(yscrollcommand=self.listbox_representative_scrollbar.set)
         self.listbox_representative.bind('<Button-3>', self.menu_representative)
@@ -868,6 +868,9 @@ class Window_akt:
             self.__documentation = None
             self.__list_text_materials_akt = tuple()
             self.__list_text_documents_akt = tuple()
+            self.__list_regulations_akt = tuple()
+            self.__additional_information = None
+            self.__number_of_copies = None
         else:
             self.__index = index
             self.__name_object = self.old_elements(x_data_akt.get_akt(index).get_name_object())
@@ -887,6 +890,9 @@ class Window_akt:
             self.__documentation = x_data_akt.get_akt(index).get_documentation()
             self.__list_text_materials_akt = x_data_akt.get_akt(index).get_text_all_materials_of_akt()
             self.__list_text_documents_akt = x_data_akt.get_akt(index).get_text_all_documents_of_akt()
+            self.__list_regulations_akt = x_data_akt.get_akt(index).get_regulations()
+            self.__additional_information = x_data_akt.get_akt(index).get_additional_information()
+            self.__number_of_copies = x_data_akt.get_akt(index).get_number_of_copies()
 
         if action == 'новый':
             self.__action = action
@@ -1119,6 +1125,35 @@ class Window_akt:
         self.label_all_documents.grid(row=0, column=2)
         self.frame_listbox_all_documents.grid(row=1, column=2)
 
+        # Группа виджетов ТЕХНИЧЕСКИЕ РЕГЛАМЕНТЫ
+        self.frame_regulations = tkinter.LabelFrame(self.frame_window_akt,
+                                                    text='Технические регламенты, нормативные документы')
+        self.button_add_regulations = tkinter.Button(self.frame_regulations, text='>>',
+                                                     command=self.add_widget_from_regulation)
+        self.button_add_regulations.grid(row=0, column=0, rowspan=1, stick='ns')
+        self.list_widget_regulations = []
+        self.list_widget_regulations.append(ttk.Combobox(self.frame_regulations,
+                                                         width=50,
+                                                         values=x_data_akt.get_all_regulations_names()))
+        self.list_widget_regulations[-1].grid(row=0, column=1, stick='we')
+
+        # Группа виджетов ДОПОЛНИТЕЛЬНЫЕ СВЕДЕНИЯ
+        self.frame_additional_information = tkinter.LabelFrame(self.frame_window_akt,
+                                                               text='Дополнительные сведения')
+        self.text_additional_information = tkinter.Text(self.frame_additional_information,
+                                                        wrap='word', height=5, width=120)
+        self.text_additional_information.pack()
+
+        # Группа виджетов КОЛИЧЕСТВО ЭКЗЕМПЛЯРОВ
+        self.frame_number_of_copies = tkinter.LabelFrame(self.frame_window_akt, text='Количество экземпляров')
+        self.label_number_of_copies1 = tkinter.Label(self.frame_number_of_copies, text='Акт составлен в ')
+        self.snipbox_number_of_copies = ttk.Spinbox(self.frame_number_of_copies, width=5, from_=0.0, to=999.0)
+        self.snipbox_number_of_copies.set(3)
+        self.label_number_of_copies2 = tkinter.Label(self.frame_number_of_copies, text=' экземплярах')
+        self.label_number_of_copies1.grid(row=0, column=0)
+        self.snipbox_number_of_copies.grid(row=0, column=1)
+        self.label_number_of_copies2.grid(row=0, column=2)
+
         if index is not None:
             self.combobox_object.set(self.__name_object)
             self.combobox_developer.set(self.__developer)
@@ -1137,6 +1172,9 @@ class Window_akt:
             self.old_doc()
             self.old_materials()
             self.old_documents()
+            self.old_regulations()
+            self.text_additional_information.insert('end', self.__additional_information)
+            self.snipbox_number_of_copies.set(self.__number_of_copies)
 
         self.frame_object.grid(row=0, column=0, stick='we')
         self.frame_work.grid(row=1, column=0, stick='we')
@@ -1144,6 +1182,9 @@ class Window_akt:
         self.frame_documentation.grid(row=3, column=0, stick='we')
         self.frame_material.grid(row=4, column=0, stick='we')
         self.frame_document.grid(row=5, column=0, stick='we')
+        self.frame_regulations.grid(row=6, column=0, stick='we')
+        self.frame_additional_information.grid(row=7, column=0, stick='we')
+        self.frame_number_of_copies.grid(row=8, column=0)
 
         self.button_akt = tkinter.Button(self.window_create_akt, text=self.__text_button, command=self.akt)
         self.label_indicator = tkinter.Label(self.window_create_akt, foreground='red')
@@ -1174,6 +1215,14 @@ class Window_akt:
             self.list_documentation[-1].grid(row=int(len(self.list_documentation) / 3), column=3, stick='we')
             self.button_add_org.grid(row=1, column=0, rowspan=int(len(self.list_documentation) / 3) + 1, stick='ns')
 
+    def add_widget_from_regulation(self):
+        if self.list_widget_regulations[-1].get() != '':
+            self.list_widget_regulations.append(ttk.Combobox(self.frame_regulations,
+                                                             width=50,
+                                                             values=x_data_akt.get_all_regulations_names()))
+            self.list_widget_regulations[-1].grid(row=len(self.list_widget_regulations), column=1, stick='we')
+            self.button_add_regulations.grid(row=0, column=0, rowspan=len(self.list_widget_regulations) + 1, stick='ns')
+
     def old_doc(self):
         for component in self.__documentation:
             self.list_documentation[-3].set(self.old_elements(component.get_organization()))
@@ -1196,6 +1245,11 @@ class Window_akt:
             self.__list_text_all_documents.remove(document_of_akt)
         self.__list_text_all_documents = tuple(self.__list_text_all_documents)
         self.listbox_all_documents.config(listvariable=tkinter.Variable(value=self.__list_text_all_documents))
+
+    def old_regulations(self):
+        for regulation in self.__list_regulations_akt:
+            self.list_widget_regulations[-1].set(self.old_elements(regulation))
+            self.add_widget_from_regulation()
 
     def transfer_to_listbox_materials_akt(self, event=None):
         self.__list_text_all_materials = list(self.__list_text_all_materials)
@@ -1355,6 +1409,12 @@ class Window_akt:
                 documents.append(x_data_akt.get_document(index_document))
             return tuple(documents)
 
+        def set_list_regulations_akt():
+            list_regulations_akt = []
+            for iter in self.list_widget_regulations:
+                list_regulations_akt.append(insert_data(iter, x_data_akt.get_all_regulations()))
+            return tuple(list_regulations_akt)
+
         # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
         self.__indicator = ''
 
@@ -1375,6 +1435,9 @@ class Window_akt:
         self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
         self.__work = self.entry_work.get()
         self.__documentation = insert_data_documentation()
+        self.__list_regulations_akt = set_list_regulations_akt()
+        self.__additional_information = self.text_additional_information.get('1.0', 'end')
+        self.__number_of_copies = self.snipbox_number_of_copies.get() if self.snipbox_number_of_copies.get() != '0' else ''
 
         # проверка корректности введенных данный
         if self.__work == '':
@@ -1404,6 +1467,9 @@ class Window_akt:
             akt.set_documentation(self.__documentation)
             akt.set_materials_of_akt(set_materials_object())
             akt.set_documents_of_akt(set_documents_object())
+            akt.set_regulations(self.__list_regulations_akt)
+            akt.set_additional_information(self.__additional_information)
+            akt.set_number_of_copies(self.__number_of_copies)
             x_data_akt.set_akt(akt)
         elif self.__action == 'изменить':
             x_data_akt.get_akt(self.__index).set_name_object(self.__name_object)
@@ -1423,6 +1489,9 @@ class Window_akt:
             x_data_akt.get_akt(self.__index).set_documentation(self.__documentation)
             x_data_akt.get_akt(self.__index).set_materials_of_akt(set_materials_object())
             x_data_akt.get_akt(self.__index).set_documents_of_akt(set_documents_object())
+            x_data_akt.get_akt(self.__index).set_regulations(self.__list_regulations_akt)
+            x_data_akt.get_akt(self.__index).set_additional_information(self.__additional_information)
+            x_data_akt.get_akt(self.__index).set_number_of_copies(self.__number_of_copies)
 
         elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
         self.__listbox.config(listvariable=elements)
@@ -1578,23 +1647,27 @@ class Window_material:
         self.frame_root.pack()
 
         # Автозаполнение combobox_documents_name
+
     def corresponding_documents_name(self, event):
         documents_name = x_data_akt.get_corresponding_documents_name_materials(self.combobox_document_name.get())
         if documents_name is not None:
             self.combobox_documents_name.set(documents_name)
 
         # Функция для получения пути до файла документа
+
     def get_file_path_file_material(self, event):
         self.entry_file.delete(0, 'end')
         path_file_material = tkinter.filedialog.askopenfilename(title='Загрузка файл документа')
         self.entry_file.insert('end', path_file_material)
 
         # Функции для установки значения в combobox порядка материалов
+
     def setting_combobox_order_material(self, event):
         index_order = self.listbox_order_material.curselection()[0]
         self.combobox_order_material.set(index_order + 1)
 
         # Функция для выделения материала в listbox порядка материалов
+
     def setting_listbox_order_material(self, event):
         index_order = self.combobox_order_material.get()
         if index_order != 'поставить в конец списка' and index_order != 'поставить последним материалом этого типа':
@@ -2606,23 +2679,27 @@ class Window_document:
         self.frame_root.pack()
 
         # Автозаполнение combobox_documents_name
+
     def corresponding_documents_name(self, event):
         documents_name = x_data_akt.get_corresponding_documents_name_documents(self.combobox_document_name.get())
         if documents_name is not None:
             self.combobox_documents_name.set(documents_name)
 
         # Функция для получения пути до файла документа
+
     def get_file_path_file_document(self, event):
         self.entry_file.delete(0, 'end')
         path_file_document = tkinter.filedialog.askopenfilename(title='Загрузка файл документа')
         self.entry_file.insert('end', path_file_document)
 
         # Функции для установки значения в combobox порядка материалов
+
     def setting_combobox_order_document(self, event):
         index_order = self.listbox_order_document.curselection()[0]
         self.combobox_order_document.set(index_order + 1)
 
         # Функция для выделения материала в listbox порядка материалов
+
     def setting_listbox_order_document(self, event):
         index_order = self.combobox_order_document.get()
         if index_order != 'поставить в конец списка' and index_order != 'поставить последним материалом этого типа':
@@ -2728,6 +2805,7 @@ def key_rus(event):
         event.widget.event_generate('<<Cut>>')
     elif event.keycode == 65:
         event.widget.event_generate('<<SelectAll>>')
+
 
 if __name__ == '__main__':
     window = RootGUI()

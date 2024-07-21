@@ -487,6 +487,8 @@ class Akt:
         self.__finish_date = None
         self.__documentation = None
         self.__regulations = ()
+        self.__additional_information = None
+        self.__number_of_copies = None
 
     # Функции для ИМЕНИ ОБЪЕКТА
     def set_name_object(self, obj):
@@ -762,6 +764,20 @@ class Akt:
 
     def get_regulations(self):
         return self.__regulations
+
+    # Функции для ДОПОЛНИТЕЛЬНЫХ СВЕДЕНИЙ
+    def set_additional_information(self, additional_information):
+        self.__additional_information = additional_information
+
+    def get_additional_information(self):
+        return self.__additional_information
+
+    # Функции для КОЛИЧЕСТВО ЭКЗЕМПЛЯРОВ
+    def set_number_of_copies(self, number_of_copies):
+        self.__number_of_copies = number_of_copies
+
+    def get_number_of_copies(self):
+        return self.__number_of_copies
 
 
 # класс ЭЛЕМЕНТЫ для АКТА
