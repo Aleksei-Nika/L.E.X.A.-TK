@@ -96,6 +96,26 @@ class RootGUI:
         self.frame_listbox_representative.pack()
         self.frame_representative.grid(row=3, column=0)
 
+        # Создание группы виджетов ПРОЕКТНО-СМЕТНАЯ ДОКУМЕНТАЦИЯ для вкладки ОБЪЕКТ
+        self.frame_project_documentation = tkinter.LabelFrame(self.frame_object,
+                                                              borderwidth=1,
+                                                              relief='solid',
+                                                              text='Проектно-сметная документация')
+        self.frame_listbox_project_documentation = tkinter.Frame(self.frame_project_documentation)
+        self.project_documentation = tkinter.Variable(value=x_data_akt.get_all_project_documentations_names())
+        self.listbox_project_documentation = tkinter.Listbox(self.frame_listbox_project_documentation,
+                                                             listvariable=self.project_documentation,
+                                                             height=5,
+                                                             width=93)
+        self.listbox_project_documentation.pack(side='left')
+        self.listbox_project_documentation_scrollbar = tkinter.Scrollbar(self.frame_listbox_project_documentation,
+                                                                         command=self.listbox_project_documentation.yview)
+        self.listbox_project_documentation_scrollbar.pack(side='right', fill='y')
+        self.listbox_project_documentation.config(yscrollcommand=self.listbox_project_documentation_scrollbar.set)
+        self.listbox_project_documentation.bind('<Button-3>', self.menu_project_documentation)
+        self.frame_listbox_project_documentation.pack()
+        self.frame_project_documentation.grid(row=4, column=0)
+
         # Создание группы виджетов ТЕХНИЧЕСКИЕ РЕГЛАМЕНТЫ для вкладки ОБЪЕКТ
         self.frame_regulation = tkinter.LabelFrame(self.frame_object,
                                                    borderwidth=1,
@@ -114,7 +134,7 @@ class RootGUI:
         self.listbox_regulation.config(yscrollcommand=self.listbox_regulation_scrollbar.set)
         self.listbox_regulation.bind('<Button-3>', self.menu_regulation)
         self.frame_listbox_regulation.pack()
-        self.frame_regulation.grid(row=4, column=0)
+        self.frame_regulation.grid(row=5, column=0)
 
         # Создание вкладки АКТЫ
         self.frame_akt = tkinter.Frame(self.root)
@@ -344,16 +364,27 @@ class RootGUI:
         self.text_work.grid(row=26, column=0, columnspan=1, sticky='w')
         self.label_documentation.grid(row=27, column=0, columnspan=1, sticky='w')
         self.text_documentation.grid(row=28, column=0, columnspan=1, sticky='w')
+        self.tuple_widget_canvas = (
+            self.label_object_name, self.text_object_name, self.label_developer, self.text_developer,
+            self.label_builder, self.text_builder, self.label_designer, self.text_designer,
+            self.label_doc1, self.frame_number_and_date, self.label_act_number, self.entry_act_number,
+            self.entry_act_date, self.label_developer_name, self.text_developer_name,
+            self.label_builder_name, self.text_builder_name, self.label_builder_control_name,
+            self.text_builder_control_name, self.label_designer_name, self.text_designer_name,
+            self.label_contractor_name, self.text_contractor_name, self.label_another_person,
+            self.text_another_person, self.frame_contractor, self.label_contractor,
+            self.text_contractor, self.label_doc2, self.label_work, self.text_work,
+            self.label_documentation, self.text_documentation)
 
         self.canvas.create_window(0, 0, anchor='nw', window=self.frame_in_canvas)
 
-        self.canvas_scrollbar = tkinter.Scrollbar(self.frame_for_canvas, command=self.canvas.yview)
+        self.canvas_scrollbar = tkinter.Scrollbar(self.frame_for_canvas, orient=tkinter.VERTICAL,
+                                                  command=self.canvas.yview)
         self.canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"), yscrollcommand=self.canvas_scrollbar.set)
         self.canvas.pack(side='left')
         # Прокрутка canvas просмотр акта
-        self.canvas.bind_all('<MouseWheel>',
-                             lambda event: self.canvas.yview_scroll(int(-1 * event.delta / 120), 'units'))
+        self.canvas.bind_all('<MouseWheel>', self.scrolling_canvas)
         self.canvas_scrollbar.pack(side='right', fill='y')
         self.frame_for_canvas.pack()
         self.frame_view_akt.grid(row=0, column=1)
@@ -405,7 +436,7 @@ class RootGUI:
         self.frame_document.pack()
         self.notebook.add(self.frame_document, text='Документы')
 
-        # Создание группы виджетов РАБОТА С МАТЕРИАЛАМИ
+        # Создание группы виджетов РАБОТА С ДОКУМЕНТАМИ СООТВЕТСВИЯ
         self.frame_documents_of_akt = ttk.LabelFrame(self.frame_document, text='Документы соответствия работ')
         self.frame_table_documents = tkinter.Frame(self.frame_documents_of_akt)
         self.table_document = ttk.Treeview(self.frame_table_documents,
@@ -414,7 +445,7 @@ class RootGUI:
                                            height=5)
         self.table_document_scrollbar = ttk.Scrollbar(self.frame_table_documents, orient='vertical',
                                                       command=self.table_document.yview)
-        self.table_document.config(yscrollcommand=self.table_material_scrollbar.set)
+        self.table_document.config(yscrollcommand=self.table_document_scrollbar.set)
         self.table_document.heading('id', text='id')
         self.table_document.heading('document', text='Документ')
         self.table_document.heading('date', text='Дата')
@@ -546,6 +577,28 @@ class RootGUI:
         x_data_akt.delete_regulation(index[0])
         self.listbox_regulation.delete(index[0])
 
+    # Контекстное меню для ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def menu_project_documentation(self, event):
+        menu = tkinter.Menu(tearoff=0)
+        menu.add_command(label='Добавить', command=self.add_project_documentation)
+        menu.add_command(label='Изменить', command=self.change_project_documentation)
+        menu.add_command(label='Удалить', command=self.delete_project_documentation)
+        menu.post(event.x_root, event.y_root)
+
+    def add_project_documentation(self):
+        window = Window_object_element(self.root, self.listbox_project_documentation,
+                                       'проектно-сметная документация')
+
+    def change_project_documentation(self):
+        index = self.listbox_project_documentation.curselection()[0]
+        window = Window_object_element(self.root, self.listbox_project_documentation,
+                                       'проектно-сметная документация', index)
+
+    def delete_project_documentation(self):
+        index = self.listbox_project_documentation.curselection()
+        x_data_akt.delete_project_documentation(index[0])
+        self.listbox_project_documentation.delete(index[0])
+
     # Контекстное меню для СПИСКА АКТОВ вкладке АКТЫ
     def menu_listbox_akts(self, event):
         menu = tkinter.Menu(tearoff=0)
@@ -570,6 +623,11 @@ class RootGUI:
         index = self.listbox_akts.curselection()
         x_data_akt.delete_akt(index[0])
         self.listbox_akts.delete(index[0])
+
+    # Скролинг ГРУППЫ виджетов canvas
+    def scrolling_canvas(self, event):
+        if self.root.focus_get() in self.tuple_widget_canvas:
+            self.canvas.yview_scroll(int(-1 * event.delta / 120), 'units')
 
     def view_akt(self, event):
         self.text_object_name.delete(0.0, 'end')
@@ -806,6 +864,10 @@ class Window_object_element:
             return x_data_akt.get_organization_name(self.__index), x_data_akt.get_organization_text(self.__index)
         elif self.__type_element == 'представители':
             return x_data_akt.get_representative_name(self.__index), x_data_akt.get_representative_text(self.__index)
+        elif self.__type_element == 'проектно-сметная документация':
+            print(self.__index)
+            return x_data_akt.get_project_documentation_name(self.__index), x_data_akt.get_project_documentation_text(
+                self.__index)
         elif self.__type_element == 'регламенты':
             return x_data_akt.get_regulation_name(self.__index), x_data_akt.get_regulation_text(self.__index)
 
@@ -816,6 +878,8 @@ class Window_object_element:
             return x_data_akt.get_all_organizations_names()
         elif self.__type_element == 'представители':
             return x_data_akt.get_all_representatives_names()
+        elif self.__type_element == 'проектно-сметная документация':
+            return x_data_akt.get_all_project_documentations_names()
         elif self.__type_element == 'регламенты':
             return x_data_akt.get_all_regulations_names()
 
@@ -826,6 +890,8 @@ class Window_object_element:
             x_data_akt.set_organization(text, name)
         elif self.__type_element == 'представители':
             x_data_akt.set_representative(text, name)
+        elif self.__type_element == 'проектно-сметная документация':
+            x_data_akt.set_project_documentation(text, name)
         elif self.__type_element == 'регламенты':
             x_data_akt.set_regulation(text, name)
 
@@ -836,6 +902,8 @@ class Window_object_element:
             x_data_akt.change_organization(text, name, self.__index)
         elif self.__type_element == 'представители':
             x_data_akt.change_representative(text, name, self.__index)
+        elif self.__type_element == 'проектно-сметная документация':
+            x_data_akt.change_project_documentation(text, name, self.__index)
         elif self.__type_element == 'регламенты':
             x_data_akt.change_regulation(text, name, self.__index)
 
@@ -1049,7 +1117,7 @@ class Window_akt:
                                                     values=x_data_akt.get_all_organizations_names()))
         self.list_documentation.append(ttk.Combobox(self.frame_documentation,
                                                     width=30,
-                                                    values=x_data_akt.get_all_texts_name_doc()))
+                                                    values=x_data_akt.get_all_project_documentations_names()))
         self.list_documentation.append(tkinter.Entry(self.frame_documentation, width=30))
         self.list_documentation[0].grid(row=1, column=1, stick='we')
         self.list_documentation[1].grid(row=1, column=2, stick='we')
@@ -1208,7 +1276,7 @@ class Window_akt:
                                                         values=x_data_akt.get_all_organizations_names()))
             self.list_documentation.append(ttk.Combobox(self.frame_documentation,
                                                         width=30,
-                                                        values=x_data_akt.get_all_texts_name_doc()))
+                                                        values=x_data_akt.get_all_project_documentations_names()))
             self.list_documentation.append(tkinter.Entry(self.frame_documentation, width=30))
             self.list_documentation[-3].grid(row=int(len(self.list_documentation) / 3), column=1, stick='we')
             self.list_documentation[-2].grid(row=int(len(self.list_documentation) / 3), column=2, stick='we')
@@ -1371,7 +1439,8 @@ class Window_akt:
             documents_list = []
             for iteration in range(int(len(self.list_documentation) / 3)):
                 org = insert_data(self.list_documentation[iteration * 3 + 0], x_data_akt.get_all_organizations())
-                doc_name = x_data_akt.set_unique_or_get_name_doc(self.list_documentation[iteration * 3 + 1].get())
+                doc_name = insert_data(self.list_documentation[iteration * 3 + 1],
+                                       x_data_akt.get_all_project_documentation())
                 page = self.list_documentation[iteration * 3 + 2].get()
                 if org.get_text() == '' and doc_name.get_text() == '' and page == '':
                     pass
@@ -2534,8 +2603,6 @@ class Window_veiw_doc:
 
         self.__window.bind('<Left>', lambda a: self.next_page(-1))
         self.__window.bind('<Right>', lambda a: self.next_page(1))
-
-        self.__window.mainloop()
 
     def next_page(self, page):
         if (self.num_page + page) <= 0:

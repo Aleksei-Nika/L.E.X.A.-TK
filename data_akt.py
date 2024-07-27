@@ -45,7 +45,7 @@ class Data_Akt:
         self.__names_object = ()
         self.__organization = ()
         self.__representative = ()
-        self.__names_design_estimate_documentation = ()
+        self.__project_documentation = ()
         self.__materials = ()
         self.__documents = ()
         self.__regulations = ()
@@ -199,7 +199,7 @@ class Data_Akt:
         return self.__organization
 
     # функции для ПРЕДСТВАВИТЕЛЕЙ
-    # Добавление ПРЕДСТАВИТЕЛЯ в конец кортежа
+        # Добавление ПРЕДСТАВИТЕЛЯ в конец кортежа
     def set_representative(self, text, name):
         self.__representative = list(self.__representative)
         self.__representative.insert(0, Object_element(text, name))
@@ -242,22 +242,49 @@ class Data_Akt:
     def get_all_representatives(self):
         return self.__representative
 
-        # Добавление уникального имени ПСД (объектов) (документации) или выдача уже существующего
-    def set_unique_or_get_name_doc(self, name_doc):
-        for iter in range(len(self.__names_design_estimate_documentation)):
-            if self.__names_design_estimate_documentation[iter].get_text() == name_doc:
-                return self.__names_design_estimate_documentation[iter]
-        self.__names_design_estimate_documentation = list(self.__names_design_estimate_documentation)
-        self.__names_design_estimate_documentation.append(Object_element(name_doc, None))
-        return self.__names_design_estimate_documentation[len(self.__names_design_estimate_documentation)-1]
+    # функции для ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+        # добовление ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ в конец кортежа
+    def set_project_documentation(self, text, name):
+        self.__project_documentation = list(self.__project_documentation)
+        self.__project_documentation.insert(0, Object_element(text, name))
+        self.__project_documentation = tuple(self.__project_documentation)
 
-        # Возвращение всех имён ПСД (объектов) (документации)
-    def get_all_obj_name_doc(self):
-        return self.__names_design_estimate_documentation
+        # Изменение ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ в кортеже
+    def change_project_documentation(self, text, name, index):
+        self.__project_documentation = list(self.__project_documentation)
+        self.__project_documentation[index].set_text(text)
+        self.__project_documentation[index].set_name(name)
+        self.__project_documentation = tuple(self.__project_documentation)
 
-        # Возвращение всех имён ПСД (text) (документации)
-    def get_all_texts_name_doc(self):
-        return tuple(element.get_text() for element in self.__names_design_estimate_documentation)
+        # Удаление ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ из кортежа
+    def delete_project_documentation(self, index):
+        self.__project_documentation = list(self.__project_documentation)
+        del self.__project_documentation[index]
+        self.__project_documentation = tuple(self.__project_documentation)
+
+        # Возвращение информации о ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def get_project_documentation_text(self, index):
+        return self.__project_documentation[index].get_text()
+
+        # Возвращение имени ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def get_project_documentation_name(self, index):
+        return self.__project_documentation[index].get_name()
+
+        # Возвращение кортежа с информацией о всех ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def get_all_project_documentations_texts(self):
+        return tuple(element.get_text() for element in self.__project_documentation)
+
+        # Возвращение кортежа с именами всех ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def get_all_project_documentations_names(self):
+        return tuple(element.get_name() for element in self.__project_documentation)
+
+        # Возвращение ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def get_project_documentation(self, index):
+        return self.__project_documentation[index]
+
+        # Возвращение кортежа с ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+    def get_all_project_documentation(self):
+        return self.__project_documentation
 
     # функции для МАТЕРИАЛОВ
         # Добавление МАТЕРИАЛА в кортеж
@@ -481,11 +508,11 @@ class Akt:
         self.__another_person = None
         self.__contractor = None
         self.__work = None
+        self.__documentation = None
         self.__materials = ()
         self.__documents = ()
         self.__start_date = None
         self.__finish_date = None
-        self.__documentation = None
         self.__regulations = ()
         self.__additional_information = None
         self.__number_of_copies = None
@@ -739,9 +766,7 @@ class Akt:
             if org is None:
                 org = doc.get_organization().get_text()
 
-            name_doc = doc.get_name_doc().get_name()
-            if name_doc is None:
-                name_doc = doc.get_name_doc().get_text()
+            name_doc = doc.get_name_doc().get_text()
 
             page = doc.get_page()
 
@@ -1004,7 +1029,7 @@ class Date:
 
 class Material:
     def __init__(self, type=None, material=None, document_name=None, documents_name=None,
-                 document_number=None, start_date=None, finish_date=None, path_file=None):
+                 document_number=None, start_date=None, finish_date=None):
         self.__id = None
         self.__type = type
         self.__material = material
