@@ -49,6 +49,7 @@ class Data_Akt:
         self.__materials = ()
         self.__documents = ()
         self.__regulations = ()
+        self.__names_classifications = ()
 
     # функции для АКТОВ
     def set_akt(self, akt):
@@ -72,8 +73,19 @@ class Data_Akt:
     def get_all_akts(self):
         return self.__akts
 
-    def get_all_akts_names(self):
+    def get_all_akts_names_object(self):
         return tuple(akts.get_name_work() for akts in self.get_all_akts())
+
+    def get_all_akts_names_text(self):
+        return tuple(akts.get_name_work().get_text() for akts in self.get_all_akts())
+
+    def get_names_previous_works(self, akt_index):
+        previous_works = []
+        for akt in self.__akts:
+            if self.get_akt(akt_index).get_name_work() in akt.get_next_work():
+                previous_works.append(akt.get_name_work())
+        return tuple(previous_works)
+
 
     # функции для ИМЁН ОБЪЕКТА
         # Добавление ИМЕНИ ОБЪЕКТА в конец кортежа
@@ -493,6 +505,32 @@ class Data_Akt:
     def get_all_text_documents_list(self):
         return tuple(element.get_in_list() for element in self.__documents)
 
+    # Функции для классификаций
+        # Назначение классификации
+    def set_name_classification(self, name_classification):
+        self.__names_classifications = list(self.__names_classifications)
+        self.__names_classifications.append(name_classification)
+        self.__names_classifications = tuple(self.__names_classifications)
+
+        # Вернуть НАИМЕНОВАНИЯ ВСЕХ КЛАССИФИКАЦИЙ
+    def get_all_names_classifications(self):
+        return self.__names_classifications
+
+        # Вернуть все НАИМЕНОВАНИЯ КЛАССИФИКАЦИЙ в АКТЕ
+    def get_keys_classifications_akt(self, index_akt):
+        keys_classifications = list(self.__akts[index_akt].get_keys_classifications())
+        keys_classifications.sort(key=lambda x: self.__names_classifications.index(x))
+        return tuple(keys_classifications)
+
+        # Вернуть все КЛАССИФИКАЦИИ (КЛАССЫ) по НАИМЕНОВАНИЮ КЛАССИФИКАЦИИ
+    def get_all_classifications_by_key(self, name_classification):
+        list_classifications = []
+        for akt in self.__akts:
+            list_classifications.append(akt.get_values_classifications(name_classification))
+        list_classifications = set(list_classifications)
+        list_classifications = list(list_classifications)
+        list_classifications.sort()
+        return tuple(list_classifications)
 
 class Akt:
     def __init__(self):
@@ -514,8 +552,10 @@ class Akt:
         self.__start_date = None
         self.__finish_date = None
         self.__regulations = ()
+        self.__next_work = ()
         self.__additional_information = None
         self.__number_of_copies = None
+        self.__classifications = dict()
 
     # Функции для ИМЕНИ ОБЪЕКТА
     def set_name_object(self, obj):
@@ -595,8 +635,8 @@ class Akt:
         return self.__contractor
 
     # функции для НАИМЕНОВАНИЯ РАБОТ
-    def set_name_work(self, name):
-        self.__work = str(name)
+    def set_name_work(self, obj):
+        self.__work = obj
 
     def get_name_work(self):
         return self.__work
@@ -790,6 +830,18 @@ class Akt:
     def get_regulations(self):
         return self.__regulations
 
+    # Функции для ПОСЛЕДУЮЩИХ РАБОТ
+    def set_next_work(self, list_next_work):
+        self.__next_work = tuple(list_next_work)
+
+    def add_next_work(self, next_work):
+        self.__next_work = list(self.__next_work)
+        self.__next_work.append(next_work)
+        self.__next_work = tuple(self.__next_work)
+
+    def get_next_work(self):
+        return self.__next_work
+
     # Функции для ДОПОЛНИТЕЛЬНЫХ СВЕДЕНИЙ
     def set_additional_information(self, additional_information):
         self.__additional_information = additional_information
@@ -803,6 +855,22 @@ class Akt:
 
     def get_number_of_copies(self):
         return self.__number_of_copies
+
+    # Функции для КЛАССИФИКАЦИИ
+    def set_classification(self, classifications):
+        self.__classifications = classifications
+
+    def add_classification(self, name_classification, classification):
+        self.__classifications[name_classification] = classification
+
+    def get_dict_classifications(self):
+        return self.__classifications
+
+    def get_values_classifications(self, key):
+        return self.__classifications[key]
+
+    def get_keys_classifications(self):
+        return tuple(self.__classifications.keys())
 
 
 # класс ЭЛЕМЕНТЫ для АКТА

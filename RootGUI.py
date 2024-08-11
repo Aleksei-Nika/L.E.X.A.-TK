@@ -470,7 +470,7 @@ class RootGUI:
         self.updater_list(self.listbox_names, x_data_akt.get_all_name_object_names())
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
         self.updater_list(self.listbox_regulation, x_data_akt.get_all_representatives_names())
-        self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
+        self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names_text())
         self.updater_table_materials()
 
     def load_file(self):
@@ -480,7 +480,7 @@ class RootGUI:
         self.updater_list(self.listbox_names, x_data_akt.get_all_name_object_names())
         self.updater_list(self.listbox_organization, x_data_akt.get_all_organizations_names())
         self.updater_list(self.listbox_regulation, x_data_akt.get_all_representatives_names())
-        self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names())
+        self.updater_list(self.listbox_akts, x_data_akt.get_all_akts_names_text())
         self.updater_table_materials()
 
     def save_file(self):
@@ -660,7 +660,7 @@ class RootGUI:
         self.text_another_person.insert('end', x_data_akt.get_akt(index[0]).get_another_person().get_text())
         self.text_contractor.insert('end', x_data_akt.get_akt(index[0]).get_contractor().get_text())
 
-        self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work())
+        self.text_work.insert('end', x_data_akt.get_akt(index[0]).get_name_work().get_text())
         self.text_documentation.insert('end', x_data_akt.get_akt(index[0]).get_text_of_documentation())
 
     # Функции меню для таблицы материалов
@@ -937,8 +937,11 @@ class Window_akt:
             self.__list_text_materials_akt = tuple()
             self.__list_text_documents_akt = tuple()
             self.__list_regulations_akt = tuple()
+            self.__previous_work = tuple()
+            self.__next_work = tuple()
             self.__additional_information = None
             self.__number_of_copies = None
+            self.__classifications = None
         else:
             self.__index = index
             self.__name_object = self.old_elements(x_data_akt.get_akt(index).get_name_object())
@@ -954,13 +957,16 @@ class Window_akt:
             self.__contractor = self.old_elements(x_data_akt.get_akt(index).get_contractor())
             self.__start_date = x_data_akt.get_akt(index).get_str_start_date()
             self.__finish_date = x_data_akt.get_akt(index).get_str_finish_date()
-            self.__work = x_data_akt.get_akt(index).get_name_work()
+            self.__work = self.old_elements(x_data_akt.get_akt(index).get_name_work())
             self.__documentation = x_data_akt.get_akt(index).get_documentation()
             self.__list_text_materials_akt = x_data_akt.get_akt(index).get_text_all_materials_of_akt()
             self.__list_text_documents_akt = x_data_akt.get_akt(index).get_text_all_documents_of_akt()
             self.__list_regulations_akt = x_data_akt.get_akt(index).get_regulations()
+            self.__previous_work = x_data_akt.get_names_previous_works(index)
+            self.__next_work = x_data_akt.get_akt(index).get_next_work()
             self.__additional_information = x_data_akt.get_akt(index).get_additional_information()
             self.__number_of_copies = x_data_akt.get_akt(index).get_number_of_copies()
+            self.__classifications = x_data_akt.get_akt(index).get_dict_classifications()
 
         if action == 'новый':
             self.__action = action
@@ -1205,6 +1211,28 @@ class Window_akt:
                                                          values=x_data_akt.get_all_regulations_names()))
         self.list_widget_regulations[-1].grid(row=0, column=1, stick='we')
 
+        # Группа виджетов ПОСЛЕДОВАТЕЛЬНОСТЬ РАБОТ
+        self.frame_order_work = tkinter.LabelFrame(self.frame_window_akt,
+                                                   text='Последовательность производства работ')
+        self.label_previous_work = tkinter.Label(self.frame_order_work, text='Предыдущая работа')
+        self.label_next_work = tkinter.Label(self.frame_order_work, text='Последующая работа')
+        self.button_add_order_work = tkinter.Button(self.frame_order_work, text='>>',
+                                                    command=self.add_widget_from_order_work)
+        self.label_previous_work.grid(row=0, column=1, rowspan=1, stick='ns')
+        self.label_next_work.grid(row=0, column=2, rowspan=1, stick='ns')
+        self.button_add_order_work.grid(row=1, column=0, rowspan=1, stick='ns')
+
+        self.list_widget_order_work = []
+        self.list_widget_order_work.append(ttk.Combobox(self.frame_order_work,
+                                                        width=50,
+                                                        state="readonly",
+                                                        values=x_data_akt.get_all_akts_names_text()))
+        self.list_widget_order_work.append(ttk.Combobox(self.frame_order_work,
+                                                        width=50,
+                                                        values=x_data_akt.get_all_akts_names_text()))
+        self.list_widget_order_work[-2].grid(row=1, column=1, rowspan=1, stick='ns')
+        self.list_widget_order_work[-1].grid(row=1, column=2, rowspan=1, stick='ns')
+
         # Группа виджетов ДОПОЛНИТЕЛЬНЫЕ СВЕДЕНИЯ
         self.frame_additional_information = tkinter.LabelFrame(self.frame_window_akt,
                                                                text='Дополнительные сведения')
@@ -1221,6 +1249,28 @@ class Window_akt:
         self.label_number_of_copies1.grid(row=0, column=0)
         self.snipbox_number_of_copies.grid(row=0, column=1)
         self.label_number_of_copies2.grid(row=0, column=2)
+
+        # Группа виджетов КЛАССИФИКАЦИЯ АКТОВ
+        self.frame_classifications = tkinter.LabelFrame(self.frame_window_akt, text='Классификация')
+        self.label_name_classification = tkinter.Label(self.frame_classifications, text='Наименование классификации')
+        self.label_classification = tkinter.Label(self.frame_classifications, text='Класс')
+        self.button_add_classification = tkinter.Button(self.frame_classifications, text='>>',
+                                                        command=self.add_widget_from_classification)
+        self.label_name_classification.grid(row=0, column=1, rowspan=1, stick='ns')
+        self.label_classification.grid(row=0, column=2, rowspan=1, stick='ns')
+        self.button_add_classification.grid(row=1, column=0, rowspan=1, stick='ns')
+
+        self.list_widget_classifications = []
+        self.list_widget_classifications.append(ttk.Combobox(self.frame_classifications,
+                                                             width=50,
+                                                             values=x_data_akt.get_all_names_classifications()))
+        combobox_name_classification = self.list_widget_classifications[-1]
+        combobox_name_classification.bind('<<ComboboxSelected>>',
+                                          lambda x: self.set_variant_in_combobox_classification(
+                                              combobox_name_classification))
+        self.list_widget_classifications.append(ttk.Combobox(self.frame_classifications, width=50))
+        self.list_widget_classifications[-2].grid(row=1, column=1, rowspan=1, stick='we')
+        self.list_widget_classifications[-1].grid(row=1, column=2, rowspan=1, stick='we')
 
         if index is not None:
             self.combobox_object.set(self.__name_object)
@@ -1241,8 +1291,10 @@ class Window_akt:
             self.old_materials()
             self.old_documents()
             self.old_regulations()
+            self.old_next_and_previous_work()
             self.text_additional_information.insert('end', self.__additional_information)
             self.snipbox_number_of_copies.set(self.__number_of_copies)
+            self.old_classifications()
 
         self.frame_object.grid(row=0, column=0, stick='we')
         self.frame_work.grid(row=1, column=0, stick='we')
@@ -1251,8 +1303,10 @@ class Window_akt:
         self.frame_material.grid(row=4, column=0, stick='we')
         self.frame_document.grid(row=5, column=0, stick='we')
         self.frame_regulations.grid(row=6, column=0, stick='we')
-        self.frame_additional_information.grid(row=7, column=0, stick='we')
-        self.frame_number_of_copies.grid(row=8, column=0)
+        self.frame_order_work.grid(row=7, column=0, stick='we')
+        self.frame_additional_information.grid(row=8, column=0, stick='we')
+        self.frame_number_of_copies.grid(row=9, column=0)
+        self.frame_classifications.grid(row=10, column=0, stick='we')
 
         self.button_akt = tkinter.Button(self.window_create_akt, text=self.__text_button, command=self.akt)
         self.label_indicator = tkinter.Label(self.window_create_akt, foreground='red')
@@ -1289,7 +1343,40 @@ class Window_akt:
                                                              width=50,
                                                              values=x_data_akt.get_all_regulations_names()))
             self.list_widget_regulations[-1].grid(row=len(self.list_widget_regulations), column=1, stick='we')
-            self.button_add_regulations.grid(row=0, column=0, rowspan=len(self.list_widget_regulations) + 1, stick='ns')
+            self.button_add_regulations.grid(row=0, column=0, rowspan=int(len(self.list_widget_regulations) / 2 + 1),
+                                             stick='ns')
+
+    def add_widget_from_order_work(self):
+        if self.list_widget_order_work[-1].get() != '' or self.list_widget_order_work[-2].get() != '':
+            self.list_widget_order_work.append(ttk.Combobox(self.frame_order_work,
+                                                            width=50,
+                                                            state="readonly",
+                                                            values=x_data_akt.get_all_akts_names_text()))
+            self.list_widget_order_work.append(ttk.Combobox(self.frame_order_work,
+                                                            width=50,
+                                                            values=x_data_akt.get_all_akts_names_text()))
+            self.list_widget_order_work[-2].grid(row=int(len(self.list_widget_order_work) / 2),
+                                                 column=1, stick='we')
+            self.list_widget_order_work[-1].grid(row=int(len(self.list_widget_order_work) / 2),
+                                                 column=2, stick='we')
+            self.button_add_order_work.grid(row=1, column=0, rowspan=int(len(self.list_widget_order_work) / 2 + 1),
+                                            stick='ns')
+
+    def add_widget_from_classification(self):
+        if self.list_widget_classifications[-1].get() != '' and self.list_widget_classifications[-2].get() != '':
+            self.list_widget_classifications.append(ttk.Combobox(self.frame_classifications, width=50,
+                                                                 values=self.set_list_selected_names_classifications()))
+            combobox_name_classification = self.list_widget_classifications[-1]
+            combobox_name_classification.bind('<<ComboboxSelected>>',
+                                              lambda x: self.set_variant_in_combobox_classification(
+                                                  combobox_name_classification))
+            self.list_widget_classifications.append(ttk.Combobox(self.frame_classifications, width=50))
+            self.list_widget_classifications[-2].grid(row=int(len(self.list_widget_classifications)/2),
+                                                      column=1, stick='we')
+            self.list_widget_classifications[-1].grid(row=int(len(self.list_widget_classifications) / 2),
+                                                      column=2, stick='we')
+            self.button_add_classification.grid(row=1, column=0, rowspan=int(len(self.list_widget_classifications) / 2 + 1),
+                                                stick='ns')
 
     def old_doc(self):
         for component in self.__documentation:
@@ -1318,6 +1405,27 @@ class Window_akt:
         for regulation in self.__list_regulations_akt:
             self.list_widget_regulations[-1].set(self.old_elements(regulation))
             self.add_widget_from_regulation()
+
+    def old_next_and_previous_work(self):
+        if len(self.__next_work) >= len(self.__previous_work):
+            number_cycles = len(self.__next_work)
+        else:
+            number_cycles = len(self.__previous_work)
+        for cycle_number in range(number_cycles):
+            if cycle_number < len(self.__next_work):
+                self.list_widget_order_work[-1].set(self.__next_work[cycle_number].get_text())
+            if cycle_number < len(self.__previous_work):
+                self.list_widget_order_work[-2].set(self.__previous_work[cycle_number].get_text())
+            self.add_widget_from_order_work()
+
+    def old_classifications(self):
+        keys_classifications = x_data_akt.get_keys_classifications_akt(self.__index)
+        for name_classification in keys_classifications:
+            self.list_widget_classifications[-2].set(name_classification)
+            self.list_widget_classifications[-1].set(self.__classifications[name_classification])
+            self.list_widget_classifications[-1].config(values=x_data_akt.get_all_classifications_by_key(name_classification))
+            self.add_widget_from_classification()
+        self.setting_variant_in_combobox_name_classification()
 
     def transfer_to_listbox_materials_akt(self, event=None):
         self.__list_text_all_materials = list(self.__list_text_all_materials)
@@ -1405,6 +1513,27 @@ class Window_akt:
         menu.add_command(label='Убрать', command=self.cancellation_transfer_documents)
         menu.post(self.window_create_akt.winfo_pointerx(), self.window_create_akt.winfo_pointery())
 
+    def set_variant_in_combobox_classification(self, combobox_classification):
+        index_widget = self.list_widget_classifications.index(combobox_classification)+1
+        key = combobox_classification.get()
+        self.list_widget_classifications[index_widget].config(values=x_data_akt.get_all_classifications_by_key(key))
+        self.setting_variant_in_combobox_name_classification()
+
+    def set_list_selected_names_classifications(self):
+        list_selected_names_classifications = []
+        new_list_names_classifications = []
+        for iteration_widget in range(int(len(self.list_widget_classifications)/2)):
+            list_selected_names_classifications.append(self.list_widget_classifications[iteration_widget*2].get())
+        list_selected_names_classifications = tuple(list_selected_names_classifications)
+        for name_classification in x_data_akt.get_all_names_classifications():
+            if name_classification not in list_selected_names_classifications:
+                new_list_names_classifications.append(name_classification)
+        return tuple(new_list_names_classifications)
+
+    def setting_variant_in_combobox_name_classification(self):
+        for iteration_widget in range(int(len(self.list_widget_classifications)/2)):
+            self.list_widget_classifications[iteration_widget*2].config(values=self.set_list_selected_names_classifications())
+
     def akt(self):
 
         # Функция для проверки корректности введенных дат и перевод их в объект класса Date
@@ -1451,7 +1580,7 @@ class Window_akt:
                     else:
                         page = data_akt.page_modification(page)
                         if page is None:
-                            self.__indicator += 'Некорректно введен список листов'
+                            self.__indicator += 'Некорректно введен список листов\n'
                             return
                         else:
                             doc = data_akt.Doc(org, doc_name, page)
@@ -1480,9 +1609,36 @@ class Window_akt:
 
         def set_list_regulations_akt():
             list_regulations_akt = []
-            for iter in self.list_widget_regulations:
-                list_regulations_akt.append(insert_data(iter, x_data_akt.get_all_regulations()))
+            for iteration in self.list_widget_regulations:
+                list_regulations_akt.append(insert_data(iteration, x_data_akt.get_all_regulations()))
             return tuple(list_regulations_akt)
+
+        def set_list_next_work():
+            list_next_work = []
+            for iteration in range(int(len(self.list_widget_order_work)/2)):
+                if self.list_widget_order_work[iteration*2+1].get() != '':
+                    list_next_work.append(insert_data(self.list_widget_order_work[iteration*2+1],
+                                                      x_data_akt.get_all_akts_names_object()))
+                if self.list_widget_order_work[iteration*2].get() != '':
+                    previous_akt_work = self.list_widget_order_work[iteration * 2].get()
+                    index_previous_akt_work = x_data_akt.get_all_akts_names_text().index(previous_akt_work)
+                    x_data_akt.get_akt(index_previous_akt_work).add_next_work(self.__work)
+            return tuple(list_next_work)
+
+        def set_classifications():
+            dict_classifications = dict()
+            for iteration in range(int(len(self.list_widget_classifications)/2)):
+                key = self.list_widget_classifications[iteration*2].get()
+                value = self.list_widget_classifications[iteration*2+1].get()
+                if key in dict_classifications:
+                    self.__indicator += 'Акта не должен содержать несколько классов в одной классификации\n'
+                if key != '' and value != '':
+                    dict_classifications[key] = value
+                    if key not in x_data_akt.get_all_names_classifications():
+                        x_data_akt.set_name_classification(key)
+                elif key == '' and value != '':
+                    self.__indicator += 'Наименование классификации не должно быть пустым, если класс заполнен\n'
+            return dict_classifications
 
         # Обновление переменной "Индикатор" (необходимо в случае, если индикатор уже горел)
         self.__indicator = ''
@@ -1502,15 +1658,17 @@ class Window_akt:
         self.__contractor = insert_data(self.combobox_contractor, x_data_akt.get_all_organizations())
         self.__start_date = self.entry_start_date.get() if self.entry_start_date.get() != '' else None
         self.__finish_date = self.entry_finish_date.get() if self.entry_finish_date.get() != '' else None
-        self.__work = self.entry_work.get()
+        self.__work = data_akt.Object_element(self.entry_work.get(), None)
         self.__documentation = insert_data_documentation()
         self.__list_regulations_akt = set_list_regulations_akt()
+        self.__next_work = set_list_next_work()
         self.__additional_information = self.text_additional_information.get('1.0', 'end')
         self.__number_of_copies = self.snipbox_number_of_copies.get() if self.snipbox_number_of_copies.get() != '0' else ''
+        self.__classifications = set_classifications()
 
         # проверка корректности введенных данный
-        if self.__work == '':
-            self.__indicator = 'Наименование работ не может быть пустым\n' + self.__indicator
+        if self.__work.get_text() == '':
+            self.__indicator = 'Наименование работ не должно быть пустым\n' + self.__indicator
         checking_deadline()
 
         if self.__indicator != '':
@@ -1537,8 +1695,10 @@ class Window_akt:
             akt.set_materials_of_akt(set_materials_object())
             akt.set_documents_of_akt(set_documents_object())
             akt.set_regulations(self.__list_regulations_akt)
+            akt.set_next_work(self.__next_work)
             akt.set_additional_information(self.__additional_information)
             akt.set_number_of_copies(self.__number_of_copies)
+            akt.set_classification(self.__classifications)
             x_data_akt.set_akt(akt)
         elif self.__action == 'изменить':
             x_data_akt.get_akt(self.__index).set_name_object(self.__name_object)
@@ -1560,9 +1720,11 @@ class Window_akt:
             x_data_akt.get_akt(self.__index).set_documents_of_akt(set_documents_object())
             x_data_akt.get_akt(self.__index).set_regulations(self.__list_regulations_akt)
             x_data_akt.get_akt(self.__index).set_additional_information(self.__additional_information)
+            x_data_akt.get_akt(self.__index).set_next_work(self.__next_work)
             x_data_akt.get_akt(self.__index).set_number_of_copies(self.__number_of_copies)
+            x_data_akt.get_akt(self.__index).set_classification(self.__classifications)
 
-        elements = tkinter.Variable(value=x_data_akt.get_all_akts_names())
+        elements = tkinter.Variable(value=x_data_akt.get_all_akts_names_text())
         self.__listbox.config(listvariable=elements)
         self.window_create_akt.destroy()
 
