@@ -3,6 +3,7 @@ from datetime import date
 import sqlite3
 import fitz
 import os
+import Export_Akt_Word
 
 
 def new():
@@ -86,15 +87,15 @@ class Data_Akt:
                 previous_works.append(akt.get_name_work())
         return tuple(previous_works)
 
-
     # функции для ИМЁН ОБЪЕКТА
-        # Добавление ИМЕНИ ОБЪЕКТА в конец кортежа
+    # Добавление ИМЕНИ ОБЪЕКТА в конец кортежа
     def set_name_object(self, text, name):
         self.__names_object = list(self.__names_object)
         self.__names_object.insert(0, Object_element(text, name))
         self.__names_object = tuple(self.__names_object)
 
         # Изменение ИМЕНИ ОБЪЕКТА в кортеже
+
     def change_name_object(self, text, name, index):
         self.__names_object = list(self.__names_object)
         self.__names_object[index].set_text(text)
@@ -102,43 +103,51 @@ class Data_Akt:
         self.__names_object = tuple(self.__names_object)
 
         # Удаление ИМЕНИ ОБЪЕКТА из кортежа
+
     def delete_name_object(self, index):
         self.__names_object = list(self.__names_object)
         del self.__names_object[index]
         self.__names_object = tuple(self.__names_object)
 
         # Возвращение ПОЛНОГО ИМЕНИ из кортежа
+
     def get_name_object_text(self, index):
         return self.__names_object[index].get_text()
 
         # Возвращение КОРОТКОГО ИМЕНИ из кортежа
+
     def get_name_object_name(self, index):
         return self.__names_object[index].get_name()
 
         # Возвращение кортежа ПОЛНЫХ ИМЁН
+
     def get_all_name_object_texts(self):
         return tuple(element.get_text() for element in self.__names_object)
 
         # Возвращение кортежа КОРОТКИХ ИМЁН
+
     def get_all_name_object_names(self):
         return tuple(element.get_name() for element in self.__names_object)
 
         # Возвращение ИМЕНИ
+
     def get_name_object(self, index):
         return self.__names_object[index]
 
         # Возвращение кортежа ПОЛНЫХ ИМЁН
+
     def get_all_names_object(self):
         return self.__names_object
 
     # Функции для ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
-        # Добавление ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+    # Добавление ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
     def set_regulation(self, text, name):
         self.__regulations = list(self.__regulations)
         self.__regulations.insert(0, Object_element(text, name))
         self.__regulations = tuple(self.__regulations)
 
         # Изменение ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+
     def change_regulation(self, text, name, index):
         self.__regulations = list(self.__regulations)
         self.__regulations[index].set_text(text)
@@ -146,32 +155,39 @@ class Data_Akt:
         self.__regulations = tuple(self.__regulations)
 
         # Удаление ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+
     def delete_regulation(self, index):
         self.__regulations = list(self.__regulations)
         del self.__regulations[index]
         self.__regulations = tuple(self.__regulations)
 
         # Возвращение ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+
     def get_regulation(self, index):
         return self.__regulations[index]
 
         # Возвращение всех ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+
     def get_all_regulations(self):
         return self.__regulations
 
         # Возвращение ТЕКСТА ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+
     def get_regulation_text(self, index):
         return self.__regulations[index].get_text()
 
         # Возвращение всех ТЕКСТОВ ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+
     def get_all_regulations_texts(self):
         return tuple(element.get_text() for element in self.__regulations)
 
         # Возвращение ИМЕНИ ТЕХНИЧЕСКОГО РЕГЛАМЕНТА
+
     def get_regulation_name(self, index):
         return self.__regulations[index].get_name()
 
         # Возвращение всех ИМЕН ТЕХНИЧЕСКИХ РЕГЛАМЕНТОВ
+
     def get_all_regulations_names(self):
         return tuple(element.get_name() for element in self.__regulations)
 
@@ -211,13 +227,14 @@ class Data_Akt:
         return self.__organization
 
     # функции для ПРЕДСТВАВИТЕЛЕЙ
-        # Добавление ПРЕДСТАВИТЕЛЯ в конец кортежа
+    # Добавление ПРЕДСТАВИТЕЛЯ в конец кортежа
     def set_representative(self, text, name):
         self.__representative = list(self.__representative)
         self.__representative.insert(0, Object_element(text, name))
         self.__representative = tuple(self.__representative)
 
         # Изменение ПРЕДСТАВИТЕЛЯ в кортеже
+
     def change_representative(self, text, name, index):
         self.__representative = list(self.__representative)
         self.__representative[index].set_text(text)
@@ -225,43 +242,51 @@ class Data_Akt:
         self.__representative = tuple(self.__representative)
 
         # Удаление ПРЕДСТВИТЕЛЯ из кортежа
+
     def delete_representative(self, index):
         self.__representative = list(self.__representative)
         del self.__representative[index]
         self.__representative = tuple(self.__representative)
 
         # Возвращение информации о ПРЕДСТАВИТЕЛЕ
+
     def get_representative_text(self, index):
         return self.__representative[index].get_text()
 
         # Возвращение имени ПРЕДСТАВИТЕЛЯ
+
     def get_representative_name(self, index):
         return self.__representative[index].get_name()
 
         # Возвращение кортежа с информацией о всех ПРЕДСТАВИТЕЛЯХ
+
     def get_all_representatives_texts(self):
         return tuple(element.get_text() for element in self.__representative)
 
         # Возвращение кортежа с именами всех ПРЕДСТАВИТЕЛЯХ
+
     def get_all_representatives_names(self):
         return tuple(element.get_name() for element in self.__representative)
 
         # Возвращение ПРЕДСТАВИТЕЛЯ
+
     def get_representative(self, index):
         return self.__representative[index]
 
         # Возвращение кортежа с ПРЕДСТАВИТЕЛЯМИ
+
     def get_all_representatives(self):
         return self.__representative
 
     # функции для ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
-        # добовление ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ в конец кортежа
+    # добовление ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ в конец кортежа
     def set_project_documentation(self, text, name):
         self.__project_documentation = list(self.__project_documentation)
         self.__project_documentation.insert(0, Object_element(text, name))
         self.__project_documentation = tuple(self.__project_documentation)
 
         # Изменение ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ в кортеже
+
     def change_project_documentation(self, text, name, index):
         self.__project_documentation = list(self.__project_documentation)
         self.__project_documentation[index].set_text(text)
@@ -269,37 +294,44 @@ class Data_Akt:
         self.__project_documentation = tuple(self.__project_documentation)
 
         # Удаление ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ из кортежа
+
     def delete_project_documentation(self, index):
         self.__project_documentation = list(self.__project_documentation)
         del self.__project_documentation[index]
         self.__project_documentation = tuple(self.__project_documentation)
 
         # Возвращение информации о ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+
     def get_project_documentation_text(self, index):
         return self.__project_documentation[index].get_text()
 
         # Возвращение имени ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+
     def get_project_documentation_name(self, index):
         return self.__project_documentation[index].get_name()
 
         # Возвращение кортежа с информацией о всех ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+
     def get_all_project_documentations_texts(self):
         return tuple(element.get_text() for element in self.__project_documentation)
 
         # Возвращение кортежа с именами всех ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+
     def get_all_project_documentations_names(self):
         return tuple(element.get_name() for element in self.__project_documentation)
 
         # Возвращение ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+
     def get_project_documentation(self, index):
         return self.__project_documentation[index]
 
         # Возвращение кортежа с ПРОЕКТНО-СМЕТНОЙ ДОКУМЕНТАЦИИ
+
     def get_all_project_documentation(self):
         return self.__project_documentation
 
     # функции для МАТЕРИАЛОВ
-        # Добавление МАТЕРИАЛА в кортеж
+    # Добавление МАТЕРИАЛА в кортеж
     def set_material(self, new_material, index_order=None):
         id = 0
         while id in self.get_all_id_materials():
@@ -310,6 +342,7 @@ class Data_Akt:
         self.__materials = tuple(self.__materials)
 
         # Изменение порядкового номера МАТЕРИАЛА
+
     def change_order_of_material(self, material, index_order=None):
         self.__materials = list(self.__materials)
         self.__materials.remove(material)
@@ -317,6 +350,7 @@ class Data_Akt:
         self.__materials = tuple(self.__materials)
 
         # Установка порядкового номера МАТЕРИАЛА
+
     def setting_order_of_material(self, material, index_order=None):
         if index_order is not None:
             self.__materials.insert(index_order, material)
@@ -330,33 +364,39 @@ class Data_Akt:
                 self.__materials.append(material)
             else:
                 index = self.__materials.index(list_materials[-1])
-                self.__materials.insert(index+1, material)
+                self.__materials.insert(index + 1, material)
 
         # Установка нового порядка всех материалов
+
     def setting_complete_material_order(self, order_materials):
         self.__materials = list(self.__materials)
         self.__materials.sort(key=lambda x: order_materials.index(x.get_in_list()))
         self.__materials = tuple(self.__materials)
 
         # Удаление МАТЕРИАЛА в кортеже
+
     def delete_material(self, index):
         self.__materials = list(self.__materials)
         del self.__materials[index]
         self.__materials = tuple(self.__materials)
 
         # Возвращение МАТЕРИАЛА из кортежа
+
     def get_material(self, index):
         return self.__materials[index]
 
         # Возвращение кортежа всех МАТЕРИАЛОВ
+
     def get_all_materials(self):
         return self.__materials
 
         # Возвращение всех ID МАТЕРИАЛОВ
+
     def get_all_id_materials(self):
         return tuple(material.get_id() for material in self.__materials)
 
         # Возвращение уникальных ТИПОВ МАТЕРИАЛОВ
+
     def get_all_unique_type_materials(self):
         all_unique_type_materials = set()
         for material in self.__materials:
@@ -365,6 +405,7 @@ class Data_Akt:
         return tuple(all_unique_type_materials)
 
         # Возвращение уникальных НАИМЕНОВАНИЙ МАТЕРИАЛОВ
+
     def get_all_unique_material_materials(self):
         all_unique_material_materials = set()
         for material in self.__materials:
@@ -373,6 +414,7 @@ class Data_Akt:
         return tuple(all_unique_material_materials)
 
         # Возвращение уникальных ИМЁН ДОКУМЕНТА МАТЕРИАЛОВ
+
     def get_all_unique_document_names_materials(self):
         all_unique_document_name_materials = set()
         for material in self.__materials:
@@ -381,6 +423,7 @@ class Data_Akt:
         return tuple(all_unique_document_name_materials)
 
         # Возвращение уникальных ИМЁН ДОКУМЕНТОВ (множественное число имени) МАТЕРИАЛОВ
+
     def get_all_unique_documents_names_materials(self):
         all_unique_documents_names_materials = set()
         for material in self.__materials:
@@ -389,21 +432,24 @@ class Data_Akt:
         return tuple(all_unique_documents_names_materials)
 
         # Возвращение соответсвующего ИМЕНИ ДОКУМЕНТОВ (множественное число имени) МАТЕРИАЛОВ
+
     def get_corresponding_documents_name_materials(self, document_name):
         for material in self.__materials:
             if material.get_document_name() == document_name:
                 return material.get_documents_name()
 
         # Возвращение всех материалов для таблицы
+
     def get_all_text_materials_table(self):
         return tuple(element.get_in_tabel() for element in self.__materials)
 
         # Возвращение всех материалов для списка
+
     def get_all_text_materials_list(self):
         return tuple(element.get_in_list() for element in self.__materials)
 
     # Функции для ДОКУМЕНТОВ СООТВЕТСТВИЯ
-        # Добавление ДОКУМЕНТА СООТВЕТСТВИЯ в кортеж
+    # Добавление ДОКУМЕНТА СООТВЕТСТВИЯ в кортеж
     def set_document(self, new_document, index_order=None):
         id = 0
         while id in self.get_all_id_documents():
@@ -414,6 +460,7 @@ class Data_Akt:
         self.__documents = tuple(self.__documents)
 
         # Изменение порядкового номера ДОКУМЕНТА СООТВЕТСТВИЯ
+
     def change_order_of_document(self, document, index_order=None):
         self.__documents = list(self.__documents)
         self.__documents.remove(document)
@@ -421,6 +468,7 @@ class Data_Akt:
         self.__documents = tuple(self.__documents)
 
         # Установка порядкового номера ДОКУМЕНТА СООТВЕТСТВИЯ
+
     def setting_order_of_document(self, document, index_order=None):
         if index_order is not None:
             self.__documents.insert(index_order, document)
@@ -448,34 +496,39 @@ class Data_Akt:
                     self.__documents.insert(index, document)
                 else:
                     index = self.__documents.index(list_documents_date[index_by_date - 1])
-                    self.__documents.insert(index+1, document)
-
+                    self.__documents.insert(index + 1, document)
 
         # Установка нового порядка всех ДОКУМЕНТОВ СООТВЕТСТВИЯ
+
     def setting_complete_document_order(self, order_documents):
         self.__documents = list(self.__documents)
         self.__documents.sort(key=lambda x: order_documents.index(x.get_in_list()))
         self.__documents = tuple(self.__documents)
 
         # Удаление ДОКУМЕНТА СООТВЕТСТВИЯ в кортеже
+
     def delete_document(self, index):
         self.__documents = list(self.__documents)
         del self.__documents[index]
         self.__documents = tuple(self.__documents)
 
         # Возвращение ДОКУМЕНТА СООТВЕТСТВИЯ из кортежа
+
     def get_document(self, index):
         return self.__documents[index]
 
         # Возвращение кортежа всех ДОКУМЕНТОВ СООТВЕТСТВИЯ
+
     def get_all_documents(self):
         return self.__materials
 
         # Возвращение всех ID ДОКУМЕНТОВ СООТВЕТСТВИЯ
+
     def get_all_id_documents(self):
         return tuple(document.get_id() for document in self.__documents)
 
         # Возвращение уникальных ИМЁН ДОКУМЕНТОВ СООТВЕТСТВИЯ
+
     def get_all_unique_document_names_documents(self):
         all_unique_document_name_documents = set()
         for document in self.__documents:
@@ -484,6 +537,7 @@ class Data_Akt:
         return tuple(all_unique_document_name_documents)
 
         # Возвращение уникальных ИМЁН ДОКУМЕНТОВ (множественное число имени) ДОКУМЕНТОВ СООТВЕТСТВИЯ
+
     def get_all_unique_documents_names_documents(self):
         all_unique_documents_names_documents = set()
         for document in self.__documents:
@@ -492,37 +546,43 @@ class Data_Akt:
         return tuple(all_unique_documents_names_documents)
 
         # Возвращение соответсвующего ИМЕНИ ДОКУМЕНТОВ (множественное число имени) ДОКУМЕНТА СООТВЕТСТВИЯ
+
     def get_corresponding_documents_name_documents(self, document_name):
         for document in self.__documents:
             if document.get_document_name() == document_name:
                 return document.get_documents_name()
 
         # Возвращение всех ДОКУМЕНТОВ СООТВЕТСТВИЯ для таблицы
+
     def get_all_text_documents_table(self):
         return tuple(element.get_in_tabel() for element in self.__documents)
 
         # Возвращение всех ДОКУМЕНТОВ СООТВЕТСТВИЯ для списка
+
     def get_all_text_documents_list(self):
         return tuple(element.get_in_list() for element in self.__documents)
 
     # Функции для классификаций
-        # Назначение классификации
+    # Назначение классификации
     def set_name_classification(self, name_classification):
         self.__names_classifications = list(self.__names_classifications)
         self.__names_classifications.append(name_classification)
         self.__names_classifications = tuple(self.__names_classifications)
 
         # Вернуть НАИМЕНОВАНИЯ ВСЕХ КЛАССИФИКАЦИЙ
+
     def get_all_names_classifications(self):
         return self.__names_classifications
 
         # Вернуть все НАИМЕНОВАНИЯ КЛАССИФИКАЦИЙ в АКТЕ
+
     def get_keys_classifications_akt(self, index_akt):
         keys_classifications = list(self.__akts[index_akt].get_keys_classifications())
         keys_classifications.sort(key=lambda x: self.__names_classifications.index(x))
         return tuple(keys_classifications)
 
         # Вернуть все КЛАССИФИКАЦИИ (КЛАССЫ) по НАИМЕНОВАНИЮ КЛАССИФИКАЦИИ
+
     def get_all_classifications_by_key(self, name_classification):
         list_classifications = []
         for akt in self.__akts:
@@ -531,6 +591,7 @@ class Data_Akt:
         list_classifications = list(list_classifications)
         list_classifications.sort()
         return tuple(list_classifications)
+
 
 class Akt:
     def __init__(self):
@@ -691,6 +752,7 @@ class Akt:
         self.__finish_date = Date(str_finish_date)
 
         # добавление даты начала и окончания работ в акт
+
     def add_deadline(self, str_start_date, str_finish_date):
         try:
             if str_start_date is None and str_finish_date is None:
@@ -717,6 +779,7 @@ class Akt:
         return self.__finish_date
 
         # возвращение строки даты начала для акта
+
     def get_str_start_date(self):
         dictionary = {'January': 'января',
                       'February': 'февраля',
@@ -738,6 +801,7 @@ class Akt:
             return f'«{date1[0]}» {dictionary[date1[1]]} {date1[2]} г.'
 
         # возвращение строки даты начала для акта
+
     def get_str_finish_date(self):
         dictionary = {'January': 'января',
                       'February': 'февраля',
@@ -872,6 +936,38 @@ class Akt:
     def get_keys_classifications(self):
         return tuple(self.__classifications.keys())
 
+    # Функции для экспорта
+    def export(self):
+        get_export = dict()
+        get_export['Наименование объекта'] = (self.__name_object.get_text(),)
+        get_export['Застройщик'] = (self.__developer.get_text(),)
+        get_export['Строитель'] = (self.__builder.get_text(),)
+        get_export['Проектная организация'] = (self.__designer.get_text(),)
+        get_export['Представитель застройщика'] = (self.__developer_name.get_text(),)
+        get_export['Представитель строителя'] = (self.__builder_name.get_text(),)
+        get_export['Представитель строителя (контроль)'] = (self.__builder_control_name.get_text(),)
+        get_export['Представитель проектной организации'] = (self.__designer_name.get_text(),)
+        get_export['Представитель исполнителя'] = (self.__contractor_name.get_text(),)
+        get_export['Иные представители'] = (self.__another_person.get_text(),)
+        get_export['Исполнитель'] = (self.__contractor.get_text(),)
+        get_export['1. Наименования работ'] = (self.__work.get_text(),)
+        get_export['2. Проектно-сметная документация'] = (self.get_text_of_documentation(),)
+        get_export['3. Материалы/оснастка'] = self.get_text_all_materials_of_akt()
+        get_export['4. Документы потверждающие соответсвия работ'] = self.get_text_all_materials_of_akt()
+        get_export['5. Дата'] = (self.get_str_start_date(), self.get_str_finish_date())
+        get_export['6. Работы выполнены в соответсвии с'] = self.__regulations
+        get_export['7. Последующие работы'] = self.__next_work
+        get_export['Дополнительные сведения'] = (self.__additional_information,)
+        get_export['Кол-во экземпляров'] = self.__number_of_copies
+        get_export['Приложения'] = ''
+        get_export['Подпись представителя застройщика'] = (self.__developer_name,)
+        get_export['Подпись представителя строителя'] = (self.__builder_name,)
+        get_export['Подпись представителя строителя (контроль)'] = (self.__builder_control_name,)
+        get_export['Подпись представителя проектной организации'] = (self.__designer_name,)
+        get_export['Подпись представителя исполнителя'] = (self.__contractor_name,)
+        get_export['Подпись представителя иных лиц'] = (self.__another_person,)
+        return get_export
+
 
 # класс ЭЛЕМЕНТЫ для АКТА
 class Object_element:
@@ -915,6 +1011,7 @@ class Doc:
 
     def get_page(self):
         return self.__page
+
 
 def page_modification(input_page):
     try:
@@ -1018,6 +1115,7 @@ def page_modification(input_page):
 
     return text_sheet_number
 
+
 class Date:
     def __init__(self, str_date):
         self.__Object_date = self.set_date(str_date)
@@ -1094,6 +1192,7 @@ class Date:
     # возвращение объекта дата
     def get_date(self):
         return self.__Object_date
+
 
 class Material:
     def __init__(self, type=None, material=None, document_name=None, documents_name=None,
@@ -1235,6 +1334,7 @@ class Material:
         return tuple(elements_material)
 
         # возвращение строки даты начала для акта
+
     def get_str_start_date(self):
         if self.__start_date == '' or self.__start_date is None:
             return None
@@ -1244,6 +1344,7 @@ class Material:
             return f'{date1[0]}.{date1[1]}.{date1[2]}'
 
         # возвращение строки даты начала
+
     def get_str_finish_date(self):
         if self.__finish_date == '' or self.__finish_date is None:
             return None
@@ -1253,6 +1354,7 @@ class Material:
             return f'{date1[0]}.{date1[1]}.{date1[2]}'
 
         # возвращение изобажений
+
     def get_bin_images(self):
         if self.__bin_images is not None:
             return pickle.loads(self.__bin_images)
@@ -1260,6 +1362,7 @@ class Material:
             return None
 
         # удаление изобажений
+
     def del_bin_images(self):
         self.__bin_images = None
 
@@ -1311,11 +1414,13 @@ class Data_base_materials:
                                 file BLOB)''')
 
         # Выдать всю базу данных
+
     def extract_all_data_from_database(self):
         self.__cur.execute('''SELECT * FROM materials''')
         return self.__cur.fetchall()
 
         # Добавить новый материал в базу данных
+
     def insert_data(self, type, material, document_name, documents_name, document_number, start_date, finish_date,
                     path_file):
         if path_file is None:
@@ -1335,6 +1440,7 @@ class Data_base_materials:
                                 file_bin))
 
         # Изменить материал в базе данных
+
     def change_data(self, material_id, type, material, document_name, documents_name, document_number, start_date,
                     finish_date, path_file):
         if path_file is None:
@@ -1369,10 +1475,12 @@ class Data_base_materials:
                                 file_bin, material_id))
 
         # Удаление материала по ID
+
     def delete_data(self, material_id):
         self.__cur.execute('''DELETE FROM materials WHERE ItemID = ?''', (material_id,))
 
         # Выборка материалов для поиска
+
     def selection_materials_for_search(self, search):
         self.__cur.execute(f'''SELECT * FROM materials
                             WHERE type LIKE "%{search}%" OR
@@ -1381,10 +1489,11 @@ class Data_base_materials:
                             documents_name LIKE "%{search}%" OR
                             document_number LIKE "%{search}%" OR
                             start_date LIKE "%{search}%" OR
-                            finish_date LIKE "%{search}%"''')# (search, search, search, search, search, search, search))
+                            finish_date LIKE "%{search}%"''')  # (search, search, search, search, search, search, search))
         return self.__cur.fetchall()
 
         # Выборка материалов для сортироваки в таблицы
+
     def selection_materials_for_table(self, material_names, document_number, column_for_order):
         str_request_material = ''
         str_request_document_number = ''
@@ -1417,16 +1526,19 @@ class Data_base_materials:
         return self.__cur.fetchall()
 
         # Выборка материалов по столбцу и условию
+
     def selection_materials(self, column, condition):
         self.__cur.execute(f'''SELECT * FROM materials WHERE {column} == ?''', (condition,))
         return self.__cur.fetchall()
 
         # Найти материал по ID
+
     def material_selection_by_id(self, material_id):
         self.__cur.execute('''SELECT * FROM materials WHERE ItemID == ?''', (material_id,))
         return self.__cur.fetchone()
 
         # Выдать все ID материалов из базы данных
+
     def all_id_material(self):
         self.__cur.execute('''SELECT ItemID FROM materials''')
         result = self.__cur.fetchall()
@@ -1436,6 +1548,7 @@ class Data_base_materials:
         return tuple(list_id)
 
         # Выдать все типы материалов из базы данных
+
     def all_type_material(self):
         self.__cur.execute('''SELECT type FROM materials''')
         result = self.__cur.fetchall()
@@ -1448,6 +1561,7 @@ class Data_base_materials:
         return tuple(list_type)
 
         # Выдать все наименования материалов из базы данных
+
     def all_name_material(self, type_material=None):
         if type_material is None:
             self.__cur.execute('''SELECT material FROM materials''')
@@ -1463,6 +1577,7 @@ class Data_base_materials:
         return tuple(list_material)
 
         # Выдать все наименования документов из базы данных
+
     def all_document_name(self):
         self.__cur.execute('''SELECT document_name FROM materials''')
         result = self.__cur.fetchall()
@@ -1475,6 +1590,7 @@ class Data_base_materials:
         return tuple(list_document_name)
 
         # Выдать все номера документов из базы данных
+
     def all_document_number(self, document_name=None):
         if document_name is None:
             self.__cur.execute('''SELECT document_number FROM materials''')
@@ -1490,6 +1606,7 @@ class Data_base_materials:
         return tuple(list_document_number)
 
         # Выдать все даты начала документов
+
     def all_start_date(self):
         self.__cur.execute('''SELECT start_date FROM materials''')
         result = self.__cur.fetchall()
@@ -1501,6 +1618,7 @@ class Data_base_materials:
         return tuple(list_start_date)
 
         # Выдать все даты окончания документов
+
     def all_finish_date(self):
         self.__cur.execute('''SELECT finish_date FROM materials''')
         result = self.__cur.fetchall()
@@ -1514,6 +1632,7 @@ class Data_base_materials:
         return tuple(list_finish_date)
 
         # Выдать файл материала
+
     def get_file_material(self, material_id):
         self.__cur.execute('''SELECT file FROM materials WHERE ItemID == ?''', (material_id,))
         file_bit = self.__cur.fetchone()
@@ -1521,6 +1640,7 @@ class Data_base_materials:
         return file
 
         # Выдать материал для экспорта в исполнительную документацию
+
     def material_export(self, material_id):
         self.__cur.execute('''SELECT * FROM materials WHERE ItemID == ?''', (material_id,))
         data_material = list(self.__cur.fetchone())
@@ -1531,14 +1651,17 @@ class Data_base_materials:
         return tuple(data_material)
 
         # Удалить файл материала с записи
+
     def del_file_material(self, material_id):
         self.__cur.execute('''UPDATE materials SET file = NULL WHERE ItemID == ?''', (material_id,))
 
         # Сохранить базу данных
+
     def commit_data_base(self):
         self.__conn.commit()
 
         # Отключить базу данных
+
     def close_date_base(self):
         self.__conn.close()
 
@@ -1668,6 +1791,7 @@ class Document:
             return f'{date1[0]}.{date1[1]}.{date1[2]}'
 
         # возвращение строки даты начала
+
     def get_str_finish_date(self):
         if self.__finish_date == '' or self.__finish_date is None:
             return None
@@ -1677,6 +1801,7 @@ class Document:
             return f'{date1[0]}.{date1[1]}.{date1[2]}'
 
         # возвращение изобажений
+
     def get_bin_images(self):
         if self.__bin_images is not None:
             return pickle.loads(self.__bin_images)
@@ -1684,6 +1809,7 @@ class Document:
             return None
 
         # удаление изобажений
+
     def del_bin_images(self):
         self.__bin_images = None
 
@@ -1712,12 +1838,128 @@ class Document:
         return document
 
 
-# Сравнение дат
+class Setting_point:
+    def __init__(self, font, size, bold, italic, underline, paragraph, alignment, text, text_list):
+        self.font = font
+        self.size = size
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+        self.paragraph = paragraph
+        self.alignment = alignment
+        self.text = text
+        self.text_list = text_list
+
+    def get_config(self):
+        return (self.font, self.size, self.bold, self.italic, self.underline, self.paragraph, self.alignment, self.text,
+                self.text_list)
+
+    def get_config_in_export(self):
+        return self.text, self.font, self.size, self.bold, self.italic, self.underline
+
+    def set_config(self, font, size, bold, italic, underline, paragraph, alignment, text, text_list):
+        self.font = font
+        self.size = size
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+        self.paragraph = paragraph
+        self.alignment = alignment
+        self.text = text
+        self.text_list = text_list
+
+    def set_content(self, content):
+        self.text = content
+
+
+class Setting_general_point:
+    def __init__(self, alternation, table, table_line_var, table_line_heading_var, table_line_explanation_var):
+        self.alternation = alternation
+        self.table = table
+        self.table_line_var = table_line_var
+        self.table_line_heading_var = table_line_heading_var
+        self.table_line_explanation_var = table_line_explanation_var
+
+    def get_config(self):
+        return (self.alternation, self.table, self.table_line_var, self.table_line_heading_var,
+                self.table_line_explanation_var)
+
+    def set_config(self, alternation, table, table_line_var, table_line_heading_var, table_line_explanation_var):
+        self.alternation = alternation
+        self.table = table
+        self.table_line_var = table_line_var
+        self.table_line_heading_var = table_line_heading_var
+        self.table_line_explanation_var = table_line_explanation_var
+
+
+class Pattern_Export_to_Word:
+    def __init__(self, name, dict_points):
+        self.name_pattern = name
+        self.dict_points = dict_points
+
+    def set_pattern_export(self, dict_points):
+        self.dict_points = dict_points
+
+    def set_name_pattern_export(self, name):
+        self.name_pattern = name
+
+    def get_pattern_export(self):
+        return self.dict_points
+
+    def get_name_pattern_export(self):
+        return self.name_pattern
+
+
+class Export_to_Word:
+    def __init__(self):
+        self.__doc = Export_Akt_Word.create_doc()
+
+    def writing_point(self, setting_point):
+        if setting_point[3].table:
+            self.writing_point_not_table(setting_point[0:2])
+        else:
+            pass
+
+    def writing_point_not_table(self, setting_point):
+        for point in setting_point:
+            if point.paragraph:
+                paragraph = Export_Akt_Word.paragraph_point(self.__doc, point.alignment)
+            Export_Akt_Word.run_point(paragraph, *point.get_config_in_export())
+
+    def Export(self):
+        pass
+
+
+class Export:
+    def __init__(self):
+        pass
+
+    def list_patterns(self):
+        if not os.path.exists('Patterns_export'):
+            os.makedirs('Patterns_export')
+        patterns_names = list()
+        for pattern_name in os.listdir('Patterns_export'):
+            if pattern_name[-4:] == '.bat':
+                patterns_names.append(pattern_name[:-4])
+        return tuple(patterns_names)
+
+    def delete_pattern(self, pattern_name):
+        os.remove(f'Patterns_export\\{pattern_name}.bat')
+
+    def add_pattern(self, pattern_name, pattern_config):
+        new_pattern = pickle.dumps(Pattern_Export_to_Word(pattern_name, pattern_config))
+        file = open(f'Patterns_export\\{pattern_name}.bat', 'wb')
+        file.write(new_pattern)
+        file.close()
+
+
+    # Сравнение дат
 def date_comparison(start_date, finish_date):
     if start_date.get_date() <= finish_date.get_date():
         return False
     elif start_date.get_date() > finish_date.get_date():
         return True
+
 
 if __name__ == '__main__':
     pass
