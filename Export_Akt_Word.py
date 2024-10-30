@@ -254,30 +254,28 @@ class Point:
         return (self.alternation_content_and_explanations, self.table_format_var, self.table_line_var,
                 self.table_line_heading_var, self.table_line_explanation_var)
 
-    # ВСТАВИТЬ ФУНКЦИЮ В ИНТЕРФЕЙС!!!!!
-    def get_text_content(self, content, text_list, symbol_before_element, symbol_split_list, symbol_after_list,
-                         number_element, symbol_before_num, symbol_after_num):
-
+    def get_text_content(self, content):
         text = ''
-        if text_list == 'ROW':
+        if self.text_list == 'ROW':
             separator = '\n'
-        elif text_list == 'COLUMN':
+        elif self.text_list == 'COLUMN':
             separator = ' '
 
         before_element = []
-        if number_element:
+        if self.number_element:
             for number in range(len(content)):
-                before_element.append(f'{symbol_before_num}{number+1}{symbol_after_num}')
+                before_element.append(f'{self.symbol_before_num}{number+1}{self.symbol_after_num}')
         else:
-            before_element = [symbol_before_element] * (len(content)+1)
+            before_element = [self.symbol_before_element] * (len(content))
 
         for index in range(len(content)):
-            if index != len(content):
-                text += f'{before_element}{content[index+1]}{symbol_split_list}{separator}'
+            if index != len(content)-1:
+                text += f'{before_element[index]}{content[index]}{self.symbol_split_list}{separator}'
             else:
-                text += f'{before_element}{content[index+1]}{symbol_after_list}'
+                text += f'{before_element[index]}{content[index]}{self.symbol_after_list}'
 
         return text
+
 
 class Point_Text:
     def __init__(self):

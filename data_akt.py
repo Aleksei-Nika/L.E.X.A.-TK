@@ -1839,7 +1839,7 @@ class Document:
 
 
 class Setting_point:
-    def __init__(self, font, size, bold, italic, underline, paragraph, alignment, text, text_list):
+    def __init__(self, font, size, bold, italic, underline, paragraph, alignment, text):
         self.font = font
         self.size = size
         self.bold = bold
@@ -1848,16 +1848,14 @@ class Setting_point:
         self.paragraph = paragraph
         self.alignment = alignment
         self.text = text
-        self.text_list = text_list
 
     def get_config(self):
-        return (self.font, self.size, self.bold, self.italic, self.underline, self.paragraph, self.alignment, self.text,
-                self.text_list)
+        return self.font, self.size, self.bold, self.italic, self.underline, self.paragraph, self.alignment, self.text
 
     def get_config_in_export(self):
         return self.text, self.font, self.size, self.bold, self.italic, self.underline
 
-    def set_config(self, font, size, bold, italic, underline, paragraph, alignment, text, text_list):
+    def set_config(self, font, size, bold, italic, underline, paragraph, alignment, text):
         self.font = font
         self.size = size
         self.bold = bold
@@ -1866,11 +1864,45 @@ class Setting_point:
         self.paragraph = paragraph
         self.alignment = alignment
         self.text = text
-        self.text_list = text_list
 
     def set_content(self, content):
         self.text = content
 
+class Setting_point_content(Setting_point):
+    def __init__(self, font, size, bold, italic, underline, paragraph, alignment, text, list_text, entry_split_item,
+                 entry_after_list, num_var, entry_before_num, entry_after_num):
+        Setting_point.__init__(self, font, size, bold, italic, underline, paragraph, alignment, text)
+        self.list_text = list_text
+        self.entry_split_item = entry_split_item
+        self.entry_after_list = entry_after_list
+        self.num_var = num_var
+        self.entry_before_num = entry_before_num
+        self.entry_after_num = entry_after_num
+
+    def get_config(self):
+        return (self.font, self.size, self.bold, self.italic, self.underline, self.paragraph, self.alignment, self.text,
+                self.list_text, self.entry_split_item, self.entry_after_list, self.num_var, self.entry_before_num,
+                self.entry_after_num)
+
+    def get_config_in_export(self):
+        return self.text, self.font, self.size, self.bold, self.italic, self.underline, self.list_text, self.num_var
+
+    def set_config(self, font, size, bold, italic, underline, paragraph, alignment, text, list_text, entry_split_item,
+                   entry_after_list, num_var, entry_before_num, entry_after_num):
+        self.font = font
+        self.size = size
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+        self.paragraph = paragraph
+        self.alignment = alignment
+        self.text = text
+        self.list_text = list_text
+        self.entry_split_item = entry_split_item
+        self.entry_after_list = entry_after_list
+        self.num_var = num_var
+        self.entry_before_num = entry_before_num
+        self.entry_after_num = entry_after_num
 
 class Setting_general_point:
     def __init__(self, alternation, table, table_line_var, table_line_heading_var, table_line_explanation_var):
@@ -1908,27 +1940,6 @@ class Pattern_Export_to_Word:
 
     def get_name_pattern_export(self):
         return self.name_pattern
-
-
-class Export_to_Word:
-    def __init__(self):
-        self.__doc = Export_Akt_Word.create_doc()
-
-    def writing_point(self, setting_point):
-        if setting_point[3].table:
-            self.writing_point_not_table(setting_point[0:2])
-        else:
-            pass
-
-    def writing_point_not_table(self, setting_point):
-        for point in setting_point:
-            if point.paragraph:
-                paragraph = Export_Akt_Word.paragraph_point(self.__doc, point.alignment)
-            Export_Akt_Word.run_point(paragraph, *point.get_config_in_export())
-
-    def Export(self):
-        pass
-
 
 class Export:
     def __init__(self):

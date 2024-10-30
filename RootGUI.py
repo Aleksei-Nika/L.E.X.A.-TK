@@ -3082,14 +3082,12 @@ class Window_export_to_word:
             def __init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var, bold_italic,
                          bold_underline):
 
-                self.point_general_object = None
-                self.list_content = False
-                self.content = (None,)
+                #self.point_general_object = None
+                #self.list_content = False
 
                 self.frame = tkinter.LabelFrame(root, text=labelframe_text)
                 self.frame_text = tkinter.Frame(self.frame)
                 self.label_text = tkinter.Label(self.frame_text, text=f'{heading}')
-                self.content = ()
                 self.text_content = tkinter.Text(self.frame_text, height=8, width=50, wrap='word')
                 self.label_text.pack()
                 self.text_content.pack()
@@ -3128,8 +3126,7 @@ class Window_export_to_word:
                 self.checkbutton_paragraph = tkinter.Checkbutton(self.paragraph_frame,
                                                                  text='Поместить в отдельный абзац',
                                                                  offvalue=False, onvalue=True,
-                                                                 variable=self.paragraph_var,
-                                                                 command=self.alignment_state)
+                                                                 variable=self.paragraph_var)
                 self.checkbutton_paragraph.grid(row=0, column=0)
 
                 self.frame_alignment = tkinter.Frame(self.frame_customization)
@@ -3161,80 +3158,6 @@ class Window_export_to_word:
                 self.frame_text.grid(row=0, column=0, rowspan=2)
                 self.frame_customization.grid(row=0, column=1)
 
-            def setting_content(self, list_text, num_var):
-                self.list_content = True
-                self.frame_list = tkinter.Frame(self.frame)
-                self.sep = ttk.Separator(self.frame_list, orient='horizontal')
-                self.list_text = tkinter.StringVar(value=list_text)
-                self.radiobutton_row = tkinter.Radiobutton(self.frame_list, text='список в колонку',
-                                                           value='ROW', variable=self.list_text, command=self.edit_text)
-                self.radiobutton_column = tkinter.Radiobutton(self.frame_list, text='список в строку',
-                                                              value='COLUMN', variable=self.list_text)
-                self.label_split_item = tkinter.Label(self.frame_list, text='Символы\nразделения пунктов')
-                self.entry_split_item = tkinter.Entry(self.frame_list, width=3)
-                self.label_after_list = tkinter.Label(self.frame_list, text='Завершающие\nсимволы списка')
-                self.entry_after_list = tkinter.Entry(self.frame_list, width=3)
-                self.num_var = tkinter.BooleanVar(value=num_var)
-                self.checkbutton_num = tkinter.Checkbutton(self.frame_list, text='Номеровать список',
-                                                           offvalue=False, onvalue=True, variable=self.num_var,
-                                                           command=self.num_checking)
-                self.label_before_num = tkinter.Label(self.frame_list, text='Символы\nдо номера')
-                self.entry_before_num = tkinter.Entry(self.frame_list, width=3)
-                self.label_after_num = tkinter.Label(self.frame_list, text='    Символы\nпосле номера')
-                self.entry_after_num = tkinter.Entry(self.frame_list, width=3)
-                self.sep.grid(row=0, column=0, columnspan=4, sticky='we')
-                self.radiobutton_row.grid(row=1, column=0, columnspan=2)
-                self.radiobutton_column.grid(row=1, column=2, columnspan=2)
-                self.label_split_item.grid(row=2, column=0, sticky='w')
-                self.entry_split_item.grid(row=2, column=1, sticky='w', padx=5)
-                self.label_after_list.grid(row=2, column=2, sticky='e')
-                self.entry_after_list.grid(row=2, column=3, sticky='e')
-                self.checkbutton_num.grid(row=3, column=0)
-                self.label_before_num.grid(row=4, column=0, sticky='e')
-                self.entry_before_num.grid(row=4, column=1)
-                self.label_after_num.grid(row=4, column=2, sticky='e')
-                self.entry_after_num.grid(row=4, column=3)
-                self.frame_list.grid(row=1, column=1)
-                self.num_checking()
-                self.text_content.config(height=16)
-
-            def num_checking(self):
-                if self.num_var.get():
-                    self.entry_before_num.config(state='normal')
-                    self.entry_after_num.config(state='normal')
-                else:
-                    self.entry_before_num.config(state='disabled')
-                    self.entry_after_num.config(state='disabled')
-
-            def edit_text(self):
-                text = ''
-                if self.list_text.get() == 'ROW':
-                    if self.num_var:
-                        for iter in range(len(self.content)):
-                            if iter != len(self.content)-1:
-                                text += f'{self.entry_before_num.get()}{iter+1}{self.entry_after_num.get()}{self.content[iter]}{self.entry_split_item.get()} '
-                            elif iter == len(self.content)-1:
-                                text += f'{self.entry_before_num.get()}{iter+1}{self.entry_after_num.get()}{self.content[iter]}{self.entry_after_list.get()}'
-                    else:
-                        for iter in range(len(self.content)):
-                            if iter != len(self.content)-1:
-                                text += f'{self.content[iter]}{self.entry_split_item.get()} '
-                            elif iter == len(self.content)-1:
-                                text += f'{self.content[iter]}{self.entry_after_list.get()}'
-                elif self.list_text.get() == 'COLUMN':
-                    if self.num_var:
-                        for iter in range(len(self.content)):
-                            if iter != len(self.content)-1:
-                                text += f'{self.entry_before_num.get()}{iter+1}{self.entry_after_num.get()}{self.content[iter]}{self.entry_split_item.get()}\n'
-                            elif iter == len(self.content)-1:
-                                text += f'{self.entry_before_num.get()}{iter+1}{self.entry_after_num.get()}{self.content[iter]}{self.entry_after_list.get()}'
-                    else:
-                        for iter in range(len(self.content)):
-                            if iter != len(self.content)-1:
-                                text += f'{self.content[iter]}{self.entry_split_item.get()}\n'
-                            elif iter == len(self.content)-1:
-                                text += f'{self.content[iter]}{self.entry_after_list.get()}'
-
             def grid(self, row, column):
                 self.frame.grid(row=row, column=column)
 
@@ -3244,32 +3167,32 @@ class Window_export_to_word:
             def set_text(self, text):
                 self.text_content.insert('end', text)
 
-            def alignment_state(self):
-                if not self.paragraph_var.get():
-                    self.left_radiobutton.config(state='disabled')
-                    self.right_radiobutton.config(state='disabled')
-                    self.cent_radiobutton.config(state='disabled')
-                    self.width_radiobutton.config(state='disabled')
-                    self.all_width_radiobutton.config(state='disabled')
-                else:
-                    self.left_radiobutton.config(state='normal')
-                    self.right_radiobutton.config(state='normal')
-                    self.cent_radiobutton.config(state='normal')
-                    self.width_radiobutton.config(state='normal')
-                    self.all_width_radiobutton.config(state='normal')
-
-                if self.point_general_object is not None:
-                    self.point_general_object.table_on_off()
+            #def alignment_state(self):
+            #    if not self.paragraph_var.get():
+            #        self.left_radiobutton.config(state='disabled')
+            #        self.right_radiobutton.config(state='disabled')
+            #        self.cent_radiobutton.config(state='disabled')
+            #        self.width_radiobutton.config(state='disabled')
+            #        self.all_width_radiobutton.config(state='disabled')
+            #    else:
+            #        self.left_radiobutton.config(state='normal')
+            #        self.right_radiobutton.config(state='normal')
+            #        self.cent_radiobutton.config(state='normal')
+            #        self.width_radiobutton.config(state='normal')
+            #        self.all_width_radiobutton.config(state='normal')
+            #
+            #    if self.point_general_object is not None:
+            #        self.point_general_object.table_on_off()
 
             def checkbutton_paragraph_state_disabled(self):
                 self.checkbutton_paragraph.config(state='disabled')
 
-            def set_point_general(self, point_general):
-                self.point_general_object = point_general
+            #def set_point_general(self, point_general):
+            #    self.point_general_object = point_general
 
-            def point_general_table_on_off(self):
-                self.point_general_object.table_heading_on_off(self)
-                self.point_general_object.table_explanation_on_off(self)
+            #def point_general_table_on_off(self):
+            #    self.point_general_object.table_heading_on_off(self)
+            #    self.point_general_object.table_explanation_on_off(self)
 
             def disabled(self):
                 self.text_content.config(state='disabled')
@@ -3293,14 +3216,9 @@ class Window_export_to_word:
                 paragraph = self.paragraph_var.get()
                 alignment = self.alignment.get()
                 text = self.text_content.get('0.0', 'end')
-                if self.list_content:
-                    list_content = (self.list_text.get(), self.entry_split_item.get(), self.entry_after_list.get(),
-                                    self.num_var.get(), self.entry_before_num.get(), self.entry_after_num.get())
-                else:
-                    list_content = None
-                return font, size, bold, italic, underline, paragraph, alignment, text, list_content
+                return font, size, bold, italic, underline, paragraph, alignment, text
 
-            def set_config(self, font, size, bold, italic, underline, paragraph, alignment, text, list_content):
+            def set_config(self, font, size, bold, italic, underline, paragraph, alignment, text):
                 self.combobox_font.set(font)
                 self.spinbox_size.set(size)
                 self.bold_var.set(bold)
@@ -3310,13 +3228,6 @@ class Window_export_to_word:
                 self.alignment.set(alignment)
                 self.text_content.delete('0.0', 'end')
                 self.text_content.insert('0.0', self.insert_content(text))
-                if list_content is not None:
-                    self.list_text.set(list_content[0])
-                    self.entry_split_item.insert('0.0', list_content[1])
-                    self.entry_after_list.insert('0.0', list_content[2])
-                    self.num_var.set(list_content[3])
-                    self.entry_before_num.insert('0.0', list_content[4])
-                    self.entry_after_num.insert('0.0', list_content[5])
 
             def insert_content(self, text):
                 content = ''
@@ -3326,11 +3237,120 @@ class Window_export_to_word:
                     content += element
                 return content
 
+        class Point_format_content(Point_format):
+            def __init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var,
+                         bold_italic, bold_underline, list_text, num_var):
+                Point_format.__init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var,
+                                      bold_italic, bold_underline)
+
+                self.frame_list = tkinter.Frame(self.frame)
+                self.sep = ttk.Separator(self.frame_list, orient='horizontal')
+                self.list_text = tkinter.StringVar(value=list_text)
+                self.radiobutton_row = tkinter.Radiobutton(self.frame_list, text='список в колонку',
+                                                           value='ROW',
+                                                           variable=self.list_text)
+                self.radiobutton_column = tkinter.Radiobutton(self.frame_list, text='список в строку',
+                                                              value='COLUMN',
+                                                              variable=self.list_text)
+                self.frame_symbol_list = tkinter.Frame(self.frame_list)
+                self.label_before_list = tkinter.Label(self.frame_symbol_list, text='Начальные символы пункта')
+                self.entry_before_list = tkinter.Entry(self.frame_symbol_list, width=3)
+                self.label_split_item = tkinter.Label(self.frame_symbol_list, text='Символы разделения пунктов')
+                self.entry_split_item = tkinter.Entry(self.frame_symbol_list, width=3)
+                self.label_after_list = tkinter.Label(self.frame_symbol_list, text='Завершающие символы списка')
+                self.entry_after_list = tkinter.Entry(self.frame_symbol_list, width=3)
+                self.num_var = tkinter.BooleanVar(value=num_var)
+                self.checkbutton_num = tkinter.Checkbutton(self.frame_list, text='Номеровать список',
+                                                           offvalue=False, onvalue=True, variable=self.num_var,
+                                                           command=self.num_checking)
+                self.label_before_num = tkinter.Label(self.frame_list, text='Символы\nдо номера')
+                self.entry_before_num = tkinter.Entry(self.frame_list, width=3)
+                self.label_after_num = tkinter.Label(self.frame_list, text='    Символы\nпосле номера')
+                self.entry_after_num = tkinter.Entry(self.frame_list, width=3)
+                self.sep.grid(row=0, column=0, columnspan=4, sticky='we')
+                self.radiobutton_row.grid(row=1, column=0, columnspan=2)
+                self.radiobutton_column.grid(row=1, column=2, columnspan=2)
+                self.frame_symbol_list.grid(row=2, column=0, columnspan=4, sticky='we')
+
+                self.label_before_list.grid(row=0, column=0, sticky='w')
+                self.entry_before_list.grid(row=0, column=1, sticky='w')
+                self.label_split_item.grid(row=1, column=0, sticky='w')
+                self.entry_split_item.grid(row=1, column=1, sticky='w')
+                self.label_after_list.grid(row=2, column=0, sticky='w')
+                self.entry_after_list.grid(row=2, column=1, sticky='w')
+
+                self.checkbutton_num.grid(row=3, column=0)
+                self.label_before_num.grid(row=4, column=0, sticky='e')
+                self.entry_before_num.grid(row=4, column=1)
+                self.label_after_num.grid(row=4, column=2, sticky='e')
+                self.entry_after_num.grid(row=4, column=3)
+                self.frame_list.grid(row=1, column=1)
+                self.num_checking()
+                self.text_content.config(height=18)
+
+            def get_config(self):
+                font = self.combobox_font.get()
+                size = self.spinbox_size.get()
+                bold = self.bold_var.get()
+                italic = self.italic_var.get()
+                underline = self.underline_var.get()
+                paragraph = self.paragraph_var.get()
+                alignment = self.alignment.get()
+                list_text = self.list_text.get()
+                entry_before_list = self.entry_before_list.get()
+                entry_split_item = self.entry_split_item.get()
+                entry_after_list = self.entry_after_list.get()
+                num_var = self.num_var.get()
+                entry_before_num = self.entry_before_num.get()
+                entry_after_num = self.entry_after_num.get()
+                return (font, size, bold, italic, underline, paragraph, alignment, list_text, entry_before_list,
+                        entry_split_item, entry_after_list, num_var, entry_before_num, entry_after_num)
+
+            def set_config(self, font, size, bold, italic, underline, paragraph, alignment, list_text,
+                           entry_before_list, entry_split_item, entry_after_list, num_var, entry_before_num,
+                           entry_after_num):
+                self.combobox_font.set(font)
+                self.spinbox_size.set(size)
+                self.bold_var.set(bold)
+                self.italic_var.set(italic)
+                self.underline_var.set(underline)
+                self.paragraph_var.set(paragraph)
+                self.alignment.set(alignment)
+
+                self.list_text.set(list_text)
+                self.entry_before_list.delete(0, 'end')
+                self.entry_before_list.insert(0, entry_before_list)
+                self.entry_split_item.delete(0, 'end')
+                self.entry_split_item.insert(0, entry_split_item)
+                self.entry_after_list.delete(0, 'end')
+                self.entry_after_list.insert(0, entry_after_list)
+                self.num_var.set(num_var)
+                self.entry_before_num.delete(0, 'end')
+                self.entry_before_num.insert(0, entry_before_num)
+                self.entry_after_num.delete(0, 'end')
+                self.entry_after_num.insert(0, entry_after_num)
+
+            def num_checking(self):
+                if self.num_var.get():
+                    self.entry_before_num.config(state='normal')
+                    self.entry_after_num.config(state='normal')
+                else:
+                    self.entry_before_num.config(state='disabled')
+                    self.entry_after_num.config(state='disabled')
+
+            def set_content(self, text):
+                self.content = text
+                self.text_content.delete('0.0', 'end')
+                self.text_content.insert('0.0', self.content)
+
+            def get_content(self):
+                return self.content
+
         class Point_general:
             def __init__(self, root, alternation, table_format, table_line, table_line_heading, table_line_explanation,
                          point_content_object, point_explanation_object):
-                self.point_content_object = point_content_object
-                self.point_explanation_object = point_explanation_object
+                #self.point_content_object = point_content_object
+                #self.point_explanation_object = point_explanation_object
                 self.frame = tkinter.LabelFrame(root, text='Общие параметры пункта')
                 self.frame_format = tkinter.Frame(self.frame)
 
@@ -3343,8 +3363,7 @@ class Window_export_to_word:
                 self.checkbutton_table_format = tkinter.Checkbutton(self.frame_format,
                                                                     text='Табличный формат',
                                                                     offvalue=False, onvalue=True,
-                                                                    variable=self.table_format_var,
-                                                                    command=lambda: self.table_on_off())
+                                                                    variable=self.table_format_var)
                 self.table_line_var = tkinter.StringVar(value=table_line)
                 self.radiobutton_content = tkinter.Radiobutton(self.frame_format,
                                                                text='Табличные строки для содержания',
@@ -3370,32 +3389,32 @@ class Window_export_to_word:
                 self.checkbutton_table_explanation.grid(row=5, column=0, sticky='w')
 
                 self.frame_format.grid(row=0, column=0)
-                self.table_on_off()
+                #self.table_on_off()
 
-            def table_format_on_off(self):
-                if self.table_format_var.get():
-                    self.radiobutton_content.config(state='normal')
-                    self.radiobutton_content_end.config(state='normal')
-                else:
-                    self.radiobutton_content.config(state='disabled')
-                    self.radiobutton_content_end.config(state='disabled')
+            #def table_format_on_off(self):
+            #    if self.table_format_var.get():
+            #        self.radiobutton_content.config(state='normal')
+            #        self.radiobutton_content_end.config(state='normal')
+            #    else:
+            #        self.radiobutton_content.config(state='disabled')
+            #        self.radiobutton_content_end.config(state='disabled')
 
-            def table_heading_on_off(self):
-                if not self.point_content_object.paragraph_var.get() and self.table_format_var.get():
-                    self.checkbutton_table_heading.config(state='normal')
-                else:
-                    self.checkbutton_table_heading.config(state='disabled')
+            #def table_heading_on_off(self):
+            #    if not self.point_content_object.paragraph_var.get() and self.table_format_var.get():
+            #        self.checkbutton_table_heading.config(state='normal')
+            #    else:
+            #        self.checkbutton_table_heading.config(state='disabled')
 
-            def table_explanation_on_off(self):
-                if not self.point_explanation_object.paragraph_var.get() and self.table_format_var.get():
-                    self.checkbutton_table_explanation.config(state='normal')
-                else:
-                    self.checkbutton_table_explanation.config(state='disabled')
+            #def table_explanation_on_off(self):
+            #    if not self.point_explanation_object.paragraph_var.get() and self.table_format_var.get():
+            #        self.checkbutton_table_explanation.config(state='normal')
+            #    else:
+            #        self.checkbutton_table_explanation.config(state='disabled')
 
-            def table_on_off(self):
-                self.table_format_on_off()
-                self.table_heading_on_off()
-                self.table_explanation_on_off()
+            #def table_on_off(self):
+            #    self.table_format_on_off()
+            #    self.table_heading_on_off()
+            #    self.table_explanation_on_off()
 
             def grid(self, row, column):
                 self.frame.grid(row=row, column=column, sticky='wens')
@@ -3422,11 +3441,10 @@ class Window_export_to_word:
                                                 False, False)
         self.heading_object_name.checkbutton_paragraph_state_disabled()
 
-        self.content_object_name = Point_format(self.window, 'Содержание пункта',
-                                                'Содержания наименования объекта',
-                                                self.__font, True, 'LEFT', False,
-                                                False, False)
-        self.content_object_name.setting_content('ROW', False)
+        self.content_object_name = Point_format_content(self.window, 'Содержание пункта',
+                                                        'Содержания наименования объекта',
+                                                        self.__font, True, 'LEFT', False,
+                                                        False, False, 'ROW', False)
 
         self.explanation_object_name = Point_format(self.window, 'Пояснение к пункту',
                                                     'Содержания наименования объекта', self.__font,
@@ -3436,8 +3454,8 @@ class Window_export_to_word:
         self.general_object = Point_general(self.window, False, False, 'CONTENT', False, False,
                                             self.content_object_name, self.explanation_object_name)
 
-        self.content_object_name.set_point_general(self.general_object)
-        self.explanation_object_name.set_point_general(self.general_object)
+        #self.content_object_name.set_point_general(self.general_object)
+        #self.explanation_object_name.set_point_general(self.general_object)
 
         self.list_point = tkinter.Variable(value=('<Все заголовки>', '<Все содержания>', '<Все пояснения>',
                                                   'Наименование объекта', 'Застройщик', 'Строитель',
@@ -3463,25 +3481,19 @@ class Window_export_to_word:
         self.dict_point = dict()
         self.null_pattern = data_akt.Pattern_Export_to_Word(None, dict())
         for point in self.list_point.get()[3:22]:
-            self.dict_point[point] = (data_akt.Setting_general_point(*self.general_object.get_config()),
-                                      data_akt.Setting_point(*self.heading_object_name.get_config()),
-                                      data_akt.Setting_point(*self.content_object_name.get_config()),
-                                      data_akt.Setting_point(*self.explanation_object_name.get_config()))
-
             self.dict_point[point] = (Export_Akt_Word.Point())
             self.dict_point[point].set_title(*self.heading_object_name.get_config())
             self.dict_point[point].set_content(*self.content_object_name.get_config())
+            self.dict_point[point].set_explanation(*self.explanation_object_name.get_config())
+            self.dict_point[point].set_parameters(*self.general_object.get_config())
 
         self.data_export = x_data_akt.get_akt(self.__index_akt).export()
-
-        for point in self.list_point.get()[3:22]:
-            self.dict_point[point][2].set_content(self.data_export[point])
 
         self.frame_list_point = tkinter.Frame(self.window)
         self.combobox_list_point = ttk.Combobox(self.frame_list_point, state='readonly', width=47,
                                                 values=self.list_point.get())
         self.label_listbox = tkinter.Label(self.frame_list_point, text='Список пунктов')
-        self.listbox_point = tkinter.Listbox(self.frame_list_point, listvariable=self.list_point, width=50, height=28)
+        self.listbox_point = tkinter.Listbox(self.frame_list_point, listvariable=self.list_point, width=50, height=30)
         self.button_point = tkinter.Button(self.frame_list_point, text='Сохранить настройки пункта',
                                            command=self.save_setting_point, height=1)
 
@@ -3500,6 +3512,118 @@ class Window_export_to_word:
 
         self.listbox_point.bind("<<ListboxSelect>>", self.set_item_to_combobox)
         self.combobox_list_point.bind("<<ComboboxSelected>>", self.set_item_to_listbox)
+
+        # Сохранение переменных при их изменении пункта заголовка
+        self.heading_object_name.combobox_font.bind('<<ComboboxSelected>>', self.updating_heading)
+        self.heading_object_name.spinbox_size.config(command=self.updating_heading)
+        self.heading_object_name.spinbox_size.bind('<KeyRelease>', self.updating_heading)
+        self.heading_object_name.checkbutton_bold.config(command=self.updating_heading)
+        self.heading_object_name.checkbutton_italic.config(command=self.updating_heading)
+        self.heading_object_name.checkbutton_underline.config(command=self.updating_heading)
+        self.heading_object_name.checkbutton_paragraph.config(
+            command=lambda: (self.checking_button(), self.updating_heading()))
+            #command=lambda: (self.heading_object_name.alignment_state(), self.updating_heading()))
+        self.heading_object_name.left_radiobutton.config(command=self.updating_heading)
+        self.heading_object_name.right_radiobutton.config(command=self.updating_heading)
+        self.heading_object_name.cent_radiobutton.config(command=self.updating_heading)
+        self.heading_object_name.width_radiobutton.config(command=self.updating_heading)
+        self.heading_object_name.all_width_radiobutton.config(command=self.updating_heading)
+
+        # Сохранение переменных при их изменении пункта контент
+        self.content_object_name.combobox_font.bind('<<ComboboxSelected>>', self.updating_content)
+        self.content_object_name.spinbox_size.config(command=self.updating_content)
+        self.content_object_name.spinbox_size.bind('<KeyRelease>', self.updating_content)
+        self.content_object_name.checkbutton_bold.config(command=self.updating_content)
+        self.content_object_name.checkbutton_italic.config(command=self.updating_content)
+        self.content_object_name.checkbutton_underline.config(command=self.updating_content)
+        self.content_object_name.checkbutton_paragraph.config(
+            command=lambda: (self.checking_button(), self.updating_content()))
+            #command=lambda: (self.content_object_name.alignment_state(), self.updating_content()))
+        self.content_object_name.left_radiobutton.config(command=self.updating_content)
+        self.content_object_name.right_radiobutton.config(command=self.updating_content)
+        self.content_object_name.cent_radiobutton.config(command=self.updating_content)
+        self.content_object_name.width_radiobutton.config(command=self.updating_content)
+        self.content_object_name.all_width_radiobutton.config(command=self.updating_content)
+
+        self.content_object_name.radiobutton_row.config(command=self.updating_content)
+        self.content_object_name.radiobutton_column.config(command=self.updating_content)
+        self.content_object_name.checkbutton_num.config(
+            command=lambda: (self.content_object_name.num_checking(), self.updating_content()))
+        self.content_object_name.entry_before_list.bind('<KeyRelease>', self.updating_content)
+        self.content_object_name.entry_split_item.bind('<KeyRelease>', self.updating_content)
+        self.content_object_name.entry_after_list.bind('<KeyRelease>', self.updating_content)
+        self.content_object_name.entry_before_num.bind('<KeyRelease>', self.updating_content)
+        self.content_object_name.entry_after_num.bind('<KeyRelease>', self.updating_content)
+        self.content_object_name.entry_after_num.config()
+
+        # Сохранение переменных при их изменении пункта пояснения
+        self.explanation_object_name.combobox_font.bind('<<ComboboxSelected>>', self.updating_explanation)
+        self.explanation_object_name.spinbox_size.config(command=self.updating_explanation)
+        self.explanation_object_name.spinbox_size.bind('<KeyRelease>', self.updating_explanation)
+        self.explanation_object_name.checkbutton_bold.config(command=self.updating_explanation)
+        self.explanation_object_name.checkbutton_italic.config(command=self.updating_explanation)
+        self.explanation_object_name.checkbutton_underline.config(command=self.updating_explanation)
+        self.explanation_object_name.checkbutton_paragraph.config(
+            command=lambda: (self.checking_button(), self.updating_explanation()))
+            #command=lambda: (self.explanation_object_name.alignment_state(), self.updating_explanation()))
+        self.explanation_object_name.left_radiobutton.config(command=self.updating_explanation)
+        self.explanation_object_name.right_radiobutton.config(command=self.updating_explanation)
+        self.explanation_object_name.cent_radiobutton.config(command=self.updating_explanation)
+        self.explanation_object_name.width_radiobutton.config(command=self.updating_explanation)
+        self.explanation_object_name.all_width_radiobutton.config(command=self.updating_explanation)
+
+        # Сохранение переменных при их изменении общих настроик пункта
+        self.general_object.checkbutton_alternation.config(command=self.updating_general)
+        self.general_object.checkbutton_table_format.config(
+            command=lambda: (self.checking_button(), self.updating_general()))
+            #command=lambda: (self.general_object.table_on_off(), self.updating_general()))
+        self.general_object.radiobutton_content.config(command=self.updating_general)
+        self.general_object.radiobutton_content_end.config(command=self.updating_general)
+        self.general_object.checkbutton_table_heading.config(command=self.updating_general)
+        self.general_object.checkbutton_table_explanation.config(command=self.updating_general)
+
+    def checking_button(self, event=None):
+        def point_check(object):
+            if object.paragraph_var.get():
+                object.left_radiobutton.config(state='normal')
+                object.right_radiobutton.config(state='normal')
+                object.cent_radiobutton.config(state='normal')
+                object.width_radiobutton.config(state='normal')
+                object.all_width_radiobutton.config(state='normal')
+                return False
+            else:
+                object.left_radiobutton.config(state='disabled')
+                object.right_radiobutton.config(state='disabled')
+                object.cent_radiobutton.config(state='disabled')
+                object.width_radiobutton.config(state='disabled')
+                object.all_width_radiobutton.config(state='disabled')
+                return True
+
+        def general_check(object):
+            if object.table_format_var.get():
+                object.radiobutton_content.config(state='normal')
+                object.radiobutton_content_end.config(state='normal')
+                return True
+            else:
+                object.radiobutton_content.config(state='disabled')
+                object.radiobutton_content_end.config(state='disabled')
+                return False
+
+        flag_general = general_check(self.general_object)
+        flag_content = point_check(self.content_object_name)
+        flag_explanation = point_check(self.explanation_object_name)
+
+        if flag_content and flag_general:
+            self.general_object.checkbutton_table_heading.config(state='normal')
+        else:
+            self.general_object.checkbutton_table_heading.config(state='disabled')
+
+        if flag_explanation and flag_general:
+            self.general_object.checkbutton_table_explanation.config(state='normal')
+        else:
+            self.general_object.checkbutton_table_explanation.config(state='disabled')
+
+        point_check(self.heading_object_name)
 
     def load_pattern(self):
         pass
@@ -3528,30 +3652,55 @@ class Window_export_to_word:
     def content_grid(self):
         pass
 
+    def updating_heading(self, event=None):
+        name_point = self.combobox_list_point.get()
+        self.dict_point[name_point].set_title(*self.heading_object_name.get_config())
+
+    def updating_content(self, event=None):
+        name_point = self.combobox_list_point.get()
+        self.dict_point[name_point].set_content(*self.content_object_name.get_config())
+        self.content_object_name.set_content(self.dict_point[name_point].get_text_content(self.data_export[name_point]))
+
+    def updating_explanation(self, event=None):
+        name_point = self.combobox_list_point.get()
+        self.dict_point[name_point].set_explanation(*self.explanation_object_name.get_config())
+
+    def updating_general(self, event=None):
+        name_point = self.combobox_list_point.get()
+        self.dict_point[name_point].set_parameters(*self.general_object.get_config())
+
     def save_setting_point(self):
         points_setting = self.dict_point[self.combobox_list_point.get()]
-        points_setting[0].set_config(*self.general_object.get_config())
-        points_setting[1].set_config(*self.heading_object_name.get_config())
-        points_setting[2].set_config(*self.content_object_name.get_config())
-        points_setting[3].set_config(*self.explanation_object_name.get_config())
+        points_setting.set_title(*self.heading_object_name.get_config())
+        points_setting.set_content(*self.content_object_name.get_config())
+        points_setting.set_explanation(*self.explanation_object_name.get_config())
+        points_setting.set_parameters(*self.general_object.get_config())
 
     def set_item_to_combobox(self, event):
         name_point = self.list_point.get()[self.listbox_point.curselection()[0]]
         self.combobox_list_point.set(name_point)
-        points_setting = self.dict_point[name_point]
-        self.general_object.set_config(*points_setting[0].get_config())
-        self.heading_object_name.set_config(*points_setting[1].get_config())
-        self.content_object_name.set_config(*points_setting[2].get_config())
-        self.explanation_object_name.set_config(*points_setting[3].get_config())
+        self.heading_object_name.set_config(*self.dict_point[name_point].get_title())
+        self.content_object_name.set_config(*self.dict_point[name_point].get_content())
+        self.explanation_object_name.set_config(*self.dict_point[name_point].get_explanation())
+        self.general_object.set_config(*self.dict_point[name_point].get_parameters())
+        self.checking_button()
+        self.updating_heading()
+        self.updating_content()
+        self.updating_explanation()
+        self.updating_general()
 
     def set_item_to_listbox(self, event):
         name_point = self.combobox_list_point.get()
         self.listbox_point.select_set(self.list_point.get().index(name_point))
-        points_setting = self.dict_point[name_point]
-        self.general_object.set_config(*points_setting[0].get_config())
-        self.heading_object_name.set_config(*points_setting[1].get_config())
-        self.content_object_name.set_config(*points_setting[2].get_config())
-        self.explanation_object_name.set_config(*points_setting[3].get_config())
+        self.heading_object_name.set_config(*self.dict_point[name_point].get_title())
+        self.content_object_name.set_config(*self.dict_point[name_point].get_content())
+        self.explanation_object_name.set_config(*self.dict_point[name_point].get_explanation())
+        self.general_object.set_config(*self.dict_point[name_point].get_parameters())
+        self.checking_button()
+        self.updating_heading()
+        self.updating_content()
+        self.updating_explanation()
+        self.updating_general()
 
 
 def key_rus(event):
