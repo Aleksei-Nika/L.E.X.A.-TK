@@ -174,6 +174,7 @@ class Point:
         self.number_element = None
         self.symbol_before_num = None
         self.symbol_after_num = None
+        self.text_content = None
 
         self.font_explanation = None
         self.size_explanation = None
@@ -218,6 +219,12 @@ class Point:
         self.symbol_before_num = symbol_before_num
         self.symbol_after_num = symbol_after_num
 
+    def set_text_content(self, text):
+        self.text_content = text
+
+    def get_text_content(self):
+        return self.text_content
+
     def set_explanation(self, font, size, bold, italic, underline, paragraph, alignment, text):
         self.font_explanation = font
         self.size_explanation = size
@@ -254,7 +261,7 @@ class Point:
         return (self.alternation_content_and_explanations, self.table_format_var, self.table_line_var,
                 self.table_line_heading_var, self.table_line_explanation_var)
 
-    def get_text_content(self, content):
+    def convert_to_text(self, content):
         text = ''
         if self.text_list == 'ROW':
             separator = '\n'

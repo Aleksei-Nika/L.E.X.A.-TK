@@ -3040,7 +3040,11 @@ class Window_export_to_word:
     def __init__(self, root, index_akt):
         self.__root = root
         self.__index_akt = index_akt
+        self.__point = None
         self.__font = ('Times New Roman', 'Calibri', 'Arial')
+        self.__format_day = ('01', '1')
+        self.__format_month = ('1', '01', 'декабрь', 'декабря')
+        self.__format_year = ('2024', '24')
 
         self.window = Toplevel(self.__root)
         self.window.title('Экспорт в Word')
@@ -3082,15 +3086,12 @@ class Window_export_to_word:
             def __init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var, bold_italic,
                          bold_underline):
 
-                #self.point_general_object = None
-                #self.list_content = False
-
                 self.frame = tkinter.LabelFrame(root, text=labelframe_text)
                 self.frame_text = tkinter.Frame(self.frame)
                 self.label_text = tkinter.Label(self.frame_text, text=f'{heading}')
                 self.text_content = tkinter.Text(self.frame_text, height=8, width=50, wrap='word')
-                self.label_text.pack()
-                self.text_content.pack()
+                self.label_text.grid(row=0, column=0)
+                self.text_content.grid(row=1, column=0)
 
                 self.frame_customization = tkinter.Frame(self.frame)
 
@@ -3158,41 +3159,20 @@ class Window_export_to_word:
                 self.frame_text.grid(row=0, column=0, rowspan=2)
                 self.frame_customization.grid(row=0, column=1)
 
-            def grid(self, row, column):
-                self.frame.grid(row=row, column=column)
+            def grid(self, row=None, column=None):
+                if row is not None:
+                    self.frame.grid(row=row, column=column, sticky='wens')
+                else:
+                    self.frame.grid()
 
-            def grid_remove(self):
+            def remove_point(self):
                 self.frame.grid_remove()
 
             def set_text(self, text):
                 self.text_content.insert('end', text)
 
-            #def alignment_state(self):
-            #    if not self.paragraph_var.get():
-            #        self.left_radiobutton.config(state='disabled')
-            #        self.right_radiobutton.config(state='disabled')
-            #        self.cent_radiobutton.config(state='disabled')
-            #        self.width_radiobutton.config(state='disabled')
-            #        self.all_width_radiobutton.config(state='disabled')
-            #    else:
-            #        self.left_radiobutton.config(state='normal')
-            #        self.right_radiobutton.config(state='normal')
-            #        self.cent_radiobutton.config(state='normal')
-            #        self.width_radiobutton.config(state='normal')
-            #        self.all_width_radiobutton.config(state='normal')
-            #
-            #    if self.point_general_object is not None:
-            #        self.point_general_object.table_on_off()
-
             def checkbutton_paragraph_state_disabled(self):
                 self.checkbutton_paragraph.config(state='disabled')
-
-            #def set_point_general(self, point_general):
-            #    self.point_general_object = point_general
-
-            #def point_general_table_on_off(self):
-            #    self.point_general_object.table_heading_on_off(self)
-            #    self.point_general_object.table_explanation_on_off(self)
 
             def disabled(self):
                 self.text_content.config(state='disabled')
@@ -3347,10 +3327,7 @@ class Window_export_to_word:
                 return self.content
 
         class Point_general:
-            def __init__(self, root, alternation, table_format, table_line, table_line_heading, table_line_explanation,
-                         point_content_object, point_explanation_object):
-                #self.point_content_object = point_content_object
-                #self.point_explanation_object = point_explanation_object
+            def __init__(self, root, alternation, table_format, table_line, table_line_heading, table_line_explanation):
                 self.frame = tkinter.LabelFrame(root, text='Общие параметры пункта')
                 self.frame_format = tkinter.Frame(self.frame)
 
@@ -3389,35 +3366,15 @@ class Window_export_to_word:
                 self.checkbutton_table_explanation.grid(row=5, column=0, sticky='w')
 
                 self.frame_format.grid(row=0, column=0)
-                #self.table_on_off()
 
-            #def table_format_on_off(self):
-            #    if self.table_format_var.get():
-            #        self.radiobutton_content.config(state='normal')
-            #        self.radiobutton_content_end.config(state='normal')
-            #    else:
-            #        self.radiobutton_content.config(state='disabled')
-            #        self.radiobutton_content_end.config(state='disabled')
+            def grid(self, row=None, column=None):
+                if row is not None:
+                    self.frame.grid(row=row, column=column, sticky='wens')
+                else:
+                    self.frame.grid()
 
-            #def table_heading_on_off(self):
-            #    if not self.point_content_object.paragraph_var.get() and self.table_format_var.get():
-            #        self.checkbutton_table_heading.config(state='normal')
-            #    else:
-            #        self.checkbutton_table_heading.config(state='disabled')
-
-            #def table_explanation_on_off(self):
-            #    if not self.point_explanation_object.paragraph_var.get() and self.table_format_var.get():
-            #        self.checkbutton_table_explanation.config(state='normal')
-            #    else:
-            #        self.checkbutton_table_explanation.config(state='disabled')
-
-            #def table_on_off(self):
-            #    self.table_format_on_off()
-            #    self.table_heading_on_off()
-            #    self.table_explanation_on_off()
-
-            def grid(self, row, column):
-                self.frame.grid(row=row, column=column, sticky='wens')
+            def remove_point(self):
+                self.frame.grid_remove()
 
             def get_config(self):
                 alternation = self.alternation_content_and_explanations.get()
@@ -3435,57 +3392,718 @@ class Window_export_to_word:
                 self.table_line_heading_var.set(table_line_heading)
                 self.table_line_explanation_var.set(table_line_explanation)
 
-        self.heading_object_name = Point_format(self.window, 'Заголовок пункта',
-                                                'Заголовок наименования объекта',
-                                                self.__font, True, 'LEFT', True,
-                                                False, False)
-        self.heading_object_name.checkbutton_paragraph_state_disabled()
+        class Point_number_akt:
+            def __init__(self, root, fonts, bold_var, bold_italic, bold_underline):
+                self.frame = tkinter.LabelFrame(root, text='Номер акта')
+                self.frame_text = tkinter.Frame(self.frame)
+                self.label_text = tkinter.Label(self.frame_text, text='Содержание номера акта')
+                self.text_content = tkinter.Text(self.frame_text, height=8, width=50, wrap='word')
+                self.label_text.pack()
+                self.text_content.pack()
 
-        self.content_object_name = Point_format_content(self.window, 'Содержание пункта',
-                                                        'Содержания наименования объекта',
-                                                        self.__font, True, 'LEFT', False,
-                                                        False, False, 'ROW', False)
+                self.frame_customization = tkinter.Frame(self.frame)
 
-        self.explanation_object_name = Point_format(self.window, 'Пояснение к пункту',
-                                                    'Содержания наименования объекта', self.__font,
-                                                    True, 'LEFT', False, True,
-                                                    False)
+                self.frame_font = tkinter.Frame(self.frame_customization)
+                self.label_font = tkinter.Label(self.frame_font, text='Шрифт:')
+                self.combobox_font = ttk.Combobox(self.frame_font, width=25, values=fonts)
+                self.label_size = tkinter.Label(self.frame_font, text='Размер:')
+                self.spinbox_size = ttk.Spinbox(self.frame_font, width=3, from_=0.0, to=999.0)
+                self.frame_font.grid(row=0, column=0)
+                self.label_font.grid(row=0, column=0, sticky='w')
+                self.combobox_font.grid(row=0, column=1, sticky='w')
+                self.label_size.grid(row=0, column=2, sticky='e')
+                self.spinbox_size.grid(row=0, column=3, sticky='e')
 
-        self.general_object = Point_general(self.window, False, False, 'CONTENT', False, False,
-                                            self.content_object_name, self.explanation_object_name)
+                self.frame_checkbutton = tkinter.Frame(self.frame_customization)
+                self.bold_var = tkinter.BooleanVar(value=bold_var)
+                self.checkbutton_bold = tkinter.Checkbutton(self.frame_checkbutton, text='Полужирный',
+                                                            offvalue=False, onvalue=True, variable=self.bold_var)
+                self.italic_var = tkinter.BooleanVar(value=bold_italic)
+                self.checkbutton_italic = tkinter.Checkbutton(self.frame_checkbutton, text='Курсив',
+                                                              offvalue=False, onvalue=True, variable=self.italic_var)
+                self.underline_var = tkinter.BooleanVar(value=bold_underline)
+                self.checkbutton_underline = tkinter.Checkbutton(self.frame_checkbutton, text='Подчеркнутый',
+                                                                 offvalue=False, onvalue=True,
+                                                                 variable=self.underline_var)
+                self.frame_checkbutton.grid(row=1, column=0)
+                self.checkbutton_bold.grid(row=0, column=0)
+                self.checkbutton_italic.grid(row=0, column=1)
+                self.checkbutton_underline.grid(row=0, column=2)
 
-        #self.content_object_name.set_point_general(self.general_object)
-        #self.explanation_object_name.set_point_general(self.general_object)
+                self.sep = ttk.Separator(self.frame_customization, orient='horizontal')
+                self.sep.grid(row=2, column=0, sticky='we', pady=2)
 
-        self.list_point = tkinter.Variable(value=('<Все заголовки>', '<Все содержания>', '<Все пояснения>',
-                                                  'Наименование объекта', 'Застройщик', 'Строитель',
-                                                  'Проектная организация',
-                                                  'Представитель застройщика', 'Представитель строителя',
-                                                  'Представитель строителя (контроль)',
-                                                  'Представитель проектной организации', 'Представитель исполнителя',
-                                                  'Иные представители',
-                                                  'Исполнитель', '1. Наименования работ',
-                                                  '2. Проектно-сметная документация',
-                                                  '3. Материалы/оснастка',
-                                                  '4. Документы потверждающие соответсвия работ', '5. Дата',
-                                                  '6. Работы выполнены в соответсвии с', '7. Последующие работы',
-                                                  'Дополнительные сведения',
-                                                  'Кол-во экземпляров', 'Приложения',
-                                                  'Подпись представителя застройщика',
-                                                  'Подпись представителя строителя',
-                                                  'Подпись представителя строителя (контроль)',
-                                                  'Подпись представителя проектной организации',
-                                                  'Подпись представителя исполнителя',
-                                                  'Подпись представителя иных лиц'))
+                self.frame_number = tkinter.Frame(self.frame)
+                self.frame_symbol_num = tkinter.Frame(self.frame_number)
+                self.label_start_num = tkinter.Label(self.frame_symbol_num, text='Начальные символы')
+                self.entry_start_num = tkinter.Entry(self.frame_symbol_num, width=3)
+                self.label_before_num = tkinter.Label(self.frame_symbol_num, text='Cимволы перед номером')
+                self.entry_before_num = tkinter.Entry(self.frame_symbol_num, width=3)
+                self.label_split_num = tkinter.Label(self.frame_symbol_num, text='Символы после номера')
+                self.entry_split_num = tkinter.Entry(self.frame_symbol_num, width=3)
 
-        self.dict_point = dict()
-        self.null_pattern = data_akt.Pattern_Export_to_Word(None, dict())
-        for point in self.list_point.get()[3:22]:
-            self.dict_point[point] = (Export_Akt_Word.Point())
-            self.dict_point[point].set_title(*self.heading_object_name.get_config())
-            self.dict_point[point].set_content(*self.content_object_name.get_config())
-            self.dict_point[point].set_explanation(*self.explanation_object_name.get_config())
-            self.dict_point[point].set_parameters(*self.general_object.get_config())
+                self.label_start_num.grid(row=0, column=0, sticky='w')
+                self.entry_start_num.grid(row=0, column=1, sticky='e')
+                self.label_before_num.grid(row=1, column=0, sticky='w')
+                self.entry_before_num.grid(row=1, column=1, sticky='e')
+                self.label_split_num.grid(row=2, column=0, sticky='w')
+                self.entry_split_num.grid(row=2, column=1, sticky='e')
+                self.frame_symbol_num.grid(row=1, column=0, sticky='we')
+
+                self.frame_text.grid(row=0, column=0, rowspan=2)
+                self.frame_customization.grid(row=0, column=1)
+                self.frame_number.grid(row=1, column=1)
+
+            def grid(self, row=None, column=None):
+                if row is not None:
+                    self.frame.grid(row=row, column=column, sticky='wens')
+                else:
+                    self.frame.grid()
+
+            def remove_point(self):
+                self.frame.grid_remove()
+
+        class Point_date:
+            def __init__(self, root, labelframe_text, heading, fonts, bold_var, bold_italic, bold_underline,
+                         format_day, format_day_bold_var, format_day_bold_italic, format_day_bold_underline,
+                         format_month, format_month_bold_var, format_month_bold_italic, format_month_bold_underline,
+                         format_year, format_year_bold_var, format_year_bold_italic, format_year_bold_underline):
+
+                self.frame = tkinter.LabelFrame(root, text=f'{labelframe_text}')
+                self.frame_text = tkinter.Frame(self.frame)
+                self.label_text = tkinter.Label(self.frame_text, text=f'{heading}')
+                self.text_content = tkinter.Text(self.frame_text, height=8, width=50, wrap='word')
+                self.label_text.grid(row=0, column=0)
+                self.text_content.grid(row=1, column=0)
+
+                self.frame_customization = tkinter.Frame(self.frame)
+                self.frame_font = tkinter.Frame(self.frame_customization)
+                self.label_font = tkinter.Label(self.frame_font, text='Шрифт:')
+                self.combobox_font = ttk.Combobox(self.frame_font, width=25, values=fonts)
+                self.label_size = tkinter.Label(self.frame_font, text='Размер:')
+                self.spinbox_size = ttk.Spinbox(self.frame_font, width=3, from_=0.0, to=999.0)
+                self.frame_font.grid(row=0, column=0)
+                self.label_font.grid(row=0, column=0, sticky='w')
+                self.combobox_font.grid(row=0, column=1, sticky='w')
+                self.label_size.grid(row=0, column=2, sticky='e')
+                self.spinbox_size.grid(row=0, column=3, sticky='e')
+
+                self.frame_checkbutton = tkinter.Frame(self.frame_customization)
+                self.bold_var = tkinter.BooleanVar(value=bold_var)
+                self.checkbutton_bold = tkinter.Checkbutton(self.frame_checkbutton, text='Полужирный',
+                                                            offvalue=False, onvalue=True, variable=self.bold_var)
+                self.italic_var = tkinter.BooleanVar(value=bold_italic)
+                self.checkbutton_italic = tkinter.Checkbutton(self.frame_checkbutton, text='Курсив',
+                                                              offvalue=False, onvalue=True, variable=self.italic_var)
+                self.underline_var = tkinter.BooleanVar(value=bold_underline)
+                self.checkbutton_underline = tkinter.Checkbutton(self.frame_checkbutton, text='Подчеркнутый',
+                                                                 offvalue=False, onvalue=True,
+                                                                 variable=self.underline_var)
+                self.frame_checkbutton.grid(row=2, column=0)
+                self.checkbutton_bold.grid(row=0, column=0)
+                self.checkbutton_italic.grid(row=0, column=1)
+                self.checkbutton_underline.grid(row=0, column=2)
+
+                self.frame_symbols = tkinter.Frame(self.frame)
+                self.label_symbols_before_date = tkinter.Label(self.frame_symbols, text='Символы перед датой:')
+                self.entry_symbols_before_date = tkinter.Entry(self.frame_symbols, width=3)
+                self.label_symbols_after_day = tkinter.Label(self.frame_symbols, text='Символы после дня:')
+                self.entry_symbols_after_day = tkinter.Entry(self.frame_symbols, width=3)
+                self.label_symbols_after_month = tkinter.Label(self.frame_symbols, text='Символы после месяца:')
+                self.entry_symbols_after_month = tkinter.Entry(self.frame_symbols, width=3)
+                self.label_symbols_after_year = tkinter.Label(self.frame_symbols, text='Символы после года:')
+                self.entry_symbols_after_year = tkinter.Entry(self.frame_symbols, width=3)
+
+                self.label_symbols_before_date.grid(row=0, column=0, sticky='e')
+                self.entry_symbols_before_date.grid(row=0, column=1, sticky='w')
+                self.label_symbols_after_day.grid(row=1, column=0, sticky='e')
+                self.entry_symbols_after_day.grid(row=1, column=1, sticky='w')
+                self.label_symbols_after_month.grid(row=2, column=0, sticky='e')
+                self.entry_symbols_after_month.grid(row=2, column=1, sticky='w')
+                self.label_symbols_after_year.grid(row=3, column=0, sticky='e')
+                self.entry_symbols_after_year.grid(row=3, column=1, sticky='W')
+
+                self.frame_elements_date = tkinter.Frame(self.frame)
+                self.sep = ttk.Separator(self.frame_elements_date)
+                self.sep.grid(row=0, column=0, sticky='we', pady=2)
+                self.frame_format_day = tkinter.Frame(self.frame_elements_date)
+                self.label_format_day = tkinter.Label(self.frame_format_day, text='Формат дня:')
+                self.combobox_format_day = ttk.Combobox(self.frame_format_day, width=25, values=format_day)
+                self.label_format_day.grid(row=0, column=0, sticky='e')
+                self.combobox_format_day.grid(row=0, column=1, sticky='e')
+                self.format_day_frame_checkbutton = tkinter.Frame(self.frame_elements_date)
+                self.format_day_bold_var = tkinter.BooleanVar(value=format_day_bold_var)
+                self.format_day_checkbutton_bold = tkinter.Checkbutton(self.format_day_frame_checkbutton,
+                                                                       text='Полужирный',
+                                                                       offvalue=False, onvalue=True,
+                                                                       variable=self.format_day_bold_var)
+                self.format_day_italic_var = tkinter.BooleanVar(value=format_day_bold_italic)
+                self.format_day_checkbutton_italic = tkinter.Checkbutton(self.format_day_frame_checkbutton,
+                                                                         text='Курсив',
+                                                                         offvalue=False, onvalue=True,
+                                                                         variable=self.format_day_italic_var)
+                self.format_day_underline_var = tkinter.BooleanVar(value=format_day_bold_underline)
+                self.format_day_checkbutton_underline = tkinter.Checkbutton(self.format_day_frame_checkbutton,
+                                                                            text='Подчеркнутый',
+                                                                            offvalue=False, onvalue=True,
+                                                                            variable=self.format_day_underline_var)
+                self.format_day_checkbutton_bold.grid(row=0, column=0)
+                self.format_day_checkbutton_italic.grid(row=0, column=1)
+                self.format_day_checkbutton_underline.grid(row=0, column=2)
+                self.frame_format_day.grid(row=1, column=0)
+                self.format_day_frame_checkbutton.grid(row=2, column=0)
+
+                self.frame_format_month = tkinter.Frame(self.frame_elements_date)
+                self.label_format_month = tkinter.Label(self.frame_format_month, text='Формат месяца:')
+                self.combobox_format_month = ttk.Combobox(self.frame_format_month, width=25, values=format_month)
+                self.label_format_month.grid(row=0, column=0, sticky='e')
+                self.combobox_format_month.grid(row=0, column=1, sticky='e')
+                self.format_month_frame_checkbutton = tkinter.Frame(self.frame_elements_date)
+                self.format_month_bold_var = tkinter.BooleanVar(value=format_month_bold_var)
+                self.format_month_checkbutton_bold = tkinter.Checkbutton(self.format_month_frame_checkbutton,
+                                                                         text='Полужирный',
+                                                                         offvalue=False, onvalue=True,
+                                                                         variable=self.format_month_bold_var)
+                self.format_month_italic_var = tkinter.BooleanVar(value=format_month_bold_italic)
+                self.format_month_checkbutton_italic = tkinter.Checkbutton(self.format_month_frame_checkbutton,
+                                                                           text='Курсив',
+                                                                           offvalue=False, onvalue=True,
+                                                                           variable=self.format_month_italic_var)
+                self.format_month_underline_var = tkinter.BooleanVar(value=format_month_bold_underline)
+                self.format_month_checkbutton_underline = tkinter.Checkbutton(self.format_month_frame_checkbutton,
+                                                                              text='Подчеркнутый',
+                                                                              offvalue=False, onvalue=True,
+                                                                              variable=self.format_month_underline_var)
+                self.format_month_checkbutton_bold.grid(row=0, column=0)
+                self.format_month_checkbutton_italic.grid(row=0, column=1)
+                self.format_month_checkbutton_underline.grid(row=0, column=2)
+                self.frame_format_month.grid(row=3, column=0)
+                self.format_month_frame_checkbutton.grid(row=4, column=0)
+
+                self.frame_format_year = tkinter.Frame(self.frame_elements_date)
+                self.label_format_year = tkinter.Label(self.frame_format_year, text='Формат года:')
+                self.combobox_format_year = ttk.Combobox(self.frame_format_year, width=25, values=format_year)
+                self.label_format_year.grid(row=0, column=0, sticky='e')
+                self.combobox_format_year.grid(row=0, column=1, sticky='e')
+                self.format_year_frame_checkbutton = tkinter.Frame(self.frame_elements_date)
+                self.format_year_bold_var = tkinter.BooleanVar(value=format_year_bold_var)
+                self.format_year_checkbutton_bold = tkinter.Checkbutton(self.format_year_frame_checkbutton,
+                                                                        text='Полужирный',
+                                                                        offvalue=False, onvalue=True,
+                                                                        variable=self.format_year_bold_var)
+                self.format_year_italic_var = tkinter.BooleanVar(value=format_year_bold_italic)
+                self.format_year_checkbutton_italic = tkinter.Checkbutton(self.format_year_frame_checkbutton,
+                                                                          text='Курсив',
+                                                                          offvalue=False, onvalue=True,
+                                                                          variable=self.format_year_italic_var)
+                self.format_year_underline_var = tkinter.BooleanVar(value=format_year_bold_underline)
+                self.format_year_checkbutton_underline = tkinter.Checkbutton(self.format_year_frame_checkbutton,
+                                                                             text='Подчеркнутый',
+                                                                             offvalue=False, onvalue=True,
+                                                                             variable=self.format_year_underline_var)
+                self.format_year_checkbutton_bold.grid(row=0, column=0)
+                self.format_year_checkbutton_italic.grid(row=0, column=1)
+                self.format_year_checkbutton_underline.grid(row=0, column=2)
+                self.frame_format_year.grid(row=5, column=0)
+                self.format_year_frame_checkbutton.grid(row=6, column=0)
+
+                self.frame_text.grid(row=0, column=0, rowspan=3)
+                self.frame_customization.grid(row=0, column=1)
+                self.frame_symbols.grid(row=1, column=1)
+                self.frame_elements_date.grid(row=2, column=1)
+
+            def grid(self, row=None, column=None):
+                if row is not None:
+                    self.frame.grid(row=row, column=column, sticky='wens')
+                else:
+                    self.frame.grid()
+
+            def remove_point(self):
+                self.frame.grid_remove()
+
+        class Point_explanation_date_and_number(Point_format):
+            def __init__(self, root, labelframe_text, heading, heading2, fonts, paragraph_var, alignment, bold_var,
+                         bold_italic, bold_underline):
+                Point_format.__init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var,
+                                      bold_italic, bold_underline)
+                self.label_text2 = tkinter.Label(self.frame_text, text=f'{heading2}')
+                self.text_content.config(height=3)
+                self.text_content2 = tkinter.Text(self.frame_text, height=3, width=50, wrap='word')
+                self.label_text2.grid(row=2, column=0)
+                self.text_content2.grid(row=3, column=0)
+
+        class Point_date_act_general:
+            def __init__(self, root, tab_underline_num, off_tab_num_first, tab_underline_date):
+                self.frame = tkinter.LabelFrame(root, text='Общие параметры пункта')
+                self.frame_format = tkinter.Frame(self.frame)
+
+                self.tab_underline_num = tkinter.BooleanVar(value=tab_underline_num)
+                self.checkbutton_tab_underline_num = tkinter.Checkbutton(self.frame_format,
+                                                                         text='Табличное подчеркивание номера',
+                                                                         offvalue=False, onvalue=True,
+                                                                         variable=self.tab_underline_num)
+                self.off_tab_num_first = tkinter.BooleanVar(value=off_tab_num_first)
+                self.checkbutton_off_tab_num_first = tkinter.Checkbutton(self.frame_format,
+                                                                         text='- Не подчеркивать начальные символы номера',
+                                                                         offvalue=False, onvalue=True,
+                                                                         variable=self.off_tab_num_first)
+
+                self.tab_underline_date = tkinter.BooleanVar(value=tab_underline_date)
+                self.checkbutton_tab_underline_date = tkinter.Checkbutton(self.frame_format,
+                                                                          text='Табличное подчеркивание даты',
+                                                                          offvalue=False, onvalue=True,
+                                                                          variable=self.tab_underline_date)
+                self.checkbutton_tab_underline_num.grid(row=0, column=0, sticky='w')
+                self.checkbutton_off_tab_num_first.grid(row=1, column=0, sticky='w')
+                self.checkbutton_tab_underline_date.grid(row=2, column=0, sticky='w')
+                self.frame_format.grid(row=0, column=0)
+
+            def grid(self, row=None, column=None):
+                if row is not None:
+                    self.frame.grid(row=row, column=column, sticky='wens')
+                else:
+                    self.frame.grid()
+
+            def remove_point(self):
+                self.frame.grid_remove()
+
+        class Point_project_documentation(Point_format_content):
+            def __init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var,
+                         bold_italic, bold_underline, list_text, num_var, page_format):
+                Point_format_content.__init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment,
+                                              bold_var, bold_italic, bold_underline, list_text, num_var)
+
+                self.text_content.config(height=9)
+                self.frame_text.grid_remove()
+                self.frame_text.grid(row=0, column=0, rowspan=1)
+
+                self.frame_psd = tkinter.Frame(self.frame)
+                self.label_symbols_after_organization = tkinter.Label(self.frame_psd, text='Символы после организации:')
+                self.entry_symbols_after_organization = tkinter.Entry(self.frame_psd, width=3)
+                self.label_symbols_after_document = tkinter.Label(self.frame_psd, text='Символы после наименования:')
+                self.entry_symbols_after_document = tkinter.Entry(self.frame_psd, width=3)
+                self.label_symbols_before_pages = tkinter.Label(self.frame_psd, text='Символы после всех номеров:')
+                self.entry_symbols_before_pages = tkinter.Entry(self.frame_psd, width=3)
+
+                self.frame_page_format = tkinter.Frame(self.frame_psd)
+                self.page_format = tkinter.StringVar(value=page_format)
+                self.element_radiobutton = tkinter.Radiobutton(self.frame_psd, text='полный список номеров',
+                                                               value='ELEMENT', variable=self.page_format)
+                self.general_radiobutton = tkinter.Radiobutton(self.frame_psd, text='сокращеный список номеров',
+                                                               value='GENERAL', variable=self.page_format)
+
+                self.label_symbols_before_page = tkinter.Label(self.frame_psd, text='Символы до номера листа:')
+                self.entry_symbols_before_page = tkinter.Entry(self.frame_psd, width=3)
+                self.label_symbols_after_page = tkinter.Label(self.frame_psd, text='Символы после номера листа:')
+                self.entry_symbols_after_page = tkinter.Entry(self.frame_psd, width=3)
+
+                self.label_symbols_after_organization.grid(row=0, column=0, sticky='e')
+                self.entry_symbols_after_organization.grid(row=0, column=1, sticky='w')
+                self.label_symbols_after_document.grid(row=1, column=0, sticky='e')
+                self.entry_symbols_after_document.grid(row=1, column=1, sticky='w')
+                self.label_symbols_before_pages.grid(row=2, column=0, sticky='e')
+                self.entry_symbols_before_pages.grid(row=2, column=1, sticky='w')
+                self.element_radiobutton.grid(row=3, column=0, sticky='w')
+                self.general_radiobutton.grid(row=3, column=1, sticky='e')
+                self.label_symbols_before_page.grid(row=4, column=0, sticky='e')
+                self.entry_symbols_before_page.grid(row=4, column=1, sticky='w')
+                self.label_symbols_after_page.grid(row=5, column=0, sticky='e')
+                self.entry_symbols_after_page.grid(row=5, column=1, sticky='w')
+
+                self.frame_psd.grid(row=1, column=0)
+
+        class Point_deadline(Point_date):
+            def __init__(self, root, labelframe_text, heading, fonts, bold_var, bold_italic, bold_underline,
+                         format_day, format_day_bold_var, format_day_bold_italic, format_day_bold_underline,
+                         format_month, format_month_bold_var, format_month_bold_italic, format_month_bold_underline,
+                         format_year, format_year_bold_var, format_year_bold_italic, format_year_bold_underline,
+                         bold_start, italic_start, underline_start, bold_finish, italic_finish, underline_finish):
+                Point_date.__init__(self, root, labelframe_text, heading, fonts, bold_var, bold_italic, bold_underline,
+                                    format_day, format_day_bold_var, format_day_bold_italic, format_day_bold_underline,
+                                    format_month, format_month_bold_var, format_month_bold_italic,
+                                    format_month_bold_underline,
+                                    format_year, format_year_bold_var, format_year_bold_italic,
+                                    format_year_bold_underline)
+
+                self.frame_start = tkinter.Frame(self.frame_text)
+                self.frame_font_start = tkinter.Frame(self.frame_start)
+                self.label_font_start = tkinter.Label(self.frame_font_start, text='Шрифт:')
+                self.combobox_font_start = ttk.Combobox(self.frame_font_start, width=25, values=fonts)
+                self.label_size_start = tkinter.Label(self.frame_font_start, text='Размер:')
+                self.spinbox_size_start = ttk.Spinbox(self.frame_font_start, width=3, from_=0.0, to=999.0)
+                self.frame_font_start.grid(row=0, column=0)
+                self.label_font_start.grid(row=0, column=0, sticky='w')
+                self.combobox_font_start.grid(row=0, column=1, sticky='w')
+                self.label_size_start.grid(row=0, column=2, sticky='e')
+                self.spinbox_size_start.grid(row=0, column=3, sticky='e')
+
+                self.frame_checkbutton_start = tkinter.Frame(self.frame_start)
+                self.bold_var_start = tkinter.BooleanVar(value=bold_start)
+                self.checkbutton_bold_start = tkinter.Checkbutton(self.frame_checkbutton_start, text='Полужирный',
+                                                                  offvalue=False, onvalue=True,
+                                                                  variable=self.bold_var_start)
+                self.italic_var_start = tkinter.BooleanVar(value=italic_start)
+                self.checkbutton_italic_start = tkinter.Checkbutton(self.frame_checkbutton_start, text='Курсив',
+                                                                    offvalue=False, onvalue=True,
+                                                                    variable=self.italic_var_start)
+                self.underline_var_start = tkinter.BooleanVar(value=underline_start)
+                self.checkbutton_underline_start = tkinter.Checkbutton(self.frame_checkbutton_start,
+                                                                       text='Подчеркнутый',
+                                                                       offvalue=False, onvalue=True,
+                                                                       variable=self.underline_var_start)
+                self.frame_checkbutton_start.grid(row=1, column=0)
+                self.checkbutton_bold_start.grid(row=0, column=0)
+                self.checkbutton_italic_start.grid(row=0, column=1)
+                self.checkbutton_underline_start.grid(row=0, column=2)
+
+                self.frame_text_start = tkinter.Frame(self.frame_start)
+                self.label_text_start = tkinter.Label(self.frame_text_start, text='Текст перед датой начала:')
+                self.entry_start = tkinter.Entry(self.frame_text_start, width=37)
+                self.frame_text_start.grid(row=2, column=0)
+                self.label_text_start.grid(row=0, column=0, sticky='w')
+                self.entry_start.grid(row=0, column=1, sticky='e')
+
+                self.frame_finish = tkinter.Frame(self.frame_text)
+                self.frame_font_finish = tkinter.Frame(self.frame_finish)
+                self.label_font_finish = tkinter.Label(self.frame_font_finish, text='Шрифт:')
+                self.combobox_font_finish = ttk.Combobox(self.frame_font_finish, width=25, values=fonts)
+                self.label_size_finish = tkinter.Label(self.frame_font_finish, text='Размер:')
+                self.spinbox_size_finish = ttk.Spinbox(self.frame_font_finish, width=3, from_=0.0, to=999.0)
+                self.frame_font_finish.grid(row=0, column=0)
+                self.label_font_finish.grid(row=0, column=0, sticky='w')
+                self.combobox_font_finish.grid(row=0, column=1, sticky='w')
+                self.label_size_finish.grid(row=0, column=2, sticky='e')
+                self.spinbox_size_finish.grid(row=0, column=3, sticky='e')
+
+                self.frame_checkbutton_finish = tkinter.Frame(self.frame_finish)
+                self.bold_var_finish = tkinter.BooleanVar(value=bold_finish)
+                self.checkbutton_bold_finish = tkinter.Checkbutton(self.frame_checkbutton_finish, text='Полужирный',
+                                                                   offvalue=False, onvalue=True,
+                                                                   variable=self.bold_var_finish)
+                self.italic_var_finish = tkinter.BooleanVar(value=italic_finish)
+                self.checkbutton_italic_finish = tkinter.Checkbutton(self.frame_checkbutton_finish, text='Курсив',
+                                                                     offvalue=False, onvalue=True,
+                                                                     variable=self.italic_var_finish)
+                self.underline_var_finish = tkinter.BooleanVar(value=underline_finish)
+                self.checkbutton_underline_finish = tkinter.Checkbutton(self.frame_checkbutton_finish,
+                                                                        text='Подчеркнутый',
+                                                                        offvalue=False, onvalue=True,
+                                                                        variable=self.underline_var_finish)
+                self.frame_checkbutton_finish.grid(row=1, column=0)
+                self.checkbutton_bold_finish.grid(row=0, column=0)
+                self.checkbutton_italic_finish.grid(row=0, column=1)
+                self.checkbutton_underline_finish.grid(row=0, column=2)
+
+                self.frame_text_finish = tkinter.Frame(self.frame_finish)
+                self.label_text_finish = tkinter.Label(self.frame_text_finish, text='Текст перед датой окончания:')
+                self.entry_finish = tkinter.Entry(self.frame_text_finish, width=37)
+                self.frame_text_finish.grid(row=2, column=0)
+                self.label_text_finish.grid(row=0, column=0, sticky='w')
+                self.entry_finish.grid(row=0, column=1, sticky='e')
+
+                self.frame_start.grid(row=2, column=0, pady=5)
+                self.frame_finish.grid(row=3, column=0)
+
+        class Point_deadline_general:
+            def __init__(self, root, heading_row, content_format, line_date):
+                self.frame = ttk.LabelFrame(root,  text='Общие параметры пункта')
+                self.heading_row = tkinter.BooleanVar(value=heading_row)
+                self.checkbutton_heading_row = tkinter.Checkbutton(self.frame,
+                                                                       text='Заголовок и содержание в одну строку',
+                                                                       offvalue=False, onvalue=True,
+                                                                       variable=self.heading_row)
+                self.content_format = tkinter.StringVar(value=content_format)
+                self.row_radiobutton = tkinter.Radiobutton(self.frame, text='Даты в строку',
+                                                               value='ROW', variable=self.content_format)
+                self.column_radiobutton = tkinter.Radiobutton(self.frame, text='Даты в колонку',
+                                                               value='COLUMN', variable=self.content_format)
+                self.line_date = tkinter.BooleanVar(value=line_date)
+                self.checkbutton_table_line_date = tkinter.Checkbutton(self.frame,
+                                                                       text='Табличное подчеркивание даты',
+                                                                       offvalue=False, onvalue=True,
+                                                                       variable=self.line_date)
+                self.checkbutton_heading_row.grid(row=0, column=0, sticky='w')
+                self.row_radiobutton.grid(row=1, column=0, sticky='w')
+                self.column_radiobutton.grid(row=2, column=0, sticky='w')
+                self.checkbutton_table_line_date.grid(row=3, column=0, sticky='w')
+
+            def grid(self, row=None, column=None):
+                if row is not None:
+                    self.frame.grid(row=row, column=column, sticky='wens')
+                else:
+                    self.frame.grid()
+
+            def remove_point(self):
+                self.frame.grid_remove()
+
+        class Point_numbers_of_copies(Point_format):
+            def __init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var, bold_italic,
+                         bold_underline):
+                Point_format.__init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var, bold_italic,
+                         bold_underline)
+                self.frame_copy = tkinter.Frame(self.frame)
+                self.sep = ttk.Separator(self.frame_copy, orient='horizontal')
+                self.label_copy = tkinter.Label(self.frame_copy, text='Кол-во экземпляров:')
+                self.spinbox_copy = ttk.Spinbox(self.frame_copy, width=3, from_=1, to=999)
+                self.label_after_symbol = tkinter.Label(self.frame_copy, text='Символы до кол-во\nэкземпляров:')
+                self.entry_after_symbol = tkinter.Entry(self.frame_copy, width=20)
+                self.label_before_symbol = tkinter.Label(self.frame_copy, text='Символы после кол-во\nэкземпляров:')
+                self.entry_before_symbol = tkinter.Entry(self.frame_copy, width=20)
+
+                self.sep.grid(row=0, column=0, columnspan=2, sticky='we', pady=3)
+                self.label_copy.grid(row=1, column=0, sticky='e')
+                self.spinbox_copy.grid(row=1, column=1, sticky='w')
+                self.label_after_symbol.grid(row=2, column=0, sticky='e')
+                self.entry_after_symbol.grid(row=2, column=1, sticky='w')
+                self.label_before_symbol.grid(row=3, column=0, sticky='e')
+                self.entry_before_symbol.grid(row=3, column=1, sticky='w')
+                self.frame_copy.grid(row=3, column=1)
+
+
+        self.gui_point_dict = dict({'Наименование объекта': (
+            Point_format(self.window, 'Заголовок пункта', 'Содержание заголовка наименования объекта',
+                         self.__font, True, 'LEFT', True, False, False),
+            Point_format_content(self.window, 'Содержание пункта', 'Содержание наименования объекта',
+                                 self.__font, True, 'LEFT', False, False,
+                                 False, 'ROW', False),
+            Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения к наименованию объекта',
+                         self.__font, True, 'LEFT', False, True, False),
+            Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Застройщик': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Застройщик"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Застройщик"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Застройщик"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Строитель': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Строитель"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Строитель"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Строитель"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Проектная организация': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Проектная организация"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Проектная организация"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Проектная организация"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Наименование документа': (
+                Point_format(self.window, 'Наименование документа, певая строка', 'Содержание первой строки',
+                             self.__font, True, 'LEFT', False, False, False),
+                Point_format(self.window, 'Наименование документа, вторая строка', 'Содержание второй строки',
+                             self.__font, True, 'LEFT', False, False, False)),
+            'Номер акта и дата': (
+                Point_number_akt(self.window, self.__font, False, False, False),
+                Point_date(self.window, 'Содержание пункта', 'Содержание пункта ""', self.__font, False, False, False, self.__format_day,
+                           False, False, False, self.__format_month,
+                           False, False, False, self.__format_year,
+                           False, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание пояснения пункта "Номер акта"',
+                                                  'Содержание пояснения пункта "Дата составления акта"', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_date_act_general(self.window, False, False, False)),
+            'Представитель застройщика': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Представитель застройщика"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Дата акта', 'Содержания даты акта',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту',
+                             'Содержание пояснения пункта "Представитель застройщика"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Представитель строителя': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Представитель строителя"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Представитель строителя"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Представитель строителя"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Представитель строителя (контроль)': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Представитель строителя (контроль)"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта',
+                                     'Содержания пункта "Представитель строителя (контроль)"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту',
+                             'Содержание пояснения пункта "Представитель строителя (контроль)"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Представитель проектной организации': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Представитель проектной организации"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта',
+                                     'Содержания пункта "Представитель проектной организации"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту',
+                             'Содержание пояснения пункта "Представитель проектной организации"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Представитель исполнителя': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Представитель исполнителя"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Представитель исполнителя"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту',
+                             'Содержание пояснения пункта "Представитель исполнителя"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Иные представители': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Иные представители"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Иные представители"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Иные представители"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Исполнитель': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Исполнитель"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Исполнитель"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Исполнитель"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            '"и составили настоящий акт о нижеследующем:"': (
+                Point_format(self.window, 'Текст, певая строка', 'Содержание первой строки',
+                             self.__font, True, 'LEFT', False, False, False),),
+            '1. Наименования работ': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Наименования работ"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Наименования работ"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Наименования работ"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            '2. Проектно-сметная документация': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Проектно-сметная документация"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_project_documentation(self.window, 'Содержание пункта',
+                                            'Содержание пункта "Проектно-сметная документация"',
+                                            self.__font, True, 'LEFT', False,
+                                            False, False, 'ROW', False, 'GENERAL'),
+                Point_format(self.window, 'Пояснение к пункту',
+                             'Содержание пояснения пункта "Проектно-сметная документация"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            '3. Материалы/оснастка': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Материалы/оснастка"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Материалы/оснастка"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Материалы/оснастка"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            '4. Документы потверждающие соответсвия работ': (
+                Point_format(self.window, 'Заголовок пункта',
+                             'Заголовок пункта "Документы потверждающие соответсвие работ"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта',
+                                     'Содержания пункта "Документы потверждающие соответсвие работ"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту',
+                             'Содержание пояснения пункта "Документы потверждающие соответсвие работ"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            '5. Дата': (
+                Point_format(self.window, 'Заголовок пункта',
+                             'Заголовок пункта "Сроки выполнения работ"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_deadline(self.window, 'Сроки выполнения работ', 'Содержания дат выполнения работ', self.__font,
+                               False, False, False, self.__format_day, False,
+                               False, False, self.__format_month, False,
+                               False, False, self.__format_year, False,
+                               False, False, False, False,
+                               False, False, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание пояснения к "начала работ"',
+                                                  'Содержание пояснения к "окончания работ"', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_deadline_general(self.window, False, 'COLUMN', True)),
+            '6. Работы выполнены в соответсвии с': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Документы соответсвия работ"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта',
+                                     'Содержания пункта "Документы соответсвия работ"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту',
+                             'Содержание пояснения пункта "Документы соответсвия работ"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            '7. Последующие работы': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Последующие работы"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта',
+                                     'Содержания пункта "Последующие работы"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Последующие работы"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Дополнительные сведения': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Дополнительные сведения"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format_content(self.window, 'Содержание пункта',
+                                     'Содержания пункта "Дополнительные сведения"',
+                                     self.__font, True, 'LEFT', False, False,
+                                     False, 'ROW', False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Дополнительные сведения"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)),
+            'Кол-во экземпляров': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "кол-во экземпляров"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_numbers_of_copies(self.window, 'Содержание пункта', 'Содержания пункта "Кол-во экземпляров"',
+                                        self.__font, True, 'LEFT', True, False, False),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Кол-во экземпляров"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)
+            ),
+            'Приложения': (None,),
+            'Подпись представителя застройщика': (None,),
+            'Подпись представителя строителя': (None,),
+            'Подпись представителя строителя (контроль)': (None,),
+            'Подпись представителя проектной организации': (None,),
+            'Подпись представителя исполнителя': (None,),
+            'Подпись представителя иных лиц': (None,)})
+
+        self.list_point = []
+        for key in self.gui_point_dict.keys():
+            self.list_point.append(key)
+            print(key, self.gui_point_dict[key])
+            for num_el in range(len(self.gui_point_dict[key])):
+                if self.gui_point_dict[key][num_el] is not None:
+                    if num_el == 3:
+                        self.gui_point_dict[key][num_el].grid(row=4, column=1)
+                        self.gui_point_dict[key][num_el].remove_point()
+                    else:
+                        self.gui_point_dict[key][num_el].grid(row=num_el + 2, column=0)
+                        self.gui_point_dict[key][num_el].remove_point()
+
+        self.list_point = ['<Все заголовки>', '<Все содержания>', '<Все пояснения>'] + self.list_point
+
+        self.list_point = tkinter.Variable(value=(self.list_point))
 
         self.data_export = x_data_akt.get_akt(self.__index_akt).export()
 
@@ -3494,136 +4112,17 @@ class Window_export_to_word:
                                                 values=self.list_point.get())
         self.label_listbox = tkinter.Label(self.frame_list_point, text='Список пунктов')
         self.listbox_point = tkinter.Listbox(self.frame_list_point, listvariable=self.list_point, width=50, height=30)
-        self.button_point = tkinter.Button(self.frame_list_point, text='Сохранить настройки пункта',
-                                           command=self.save_setting_point, height=1)
 
         self.label_listbox.grid(row=1, column=0, sticky='ns')
         self.combobox_list_point.grid(row=2, column=0, sticky='ns')
         self.listbox_point.grid(row=3, column=0, sticky='ns')
-        self.button_point.grid(row=4, column=0, sticky='ns we')
 
         self.frame_pattern_akt.grid(row=0, column=0)
         self.frame_pattern_name.grid(row=1, column=0)
-        self.heading_object_name.grid(row=2, column=0)
-        self.content_object_name.grid(row=3, column=0)
-        self.explanation_object_name.grid(row=4, column=0)
-        self.frame_list_point.grid(row=1, column=1, rowspan=3, sticky='ns')
-        self.general_object.grid(row=4, column=1)
+        self.frame_list_point.grid(row=2, column=1, rowspan=2, sticky='ns')
 
         self.listbox_point.bind("<<ListboxSelect>>", self.set_item_to_combobox)
         self.combobox_list_point.bind("<<ComboboxSelected>>", self.set_item_to_listbox)
-
-        # Сохранение переменных при их изменении пункта заголовка
-        self.heading_object_name.combobox_font.bind('<<ComboboxSelected>>', self.updating_heading)
-        self.heading_object_name.spinbox_size.config(command=self.updating_heading)
-        self.heading_object_name.spinbox_size.bind('<KeyRelease>', self.updating_heading)
-        self.heading_object_name.checkbutton_bold.config(command=self.updating_heading)
-        self.heading_object_name.checkbutton_italic.config(command=self.updating_heading)
-        self.heading_object_name.checkbutton_underline.config(command=self.updating_heading)
-        self.heading_object_name.checkbutton_paragraph.config(
-            command=lambda: (self.checking_button(), self.updating_heading()))
-            #command=lambda: (self.heading_object_name.alignment_state(), self.updating_heading()))
-        self.heading_object_name.left_radiobutton.config(command=self.updating_heading)
-        self.heading_object_name.right_radiobutton.config(command=self.updating_heading)
-        self.heading_object_name.cent_radiobutton.config(command=self.updating_heading)
-        self.heading_object_name.width_radiobutton.config(command=self.updating_heading)
-        self.heading_object_name.all_width_radiobutton.config(command=self.updating_heading)
-
-        # Сохранение переменных при их изменении пункта контент
-        self.content_object_name.combobox_font.bind('<<ComboboxSelected>>', self.updating_content)
-        self.content_object_name.spinbox_size.config(command=self.updating_content)
-        self.content_object_name.spinbox_size.bind('<KeyRelease>', self.updating_content)
-        self.content_object_name.checkbutton_bold.config(command=self.updating_content)
-        self.content_object_name.checkbutton_italic.config(command=self.updating_content)
-        self.content_object_name.checkbutton_underline.config(command=self.updating_content)
-        self.content_object_name.checkbutton_paragraph.config(
-            command=lambda: (self.checking_button(), self.updating_content()))
-            #command=lambda: (self.content_object_name.alignment_state(), self.updating_content()))
-        self.content_object_name.left_radiobutton.config(command=self.updating_content)
-        self.content_object_name.right_radiobutton.config(command=self.updating_content)
-        self.content_object_name.cent_radiobutton.config(command=self.updating_content)
-        self.content_object_name.width_radiobutton.config(command=self.updating_content)
-        self.content_object_name.all_width_radiobutton.config(command=self.updating_content)
-
-        self.content_object_name.radiobutton_row.config(command=self.updating_content)
-        self.content_object_name.radiobutton_column.config(command=self.updating_content)
-        self.content_object_name.checkbutton_num.config(
-            command=lambda: (self.content_object_name.num_checking(), self.updating_content()))
-        self.content_object_name.entry_before_list.bind('<KeyRelease>', self.updating_content)
-        self.content_object_name.entry_split_item.bind('<KeyRelease>', self.updating_content)
-        self.content_object_name.entry_after_list.bind('<KeyRelease>', self.updating_content)
-        self.content_object_name.entry_before_num.bind('<KeyRelease>', self.updating_content)
-        self.content_object_name.entry_after_num.bind('<KeyRelease>', self.updating_content)
-        self.content_object_name.entry_after_num.config()
-
-        # Сохранение переменных при их изменении пункта пояснения
-        self.explanation_object_name.combobox_font.bind('<<ComboboxSelected>>', self.updating_explanation)
-        self.explanation_object_name.spinbox_size.config(command=self.updating_explanation)
-        self.explanation_object_name.spinbox_size.bind('<KeyRelease>', self.updating_explanation)
-        self.explanation_object_name.checkbutton_bold.config(command=self.updating_explanation)
-        self.explanation_object_name.checkbutton_italic.config(command=self.updating_explanation)
-        self.explanation_object_name.checkbutton_underline.config(command=self.updating_explanation)
-        self.explanation_object_name.checkbutton_paragraph.config(
-            command=lambda: (self.checking_button(), self.updating_explanation()))
-            #command=lambda: (self.explanation_object_name.alignment_state(), self.updating_explanation()))
-        self.explanation_object_name.left_radiobutton.config(command=self.updating_explanation)
-        self.explanation_object_name.right_radiobutton.config(command=self.updating_explanation)
-        self.explanation_object_name.cent_radiobutton.config(command=self.updating_explanation)
-        self.explanation_object_name.width_radiobutton.config(command=self.updating_explanation)
-        self.explanation_object_name.all_width_radiobutton.config(command=self.updating_explanation)
-
-        # Сохранение переменных при их изменении общих настроик пункта
-        self.general_object.checkbutton_alternation.config(command=self.updating_general)
-        self.general_object.checkbutton_table_format.config(
-            command=lambda: (self.checking_button(), self.updating_general()))
-            #command=lambda: (self.general_object.table_on_off(), self.updating_general()))
-        self.general_object.radiobutton_content.config(command=self.updating_general)
-        self.general_object.radiobutton_content_end.config(command=self.updating_general)
-        self.general_object.checkbutton_table_heading.config(command=self.updating_general)
-        self.general_object.checkbutton_table_explanation.config(command=self.updating_general)
-
-    def checking_button(self, event=None):
-        def point_check(object):
-            if object.paragraph_var.get():
-                object.left_radiobutton.config(state='normal')
-                object.right_radiobutton.config(state='normal')
-                object.cent_radiobutton.config(state='normal')
-                object.width_radiobutton.config(state='normal')
-                object.all_width_radiobutton.config(state='normal')
-                return False
-            else:
-                object.left_radiobutton.config(state='disabled')
-                object.right_radiobutton.config(state='disabled')
-                object.cent_radiobutton.config(state='disabled')
-                object.width_radiobutton.config(state='disabled')
-                object.all_width_radiobutton.config(state='disabled')
-                return True
-
-        def general_check(object):
-            if object.table_format_var.get():
-                object.radiobutton_content.config(state='normal')
-                object.radiobutton_content_end.config(state='normal')
-                return True
-            else:
-                object.radiobutton_content.config(state='disabled')
-                object.radiobutton_content_end.config(state='disabled')
-                return False
-
-        flag_general = general_check(self.general_object)
-        flag_content = point_check(self.content_object_name)
-        flag_explanation = point_check(self.explanation_object_name)
-
-        if flag_content and flag_general:
-            self.general_object.checkbutton_table_heading.config(state='normal')
-        else:
-            self.general_object.checkbutton_table_heading.config(state='disabled')
-
-        if flag_explanation and flag_general:
-            self.general_object.checkbutton_table_explanation.config(state='normal')
-        else:
-            self.general_object.checkbutton_table_explanation.config(state='disabled')
-
-        point_check(self.heading_object_name)
 
     def load_pattern(self):
         pass
@@ -3652,66 +4151,32 @@ class Window_export_to_word:
     def content_grid(self):
         pass
 
-    def updating_heading(self, event=None):
-        name_point = self.combobox_list_point.get()
-        self.dict_point[name_point].set_title(*self.heading_object_name.get_config())
-
-    def updating_content(self, event=None):
-        name_point = self.combobox_list_point.get()
-        self.dict_point[name_point].set_content(*self.content_object_name.get_config())
-        self.content_object_name.set_content(self.dict_point[name_point].get_text_content(self.data_export[name_point]))
-
-    def updating_explanation(self, event=None):
-        name_point = self.combobox_list_point.get()
-        self.dict_point[name_point].set_explanation(*self.explanation_object_name.get_config())
-
-    def updating_general(self, event=None):
-        name_point = self.combobox_list_point.get()
-        self.dict_point[name_point].set_parameters(*self.general_object.get_config())
-
-    def save_setting_point(self):
-        points_setting = self.dict_point[self.combobox_list_point.get()]
-        points_setting.set_title(*self.heading_object_name.get_config())
-        points_setting.set_content(*self.content_object_name.get_config())
-        points_setting.set_explanation(*self.explanation_object_name.get_config())
-        points_setting.set_parameters(*self.general_object.get_config())
-
     def set_item_to_combobox(self, event):
         name_point = self.list_point.get()[self.listbox_point.curselection()[0]]
         self.combobox_list_point.set(name_point)
-        self.heading_object_name.set_config(*self.dict_point[name_point].get_title())
-        self.content_object_name.set_config(*self.dict_point[name_point].get_content())
-        self.explanation_object_name.set_config(*self.dict_point[name_point].get_explanation())
-        self.general_object.set_config(*self.dict_point[name_point].get_parameters())
-        self.checking_button()
-        self.updating_heading()
-        self.updating_content()
-        self.updating_explanation()
-        self.updating_general()
+        if self.__point is not None:
+            for el in self.__point:
+                el.remove_point()
+        self.__point = self.gui_point_dict[name_point]
+        for el in self.__point:
+            el.grid()
 
     def set_item_to_listbox(self, event):
         name_point = self.combobox_list_point.get()
         self.listbox_point.select_set(self.list_point.get().index(name_point))
-        self.heading_object_name.set_config(*self.dict_point[name_point].get_title())
-        self.content_object_name.set_config(*self.dict_point[name_point].get_content())
-        self.explanation_object_name.set_config(*self.dict_point[name_point].get_explanation())
-        self.general_object.set_config(*self.dict_point[name_point].get_parameters())
-        self.checking_button()
-        self.updating_heading()
-        self.updating_content()
-        self.updating_explanation()
-        self.updating_general()
 
 
 def key_rus(event):
-    if event.keycode == 86:
-        event.widget.event_generate('<<Paste>>')
-    elif event.keycode == 67:
-        event.widget.event_generate('<<Copy>>')
-    elif event.keycode == 88:
-        event.widget.event_generate('<<Cut>>')
-    elif event.keycode == 65:
-        event.widget.event_generate('<<SelectAll>>')
+    keys = ('z', 'x', 'c', 'v', 'a')
+    if event.keysym.lower() not in keys:
+        if event.keycode == 86:
+            event.widget.event_generate('<<Paste>>')
+        elif event.keycode == 67:
+            event.widget.event_generate('<<Copy>>')
+        elif event.keycode == 88:
+            event.widget.event_generate('<<Cut>>')
+        elif event.keycode == 65:
+            event.widget.event_generate('<<SelectAll>>')
 
 
 if __name__ == '__main__':

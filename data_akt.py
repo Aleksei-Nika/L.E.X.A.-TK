@@ -1943,7 +1943,9 @@ class Pattern_Export_to_Word:
 
 class Export:
     def __init__(self):
-        pass
+        # self.settings_of_export = setting
+        self.element_of_akts = dict()
+        self.content_of_akts = dict()
 
     def list_patterns(self):
         if not os.path.exists('Patterns_export'):
@@ -1962,6 +1964,17 @@ class Export:
         file = open(f'Patterns_export\\{pattern_name}.bat', 'wb')
         file.write(new_pattern)
         file.close()
+
+    def load_content_of_akts(self, akts):
+        for akt in akts:
+            self.element_of_akts[akt.get_name_work().get_text()] = akt.export()
+
+    def create_content_of_akt(self, akts, points):
+        for akt in akts:
+            pass
+
+    def change_content_of_akt(self, name_of_akt, point, text):
+        self.content_of_akts[name_of_akt][point] = text
 
 
     # Сравнение дат
