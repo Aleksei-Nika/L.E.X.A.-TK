@@ -3859,6 +3859,95 @@ class Window_export_to_word:
                 self.entry_before_symbol.grid(row=3, column=1, sticky='w')
                 self.frame_copy.grid(row=3, column=1)
 
+        class Point_appendices(Point_format_content):
+            def __init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment, bold_var,
+                         bold_italic, bold_underline, list_text, num_var, materials, documents, first_content, type_text):
+                Point_format_content.__init__(self, root, labelframe_text, heading, fonts, paragraph_var, alignment,
+                                              bold_var, bold_italic, bold_underline, list_text, num_var)
+
+                self.text_content.config(height=9)
+                self.frame_text.grid_remove()
+                self.frame_text.grid(row=0, column=0, rowspan=1)
+
+                self.frame_appendices = tkinter.Frame(self.frame)
+
+                self.content_app_frame = tkinter.Frame(self.frame_appendices)
+                self.content_app_label = tkinter.Label(self.content_app_frame, text='Добавить в приложение:')
+                self.materials = tkinter.BooleanVar(value=materials)
+                self.checkbutton_materials = tkinter.Checkbutton(self.content_app_frame,
+                                                                  text='- материалы',
+                                                                  offvalue=False, onvalue=True,
+                                                                  variable=self.materials)
+                self.documents = tkinter.BooleanVar(value=documents)
+                self.checkbutton_documents = tkinter.Checkbutton(self.content_app_frame,
+                                                                 text='- документы соответствия работ',
+                                                                 offvalue=False, onvalue=True,
+                                                                 variable=self.documents)
+
+                self.first_content_label = tkinter.Label(self.content_app_frame, text='Добавить первым в приложения:')
+                self.first_content = tkinter.StringVar(value=first_content)
+                self.first_materials_radiobutton = tkinter.Radiobutton(self.content_app_frame, text='- материалы',
+                                                               value='MATERIALS', variable=self.first_content)
+                self.first_documents_radiobutton = tkinter.Radiobutton(self.content_app_frame, text='- документы соответствия работ',
+                                                               value='DOCUMENTS', variable=self.first_content)
+
+                self.type_text_frame = tkinter.Frame(self.frame_appendices)
+                self.type_text_label = tkinter.Label(self.type_text_frame, text='Вариант текста:')
+                self.type_text = tkinter.StringVar(value=type_text)
+                self.full_text_radiobutton = tkinter.Radiobutton(self.type_text_frame, text='- полный',
+                                                                       value='FULL', variable=self.type_text)
+                self.short_text_radiobutton = tkinter.Radiobutton(self.type_text_frame,
+                                                                       text='- сократить',
+                                                                       value='SHORT', variable=self.type_text)
+                self.order_short_text_radiobutton = tkinter.Radiobutton(self.type_text_frame,
+                                                                      text='- упорядочить и сократить',
+                                                                      value='ORDER_SHORT', variable=self.type_text)
+
+                self.content_app_label.grid(row=0, column=0, columnspan=2, sticky='w')
+                self.checkbutton_materials.grid(row=1, column=0, sticky='w')
+                self.checkbutton_documents.grid(row=1, column=1, sticky='w')
+                self.first_content_label.grid(row=2, column=0, columnspan=2, sticky='w')
+                self.first_materials_radiobutton.grid(row=3, column=0, sticky='w')
+                self.first_documents_radiobutton.grid(row=3, column=1, sticky='w')
+                self.content_app_frame.grid(row=0, column=0, sticky='wens')
+
+                self.type_text_label.grid(row=0, column=0, columnspan=3, sticky='w')
+                self.full_text_radiobutton.grid(row=1, column=0, sticky='w')
+                self.short_text_radiobutton.grid(row=1, column=1, sticky='w')
+                self.order_short_text_radiobutton.grid(row=1, column=2, sticky='w')
+                self.type_text_frame.grid(row=1, column=0, sticky='wens')
+
+                self.frame_appendices.grid(row=1, column=0)
+
+        class Point_signature:
+            def __init__(self, root, var_row, double_explanation):
+                self.frame = tkinter.LabelFrame(root, text='Общие параментры пункта')
+                self.var_row_label = tkinter.Label(self.frame, text='Представитель и подпись:')
+                self.var_row = tkinter.StringVar(value=var_row)
+                self.radiobutton_one_area = tkinter.Radiobutton(self.frame, text='- Одним полем',
+                                                           value='ONE', variable=self.var_row)
+                self.radiobutton_two_area = tkinter.Radiobutton(self.frame, text='- Разделить на два поля',
+                                                              value='TWO', variable=self.var_row)
+
+                self.double_explanation = tkinter.BooleanVar(value=double_explanation)
+                self.checkbutton_table_line = tkinter.Checkbutton(self.frame,
+                                                                   text='Разделить пояснение',
+                                                                   offvalue=False, onvalue=True,
+                                                                   variable=self.double_explanation)
+                self.var_row_label.grid(row=0, column=0, sticky='w')
+                self.radiobutton_one_area.grid(row=1, column=0, sticky='w')
+                self.radiobutton_two_area.grid(row=2, column=0, sticky='w')
+                self.checkbutton_table_line.grid(row=3, column=0, sticky='w')
+
+            def grid(self, row=None, column=None):
+                if row is not None:
+                    self.frame.grid(row=row, column=column, sticky='wens')
+                else:
+                    self.frame.grid()
+
+            def remove_point(self):
+                self.frame.grid_remove()
+
 
         self.gui_point_dict = dict({'Наименование объекта': (
             Point_format(self.window, 'Заголовок пункта', 'Содержание заголовка наименования объекта',
@@ -3903,7 +3992,7 @@ class Window_export_to_word:
                              self.__font, True, 'LEFT', False, False, False)),
             'Номер акта и дата': (
                 Point_number_akt(self.window, self.__font, False, False, False),
-                Point_date(self.window, 'Содержание пункта', 'Содержание пункта ""', self.__font, False, False, False, self.__format_day,
+                Point_date(self.window, 'Содержание пункта', 'Содержание даты акта', self.__font, False, False, False, self.__format_day,
                            False, False, False, self.__format_month,
                            False, False, False, self.__format_year,
                            False, False, False),
@@ -3915,7 +4004,7 @@ class Window_export_to_word:
             'Представитель застройщика': (
                 Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Представитель застройщика"',
                              self.__font, True, 'LEFT', True, False, False),
-                Point_format_content(self.window, 'Дата акта', 'Содержания даты акта',
+                Point_format_content(self.window, 'Содержание пункта', 'Содержания пункта "Представитель застройщика"',
                                      self.__font, True, 'LEFT', False, False,
                                      False, 'ROW', False),
                 Point_format(self.window, 'Пояснение к пункту',
@@ -4080,13 +4169,82 @@ class Window_export_to_word:
                              self.__font, True, 'LEFT', False, True, False),
                 Point_general(self.window, False, False, 'CONTENT', False, False)
             ),
-            'Приложения': (None,),
-            'Подпись представителя застройщика': (None,),
-            'Подпись представителя строителя': (None,),
-            'Подпись представителя строителя (контроль)': (None,),
-            'Подпись представителя проектной организации': (None,),
-            'Подпись представителя исполнителя': (None,),
-            'Подпись представителя иных лиц': (None,)})
+            'Приложения': (
+                Point_format(self.window, 'Заголовок пункта', 'Заголовок пункта "Приложения"',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_appendices(self.window, 'Содержание пункта', 'Содержания пункта "Приложения"',
+                                 self.__font, True, 'LEFT', False, False, False,
+                                 'ROW', False, False, True, 'DOCUMENTS','SHORT'),
+                Point_format(self.window, 'Пояснение к пункту', 'Содержание пояснения пункта "Приложения"',
+                             self.__font, True, 'LEFT', False, True, False),
+                Point_general(self.window, False, False, 'CONTENT', False, False)
+            ),
+            'Подпись представителя застройщика': (
+                Point_format(self.window, 'Заголовок пункта', 'Подпись представителя застройщика',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format(self.window, 'Содеражание данных о представителе', 'Представитель',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание первого пояснения',
+                                                  'Содержание второго пояснения', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_signature(self.window, 'ONE', True)
+            ),
+            'Подпись представителя строителя': (
+                Point_format(self.window, 'Заголовок пункта', 'Подпись представителя строителя',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format(self.window, 'Содеражание данных о представителе', 'Представитель',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание первого пояснения',
+                                                  'Содержание второго пояснения', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_signature(self.window, 'ONE', True)
+            ),
+            'Подпись представителя строителя (контроль)': (
+                Point_format(self.window, 'Заголовок пункта', 'Подпись представителя строителя (контроль)',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format(self.window, 'Содеражание данных о представителе', 'Представитель',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание первого пояснения',
+                                                  'Содержание второго пояснения', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_signature(self.window, 'ONE', True)
+            ),
+            'Подпись представителя проектной организации': (
+                Point_format(self.window, 'Заголовок пункта', 'Подпись представителя проектной организации',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format(self.window, 'Содеражание данных о представителе', 'Представитель',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание первого пояснения',
+                                                  'Содержание второго пояснения', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_signature(self.window, 'ONE', True)
+            ),
+            'Подпись представителя исполнителя': (
+                Point_format(self.window, 'Заголовок пункта', 'Подпись представителя исполнителя',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format(self.window, 'Содеражание данных о представителе', 'Представитель',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание первого пояснения',
+                                                  'Содержание второго пояснения', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_signature(self.window, 'ONE', True)
+            ),
+            'Подпись представителя иных лиц': (
+                Point_format(self.window, 'Заголовок пункта', 'Подпись представителя иных лиц',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_format(self.window, 'Содеражание данных о представителе', 'Представитель',
+                             self.__font, True, 'LEFT', True, False, False),
+                Point_explanation_date_and_number(self.window, 'Пояснение к пункту',
+                                                  'Содержание первого пояснения',
+                                                  'Содержание второго пояснения', self.__font,
+                                                  True, 'LEFT', False, True, False),
+                Point_signature(self.window, 'ONE', True)
+            )})
 
         self.list_point = []
         for key in self.gui_point_dict.keys():
